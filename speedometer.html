@@ -1,89 +1,85 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speedometer Sensor</title>
-  
-  <style>
-    body { font-family: sans-serif; background-color: #0f172a; color: white; margin: 0; }
-    .header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 20px; text-align: center; border-bottom: 1px solid #334155; }
-    .header h1 { color: #38bdf8; margin: 0; }
-    .nav { background-color: #1e293b; padding: 15px; text-align: center; border-bottom: 1px solid #334155; }
-    .nav a { text-decoration: none; margin: 0 15px; font-weight: bold; font-size: 1.1rem; }
-    .container { max-width: 900px; margin: 40px auto; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
-    .gauge-box { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; text-align: center; }
-  </style>
-
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speedometer Indikator - Monitoring Air</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-  <header class="header">
-    <h1>SPEEDOMETER SENSOR</h1>
-  </header>
+    <nav class="navbar">
+        <div class="nav-brand"><i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING</div>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="speedometer.html" class="active">Speedometer</a>
+            <a href="grafik.html">Grafik</a>
+            <a href="history.html">History</a>
+            <a href="#" class="btn-login"><i class="fa-solid fa-lock"></i> Login Admin</a>
+        </div>
+    </nav>
 
-  <nav class="nav">
-    <a href="index.html" style="color: #94a3b8;">Dashboard Utama</a>
-    <a href="speedometer.html" style="color: #38bdf8;">Speedometer</a>
-    <a href="grafik.html" style="color: #94a3b8;">Grafik Real-time</a>
-  </nav>
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title">
+                <h1><i class="fa-solid fa-gauge-high"></i> Speedometer Indikator</h1>
+                <p>Visualisasi metrik sensor menggunakan model pengukur radial</p>
+            </div>
+        </div>
 
-  <div class="container">
-    <div class="gauge-box">
-      <h3>Kadar pH</h3>
-      <div id="gauge_ph" style="width: 200px; height: 200px;"></div>
+        <div class="grid-layout">
+            <div class="card"><div class="card-title">Gauge Derajat Keasaman (pH)</div><div class="chart-wrapper"><canvas id="gauge-ph"></canvas></div><div class="card-value" id="txt-ph" style="margin-top: -30px;">0</div></div>
+            <div class="card"><div class="card-title">Gauge Kekeruhan (NTU)</div><div class="chart-wrapper"><canvas id="gauge-turbidity"></canvas></div><div class="card-value" id="txt-turbidity" style="margin-top: -30px;">0</div></div>
+            <div class="card"><div class="card-title">Gauge Ketinggian Air (cm)</div><div class="chart-wrapper"><canvas id="gauge-level"></canvas></div><div class="card-value" id="txt-level" style="margin-top: -30px;">0</div></div>
+        </div>
     </div>
-    <div class="gauge-box">
-      <h3>Kekeruhan (NTU)</h3>
-      <div id="gauge_turbidity" style="width: 200px; height: 200px;"></div>
-    </div>
-    <div class="gauge-box">
-      <h3>Tinggi Air (cm)</h3>
-      <div id="gauge_water" style="width: 200px; height: 200px;"></div>
-    </div>
-  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
-      databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+        const firebaseConfig = {
+            apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
+            databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        initializeApp(firebaseConfig);
+        const db = getDatabase();
 
-    // Inisialisasi Google Charts
-    google.charts.load('current', {'packages':['gauge']});
-    google.charts.setOnLoadCallback(drawCharts);
+        function buatGauge(id, maxVal, color) {
+            return new Chart(document.getElementById(id), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{ data: [0, maxVal], backgroundColor: [color, '#e2e8f0'], borderWidth: 0 }]
+                },
+                options: {
+                    rotation: -90, circumference: 180, cutout: '75%',
+                    plugins: { tooltip: { enabled: false } }
+                }
+            });
+        }
 
-    function drawCharts() {
-      // Setup Data
-      var dataPh = google.visualization.arrayToDataTable([ ['Label', 'Value'], ['pH', 0] ]);
-      var dataTurb = google.visualization.arrayToDataTable([ ['Label', 'Value'], ['NTU', 0] ]);
-      var dataWater = google.visualization.arrayToDataTable([ ['Label', 'Value'], ['Air (cm)', 0] ]);
+        const chartPh = buatGauge('gauge-ph', 14, '#10b981');
+        const chartTb = buatGauge('gauge-turbidity', 3000, '#f59e0b');
+        const chartLv = buatGauge('gauge-level', 100, '#3b82f6');
 
-      // Setup Options (Desain Speedometer)
-      var optPh = { width: 200, height: 200, redFrom: 0, redTo: 5, yellowFrom:5, yellowTo: 6.5, greenFrom: 6.5, greenTo: 8.5, max: 14 };
-      var optTurb = { width: 200, height: 200, redFrom: 20, redTo: 50, yellowFrom:10, yellowTo: 20, greenFrom: 0, greenTo: 10, max: 50 };
-      var optWater = { width: 200, height: 200, min: 0, max: 100 };
+        onValue(ref(db, 'SistemAir'), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                
+                let p = data.pH || 0, t = data.turbidity || 0, l = data.tinggiAir || 0;
+                
+                document.getElementById('txt-ph').innerText = p;
+                chartPh.data.datasets[0].data = [p, 14 - p]; chartPh.update();
 
-      // Render Charts
-      var chartPh = new google.visualization.Gauge(document.getElementById('gauge_ph'));
-      var chartTurb = new google.visualization.Gauge(document.getElementById('gauge_turbidity'));
-      var chartWater = new google.visualization.Gauge(document.getElementById('gauge_water'));
+                document.getElementById('txt-turbidity').innerText = t + " NTU";
+                chartTb.data.datasets[0].data = [t, Math.max(0, 3000 - t)]; chartTb.update();
 
-      chartPh.draw(dataPh, optPh);
-      chartTurb.draw(dataTurb, optTurb);
-      chartWater.draw(dataWater, optWater);
-
-      // Update Real-time dari Firebase
-      onValue(ref(database, 'SistemAir/pH'), (s) => { dataPh.setValue(0, 1, s.val() || 0); chartPh.draw(dataPh, optPh); });
-      onValue(ref(database, 'SistemAir/turbidity'), (s) => { dataTurb.setValue(0, 1, s.val() || 0); chartTurb.draw(dataTurb, optTurb); });
-      onValue(ref(database, 'SistemAir/tinggiAir'), (s) => { dataWater.setValue(0, 1, s.val() || 0); chartWater.draw(dataWater, optWater); });
-    }
-  </script>
+                document.getElementById('txt-level').innerText = l + " cm";
+                chartLv.data.datasets[0].data = [l, Math.max(0, 100 - l)]; chartLv.update();
+            }
+        });
+    </script>
 </body>
 </html>
