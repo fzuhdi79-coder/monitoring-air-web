@@ -1,120 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
 :root {
-    --primary-bg: #f4f7fe;
+    --bg-color: #f8f9fc;
     --card-bg: #ffffff;
-    --text-main: #2b3674;
-    --text-muted: #a3aed1;
-    --color-ph: #10b981;
-    --color-turbidity: #f59e0b;
-    --color-water: #3b82f6;
+    --text-dark: #202b36;
+    --text-muted: #637381;
+    --primary-blue: #2563eb;
+    --border-color: #e5e7eb;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--primary-bg);
-    color: var(--text-main);
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--bg-color);
     margin: 0;
-    padding: 20px;
+    color: var(--text-dark);
 }
 
-.container {
-    max-width: 1200px; /* Lebar maksimal konten */
-    width: 100%;
-    margin: 0 auto;
-}
-
-header { text-align: center; margin-bottom: 20px; }
-header h1 { font-size: 26px; margin: 0; font-weight: 700; }
-header p { color: var(--text-muted); margin: 5px 0 0 0; font-size: 14px; }
-
-/* NAVIGASI TABS ATAS */
-.nav-tabs {
+/* NAVBAR ATAS */
+.navbar {
+    background-color: var(--card-bg);
+    padding: 15px 40px;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border-color);
+}
+.nav-brand {
+    font-size: 20px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
     gap: 10px;
-    margin-bottom: 30px;
-    border-bottom: 2px solid #e0e5f2;
-    padding-bottom: 10px;
-    flex-wrap: wrap; /* Aman saat dibuka di HP */
+}
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+.nav-links a:hover { background-color: #f1f5f9; }
+.nav-links a.active {
+    background-color: var(--primary-blue);
+    color: white;
+}
+.btn-login {
+    border: 1px solid var(--primary-blue);
+    color: var(--primary-blue) !important;
+    border-radius: 6px;
 }
 
-.tab-link {
-    text-decoration: none;
-    color: var(--text-muted);
-    padding: 10px 20px;
-    font-weight: 600;
-    border-radius: 10px;
-    transition: 0.3s;
+/* MAIN CONTAINER */
+.container {
+    max-width: 1300px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* HEADER HALAMAN */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.page-title h1 { margin: 0; font-size: 28px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.page-title p { margin: 5px 0 0 40px; color: var(--text-muted); font-size: 15px; }
+
+.status-badge {
+    background-color: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 13px;
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.tab-link:hover {
-    color: var(--text-main);
-    background: rgba(43, 54, 116, 0.05);
+/* SECTION JUDUL */
+.section-title {
+    font-size: 16px;
+    font-weight: 800;
+    margin: 40px 0 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: uppercase;
 }
 
-.tab-link.active {
-    color: white;
-    background-color: var(--text-main);
-}
-
-/* KARTU UMUM */
-.card {
-    background-color: var(--card-bg);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    margin-bottom: 20px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.card h3 { 
-    margin-top: 0; 
-    font-size: 16px; 
-    border-bottom: 1px solid #f4f7fe; 
-    padding-bottom: 8px; 
-    text-align: center;
-}
-
-/* =========================================
-   TATA LETAK SPEEDOMETER (index.html)
-   ========================================= */
-.gauge-grid {
+/* GRID KARTU KECIL (Atas) */
+.grid-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
-    width: 100%;
+    margin-bottom: 30px;
 }
 
-.gauge-container {
-    width: 100%;
-    height: 220px;
+/* GRID KARTU BESAR (Indikator) */
+.grid-indicators {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
 }
 
-/* =========================================
-   TATA LETAK GRAFIK (grafik.html)
-   ========================================= */
-.chart-wrapper {
-    position: relative;
-    width: 100%;
-    height: 300px; /* Tinggi grafik dibesarkan */
+/* DESAIN KARTU */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
+.card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.card-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-blue);
+    margin-bottom: 15px;
+}
+.card-emoji { font-size: 35px; margin-bottom: 10px; }
+.card-status { font-weight: 800; font-size: 16px; }
 
-canvas {
-    width: 100% !important;
-    max-width: 100%;
-    height: 100% !important;
-}
-
-/* =========================================
-   STATUS BAR & KONTROL (kontrol.html)
-   ========================================= */
-#status-bar { 
-    text-align: center; 
-    font-size: 13px; 
-    font-weight: 500; 
-    color: var(--text-muted); 
-    margin-top: 20px; 
-}
+/* Warna Status */
+.status-baik { color: #10b981; }
+.status-sedang { color: #f59e0b; }
+.status-buruk { color: #ef4444; }
