@@ -61,12 +61,31 @@
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
+        const statusBadge = document.getElementById('koneksi-status');
+
+        // FITUR BARU: Mendeteksi Koneksi Internet & Firebase
+        const connectedRef = ref(db, ".info/connected");
+        onValue(connectedRef, (snap) => {
+            if (snap.val() === true) {
+                // Jika Online
+                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> LIVE CONNECTION';
+                statusBadge.style.backgroundColor = '#ecfdf5';
+                statusBadge.style.color = '#047857';
+                statusBadge.style.borderColor = '#a7f3d0';
+            } else {
+                // Jika Offline / Putus
+                statusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> LOST CONNECTION';
+                statusBadge.style.backgroundColor = '#fef2f2';
+                statusBadge.style.color = '#ef4444';
+                statusBadge.style.borderColor = '#fecaca';
+            }
+        });
+
+        // Menarik Data Sensor
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
                 const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
-                
-                document.getElementById('koneksi-status').innerHTML = '<i class="fa-solid fa-circle-check"></i> LIVE CONNECTION';
                 
                 // Update Timestamps
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
