@@ -62,30 +62,47 @@
         const db = getDatabase(app);
 
         const statusBadge = document.getElementById('koneksi-status');
+        let timerSensor; // Variabel untuk menghitung waktu putus alat
 
-        // FITUR BARU: Mendeteksi Koneksi Internet & Firebase
+        // 1. Fungsi mengubah UI jadi Merah (Offline)
+        function setOfflineUI(pesan) {
+            statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${pesan}`;
+            statusBadge.style.backgroundColor = '#fef2f2';
+            statusBadge.style.color = '#ef4444';
+            statusBadge.style.borderColor = '#fecaca';
+        }
+
+        // 2. Fungsi mengubah UI jadi Hijau (Online)
+        function setOnlineUI() {
+            statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> LIVE CONNECTION';
+            statusBadge.style.backgroundColor = '#ecfdf5';
+            statusBadge.style.color = '#047857';
+            statusBadge.style.borderColor = '#a7f3d0';
+        }
+
+        // 3. Cek Koneksi Internet Laptop/HP ke Server (Tetap dipertahankan)
         const connectedRef = ref(db, ".info/connected");
         onValue(connectedRef, (snap) => {
-            if (snap.val() === true) {
-                // Jika Online
-                statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> LIVE CONNECTION';
-                statusBadge.style.backgroundColor = '#ecfdf5';
-                statusBadge.style.color = '#047857';
-                statusBadge.style.borderColor = '#a7f3d0';
-            } else {
-                // Jika Offline / Putus
-                statusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> LOST CONNECTION';
-                statusBadge.style.backgroundColor = '#fef2f2';
-                statusBadge.style.color = '#ef4444';
-                statusBadge.style.borderColor = '#fecaca';
+            if (snap.val() !== true) {
+                setOfflineUI("WEB OFFLINE"); // Jika laptop yang putus internet
             }
         });
 
-        // Menarik Data Sensor
+        // 4. Menarik Data Sensor & Deteksi ESP Mati
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
                 const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+                
+                // --- AWAL SISTEM HEARTBEAT ---
+                setOnlineUI(); // Saat ada data masuk, status berubah jadi Hijau
+                clearTimeout(timerSensor); // Hapus hitungan mundur sebelumnya
+                
+                // Mulai hitung mundur 15 detik. Jika 15 detik tidak ada data masuk, berarti alat/ESP mati!
+                timerSensor = setTimeout(() => {
+                    setOfflineUI("SENSOR OFFLINE");
+                }, 15000); 
+                // --- AKHIR SISTEM HEARTBEAT ---
                 
                 // Update Timestamps
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
