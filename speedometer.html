@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speedometer Indikator - Monitoring Air</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css?v=4">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.6.1/justgage.min.js"></script>
+    
+    <style>
+        .gauge-container { width: 100%; height: 220px; }
+    </style>
 </head>
 <body>
 
@@ -25,14 +31,23 @@
         <div class="page-header">
             <div class="page-title">
                 <h1><i class="fa-solid fa-gauge-high"></i> Speedometer Indikator</h1>
-                <p>Visualisasi metrik sensor menggunakan model pengukur radial</p>
+                <p>Visualisasi metrik sensor menggunakan model pengukur radial (Gauge)</p>
             </div>
         </div>
 
         <div class="grid-layout">
-            <div class="card"><div class="card-title">Gauge Derajat Keasaman (pH)</div><div class="chart-wrapper"><canvas id="gauge-ph"></canvas></div><div class="card-value" id="txt-ph" style="margin-top: -30px;">0</div></div>
-            <div class="card"><div class="card-title">Gauge Kekeruhan (NTU)</div><div class="chart-wrapper"><canvas id="gauge-turbidity"></canvas></div><div class="card-value" id="txt-turbidity" style="margin-top: -30px;">0</div></div>
-            <div class="card"><div class="card-title">Gauge Ketinggian Air (cm)</div><div class="chart-wrapper"><canvas id="gauge-level"></canvas></div><div class="card-value" id="txt-level" style="margin-top: -30px;">0</div></div>
+            <div class="card">
+                <div class="card-title">Derajat Keasaman (pH)</div>
+                <div id="gauge-ph" class="gauge-container"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Kekeruhan Air (NTU)</div>
+                <div id="gauge-turbidity" class="gauge-container"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Ketinggian Air (cm)</div>
+                <div id="gauge-level" class="gauge-container"></div>
+            </div>
         </div>
     </div>
 
@@ -47,37 +62,18 @@
         initializeApp(firebaseConfig);
         const db = getDatabase();
 
-        function buatGauge(id, maxVal, color) {
-            return new Chart(document.getElementById(id), {
-                type: 'doughnut',
-                data: {
-                    datasets: [{ data: [0, maxVal], backgroundColor: [color, '#e2e8f0'], borderWidth: 0 }]
-                },
-                options: {
-                    rotation: -90, circumference: 180, cutout: '75%',
-                    plugins: { tooltip: { enabled: false } }
-                }
-            });
-        }
+        // Konfigurasi Speedometer
+        const gaugePH = new JustGage({ id: "gauge-ph", value: 0, min: 0, max: 14, decimals: 2, label: "pH", levelColors: ["#ef4444", "#10b981", "#ef4444"], pointer: true, pointerOptions: { color: '#202b36' } });
+        const gaugeTurbidity = new JustGage({ id: "gauge-turbidity", value: 0, min: 0, max: 3000, label: "NTU", levelColors: ["#10b981", "#f59e0b", "#ef4444"], pointer: true, pointerOptions: { color: '#202b36' } });
+        const gaugeLevel = new JustGage({ id: "gauge-level", value: 0, min: 0, max: 100, label: "cm", levelColors: ["#ef4444", "#3b82f6", "#10b981"], pointer: true, pointerOptions: { color: '#202b36' } });
 
-        const chartPh = buatGauge('gauge-ph', 14, '#10b981');
-        const chartTb = buatGauge('gauge-turbidity', 3000, '#f59e0b');
-        const chartLv = buatGauge('gauge-level', 100, '#3b82f6');
-
+        // Update Real-time
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                
-                let p = data.pH || 0, t = data.turbidity || 0, l = data.tinggiAir || 0;
-                
-                document.getElementById('txt-ph').innerText = p;
-                chartPh.data.datasets[0].data = [p, 14 - p]; chartPh.update();
-
-                document.getElementById('txt-turbidity').innerText = t + " NTU";
-                chartTb.data.datasets[0].data = [t, Math.max(0, 3000 - t)]; chartTb.update();
-
-                document.getElementById('txt-level').innerText = l + " cm";
-                chartLv.data.datasets[0].data = [l, Math.max(0, 100 - l)]; chartLv.update();
+                gaugePH.refresh(data.pH || 0);
+                gaugeTurbidity.refresh(data.turbidity || 0);
+                gaugeLevel.refresh(data.tinggiAir || 0);
             }
         });
     </script>
