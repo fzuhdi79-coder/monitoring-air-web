@@ -24,8 +24,8 @@
             
             <div id="pesan-error" class="error-msg">Username atau Password salah!</div>
 
-            <input type="text" id="username" class="form-control" placeholder="Username (admin)" onkeypress="cekEnter(event)">
-            <input type="password" id="password" class="form-control" placeholder="Password (1234)" onkeypress="cekEnter(event)">
+            <input type="text" id="username" class="form-control" placeholder="Masukkan Username" onkeypress="cekEnter(event)">
+            <input type="password" id="password" class="form-control" placeholder="Masukkan Password" onkeypress="cekEnter(event)">
             
             <button class="btn-submit" onclick="prosesLogin()">Masuk ke Dashboard</button>
         </div>
@@ -36,7 +36,7 @@
             let u = document.getElementById('username').value;
             let p = document.getElementById('password').value;
             
-            if (u === "admin" && p === "1234") {
+            if (u === "roy" && p === "1986") {
                 sessionStorage.setItem("statusLogin", "sukses");
                 window.location.href = "index.html";
             } else {
