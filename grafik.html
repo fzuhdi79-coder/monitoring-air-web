@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grafik Analisis - Monitoring Air</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .grid-grafik {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+    </style>
 </head>
 <body>
 
@@ -29,9 +36,22 @@
             </div>
         </div>
 
-        <div class="chart-container"><div class="section-title"><i class="fa-solid fa-flask" style="color:#10b981"></i> Grafik Perkembangan pH</div><div class="chart-wrapper"><canvas id="chart-ph"></canvas></div></div>
-        <div class="chart-container"><div class="section-title"><i class="fa-solid fa-bolt" style="color:#f59e0b"></i> Grafik Tingkat Kekeruhan (NTU)</div><div class="chart-wrapper"><canvas id="chart-turbidity"></canvas></div></div>
-        <div class="chart-container"><div class="section-title"><i class="fa-solid fa-water" style="color:#3b82f6"></i> Grafik Ketinggian Air (cm)</div><div class="chart-wrapper"><canvas id="chart-level"></canvas></div></div>
+        <div class="grid-grafik">
+            <div class="chart-container">
+                <div class="section-title" style="margin-top: 0;"><i class="fa-solid fa-flask" style="color:#10b981"></i> Grafik pH Air</div>
+                <div class="chart-wrapper"><canvas id="chart-ph"></canvas></div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="section-title" style="margin-top: 0;"><i class="fa-solid fa-bolt" style="color:#f59e0b"></i> Grafik Kekeruhan (NTU)</div>
+                <div class="chart-wrapper"><canvas id="chart-turbidity"></canvas></div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="section-title" style="margin-top: 0;"><i class="fa-solid fa-water" style="color:#3b82f6"></i> Grafik Ketinggian Air (cm)</div>
+                <div class="chart-wrapper"><canvas id="chart-level"></canvas></div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -45,18 +65,38 @@
         initializeApp(firebaseConfig);
         const db = getDatabase();
 
-        function buatLineChart(id, label, color) {
-            return new Chart(document.getElementById(id), {
+        // Konfigurasi Standar Chart.js
+        function buatLineChart(id, label, colorSolid, colorBg) {
+            return new Chart(document.getElementById(id).getContext('2d'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: label, data: [], borderColor: color, backgroundColor: color+'20', fill: true, tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } } } }
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: label, 
+                        data: [], 
+                        borderColor: colorSolid, 
+                        backgroundColor: colorBg, 
+                        fill: true, 
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 3
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    animation: { duration: 400 },
+                    scales: { x: { grid: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
             });
         }
 
-        const cPh = buatLineChart('chart-ph', 'pH Air', '#10b981');
-        const cTb = buatLineChart('chart-turbidity', 'Kekeruhan (NTU)', '#f59e0b');
-        const cLv = buatLineChart('chart-level', 'Tinggi Air (cm)', '#3b82f6');
+        const cPh = buatLineChart('chart-ph', 'pH Air', '#10b981', 'rgba(16, 185, 129, 0.1)');
+        const cTb = buatLineChart('chart-turbidity', 'Kekeruhan', '#f59e0b', 'rgba(245, 158, 11, 0.1)');
+        const cLv = buatLineChart('chart-level', 'Tinggi Air', '#3b82f6', 'rgba(59, 130, 246, 0.1)');
 
+        // Tarik Data Real-time
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
@@ -65,7 +105,12 @@
                 [ [cPh, data.pH], [cTb, data.turbidity], [cLv, data.tinggiAir] ].forEach(([chart, val]) => {
                     chart.data.labels.push(waktu);
                     chart.data.datasets[0].data.push(val || 0);
-                    if(chart.data.labels.length > 12) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+                    
+                    // Batasi maksimal 15 titik agar grafik tidak terlalu rapat
+                    if(chart.data.labels.length > 15) { 
+                        chart.data.labels.shift(); 
+                        chart.data.datasets[0].data.shift(); 
+                    }
                     chart.update();
                 });
             }
