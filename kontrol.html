@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrol Perangkat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .control-panel { text-align: center; padding: 40px 20px; }
+        .btn-group { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 30px; }
+        button {
+            border: none; padding: 15px 35px; border-radius: 12px;
+            font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 600;
+            color: white; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 10px;
+        }
+        button:hover { opacity: 0.85; transform: translateY(-2px); }
+        button:active { transform: scale(0.98); }
+        .btn-kuras { background-color: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        .btn-isi { background-color: #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2); }
+        .btn-off { background-color: #64748b; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2); }
+        .status-box { font-size: 18px; margin-bottom: 10px; }
+        .status-box strong { font-size: 22px; color: #2b3674; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Kontrol Perangkat IoT</h1>
+            <p>Aksi Saklar Relay Pompa Air</p>
+        </header>
+
+        <div class="nav-tabs">
+            <a href="index.html" class="tab-link"><i class="fa-solid fa-gauge"></i> Speedometer</a>
+            <a href="grafik.html" class="tab-link"><i class="fa-solid fa-chart-line"></i> Grafik Riwayat</a>
+            <a href="kontrol.html" class="tab-link active"><i class="fa-solid fa-sliders"></i> Kontrol Pompa</a>
+        </div>
+
+        <div class="card control-panel">
+            <p class="status-box">Status Aktif Pompa Saat Ini:</p>
+            <strong id="val-pompaStatus">MENUNGGU...</strong>
+
+            <div class="btn-group">
+                <button class="btn-kuras" id="btn-kuras"><i class="fa-solid fa-arrow-down-wide-short"></i> KURAS AIR</button>
+                <button class="btn-isi" id="btn-isi"><i class="fa-solid fa-arrow-up-right-dots"></i> ISI ULANG</button>
+                <button class="btn-off" id="btn-off"><i class="fa-solid fa-power-off"></i> STANDBY (OFF)</button>
+            </div>
+        </div>
+
+        <div id="status-bar"><span id="text-status">Menghubungkan ke Firebase...</span></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        onValue(ref(db, 'SistemAir/pompaStatus'), (snapshot) => {
+            if (snapshot.exists()) {
+                document.getElementById('val-pompaStatus').innerText = snapshot.val();
+                document.getElementById('text-status').innerText = "🟢 Sistem Kontrol Siap";
+            }
+        });
+
+        function setPompaStatus(status) {
+            set(ref(db, 'SistemAir/pompaStatus'), status).catch((err) => alert("Gagal!"));
+        }
+        document.getElementById('btn-kuras').addEventListener('click', () => setPompaStatus('KURAS'));
+        document.getElementById('btn-isi').addEventListener('click', () => setPompaStatus('ISI'));
+        document.getElementById('btn-off').addEventListener('click', () => setPompaStatus('OFF'));
+    </script>
+</body>
+</html>

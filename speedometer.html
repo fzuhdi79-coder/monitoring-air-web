@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speedometer Sensor</title>
+  
+  <style>
+    body { font-family: sans-serif; background-color: #0f172a; color: white; margin: 0; }
+    .header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 20px; text-align: center; border-bottom: 1px solid #334155; }
+    .header h1 { color: #38bdf8; margin: 0; }
+    .nav { background-color: #1e293b; padding: 15px; text-align: center; border-bottom: 1px solid #334155; }
+    .nav a { text-decoration: none; margin: 0 15px; font-weight: bold; font-size: 1.1rem; }
+    .container { max-width: 900px; margin: 40px auto; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
+    .gauge-box { background: #1e293b; padding: 20px; border-radius: 16px; border: 1px solid #334155; text-align: center; }
+  </style>
+
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+
+  <header class="header">
+    <h1>SPEEDOMETER SENSOR</h1>
+  </header>
+
+  <nav class="nav">
+    <a href="index.html" style="color: #94a3b8;">Dashboard Utama</a>
+    <a href="speedometer.html" style="color: #38bdf8;">Speedometer</a>
+    <a href="grafik.html" style="color: #94a3b8;">Grafik Real-time</a>
+  </nav>
+
+  <div class="container">
+    <div class="gauge-box">
+      <h3>Kadar pH</h3>
+      <div id="gauge_ph" style="width: 200px; height: 200px;"></div>
+    </div>
+    <div class="gauge-box">
+      <h3>Kekeruhan (NTU)</h3>
+      <div id="gauge_turbidity" style="width: 200px; height: 200px;"></div>
+    </div>
+    <div class="gauge-box">
+      <h3>Tinggi Air (cm)</h3>
+      <div id="gauge_water" style="width: 200px; height: 200px;"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
+      databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Inisialisasi Google Charts
+    google.charts.load('current', {'packages':['gauge']});
+    google.charts.setOnLoadCallback(drawCharts);
+
+    function drawCharts() {
+      // Setup Data
+      var dataPh = google.visualization.arrayToDataTable([ ['Label', 'Value'], ['pH', 0] ]);
+      var dataTurb = google.visualization.arrayToDataTable([ ['Label', 'Value'], ['NTU', 0] ]);
+      var dataWater = google.visualization.arrayToDataTable([ ['Label', 'Value'], ['Air (cm)', 0] ]);
+
+      // Setup Options (Desain Speedometer)
+      var optPh = { width: 200, height: 200, redFrom: 0, redTo: 5, yellowFrom:5, yellowTo: 6.5, greenFrom: 6.5, greenTo: 8.5, max: 14 };
+      var optTurb = { width: 200, height: 200, redFrom: 20, redTo: 50, yellowFrom:10, yellowTo: 20, greenFrom: 0, greenTo: 10, max: 50 };
+      var optWater = { width: 200, height: 200, min: 0, max: 100 };
+
+      // Render Charts
+      var chartPh = new google.visualization.Gauge(document.getElementById('gauge_ph'));
+      var chartTurb = new google.visualization.Gauge(document.getElementById('gauge_turbidity'));
+      var chartWater = new google.visualization.Gauge(document.getElementById('gauge_water'));
+
+      chartPh.draw(dataPh, optPh);
+      chartTurb.draw(dataTurb, optTurb);
+      chartWater.draw(dataWater, optWater);
+
+      // Update Real-time dari Firebase
+      onValue(ref(database, 'SistemAir/pH'), (s) => { dataPh.setValue(0, 1, s.val() || 0); chartPh.draw(dataPh, optPh); });
+      onValue(ref(database, 'SistemAir/turbidity'), (s) => { dataTurb.setValue(0, 1, s.val() || 0); chartTurb.draw(dataTurb, optTurb); });
+      onValue(ref(database, 'SistemAir/tinggiAir'), (s) => { dataWater.setValue(0, 1, s.val() || 0); chartWater.draw(dataWater, optWater); });
+    }
+  </script>
+</body>
+</html>

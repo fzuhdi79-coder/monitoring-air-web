@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Utama</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.6.1/justgage.min.js"></script>
+
+    <style>
+        .gauge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .gauge-container { width: 100%; height: 200px; }
+        .card h3 { text-align: center; margin-top: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Monitoring Kualitas Air</h1>
+            <p>Sistem Real-Time Berbasis IoT</p>
+        </header>
+
+        <div class="nav-tabs">
+            <a href="index.html" class="tab-link active"><i class="fa-solid fa-gauge"></i> Speedometer</a>
+            <a href="grafik.html" class="tab-link"><i class="fa-solid fa-chart-line"></i> Grafik Riwayat</a>
+            <a href="kontrol.html" class="tab-link"><i class="fa-solid fa-sliders"></i> Kontrol Pompa</a>
+        </div>
+
+        <div class="gauge-grid">
+            <div class="card">
+                <h3><i class="fa-solid fa-flask" style="color: var(--color-ph);"></i> Kondisi pH</h3>
+                <div id="gauge-ph" class="gauge-container"></div>
+            </div>
+            <div class="card">
+                <h3><i class="fa-solid fa-water" style="color: var(--color-turbidity);"></i> Kekeruhan Air</h3>
+                <div id="gauge-turbidity" class="gauge-container"></div>
+            </div>
+            <div class="card">
+                <h3><i class="fa-solid fa-ruler-vertical" style="color: var(--color-water);"></i> Tinggi Air (cm)</h3>
+                <div id="gauge-level" class="gauge-container"></div>
+            </div>
+        </div>
+
+        <div id="status-bar"><span id="text-status">Menghubungkan ke Firebase...</span></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
+            databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const gaugePH = new JustGage({ id: "gauge-ph", value: 0, min: 0, max: 14, decimals: 2, levelColors: ["#ef4444", "#10b981", "#ef4444"] });
+        const gaugeTurbidity = new JustGage({ id: "gauge-turbidity", value: 0, min: 0, max: 3000, levelColors: ["#10b981", "#f59e0b", "#ef4444"] });
+        const gaugeLevel = new JustGage({ id: "gauge-level", value: 0, min: 0, max: 100, levelColors: ["#ef4444", "#3b82f6", "#10b981"] });
+
+        onValue(ref(db, 'SistemAir'), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                gaugePH.refresh(data.pH || 0);
+                gaugeTurbidity.refresh(data.turbidity || 0);
+                gaugeLevel.refresh(data.tinggiAir || 0);
+                document.getElementById('text-status').innerText = "🟢 Terhubung Real-Time";
+            }
+        });
+    </script>
+</body>
+</html>
