@@ -204,3 +204,61 @@ body {
 .status-baik { color: #10b981; }
 .status-sedang { color: #f59e0b; }
 .status-buruk { color: #ef4444; }
+
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 75vh;
+}
+.login-box {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+.login-box h2 {
+    margin-top: 0;
+    color: var(--text-dark);
+    font-weight: 800;
+}
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0 15px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    outline: none;
+}
+.form-control:focus {
+    border-color: var(--primary-blue);
+}
+.btn-submit {
+    width: 100%;
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+.btn-submit:hover {
+    background-color: #1d4ed8;
+}
+.error-msg {
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: none;
+}
