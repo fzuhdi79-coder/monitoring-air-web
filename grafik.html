@@ -3,88 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grafik Analisis</title>
+    <title>Grafik Analisis - Monitoring Air</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=2">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <link rel="stylesheet" href="style.css?v=3">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+
+    <nav class="navbar">
+        <div class="nav-brand"><i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING</div>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="speedometer.html">Speedometer</a>
+            <a href="grafik.html" class="active">Grafik</a>
+            <a href="history.html">History</a>
+            <a href="#" class="btn-login"><i class="fa-solid fa-lock"></i> Login Admin</a>
+        </div>
+    </nav>
+
     <div class="container">
-        <header>
-            <h1>Grafik Analisis Data</h1>
-            <p>Riwayat Perubahan Sensor Air</p>
-        </header>
-
-        <div class="nav-tabs">
-            <a href="index.html" class="tab-link"><i class="fa-solid fa-gauge"></i> Speedometer</a>
-            <a href="grafik.html" class="tab-link active"><i class="fa-solid fa-chart-line"></i> Grafik Riwayat</a>
-            <a href="kontrol.html" class="tab-link"><i class="fa-solid fa-sliders"></i> Kontrol Pompa</a>
+        <div class="page-header">
+            <div class="page-title">
+                <h1><i class="fa-solid fa-chart-line"></i> Grafik Analisis Data</h1>
+                <p>Tren perubahan parameter sensor air secara real-time</p>
+            </div>
         </div>
 
-        <div class="card">
-            <h3><i class="fa-solid fa-flask" style="color: var(--color-ph);"></i> Grafik pH Air</h3>
-            <div class="chart-wrapper"><canvas id="chart-ph"></canvas></div>
-        </div>
-
-        <div class="card">
-            <h3><i class="fa-solid fa-water" style="color: var(--color-turbidity);"></i> Grafik Kekeruhan (NTU)</h3>
-            <div class="chart-wrapper"><canvas id="chart-turbidity"></canvas></div>
-        </div>
-
-        <div class="card">
-            <h3><i class="fa-solid fa-ruler-vertical" style="color: var(--color-water);"></i> Grafik Ketinggian Air (cm)</h3>
-            <div class="chart-wrapper"><canvas id="chart-level"></canvas></div>
-        </div>
-
-        <div id="status-bar"><span id="text-status">Menghubungkan ke Firebase...</span></div>
+        <div class="chart-container"><div class="section-title"><i class="fa-solid fa-flask" style="color:#10b981"></i> Grafik Perkembangan pH</div><div class="chart-wrapper"><canvas id="chart-ph"></canvas></div></div>
+        <div class="chart-container"><div class="section-title"><i class="fa-solid fa-bolt" style="color:#f59e0b"></i> Grafik Tingkat Kekeruhan (NTU)</div><div class="chart-wrapper"><canvas id="chart-turbidity"></canvas></div></div>
+        <div class="chart-container"><div class="section-title"><i class="fa-solid fa-water" style="color:#3b82f6"></i> Grafik Ketinggian Air (cm)</div><div class="chart-wrapper"><canvas id="chart-level"></canvas></div></div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        const firebaseConfig = { apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        const firebaseConfig = {
+            apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
+            databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        initializeApp(firebaseConfig);
+        const db = getDatabase();
 
-        let timeLabels = [], dataPH = [], dataTurbidity = [], dataLevel = [];
-        const commonOptions = { responsive: true, maintainAspectRatio: false, animation: false };
+        function buatLineChart(id, label, color) {
+            return new Chart(document.getElementById(id), {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: color, backgroundColor: color+'20', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } } } }
+            });
+        }
 
-        const chartPH = new Chart(document.getElementById('chart-ph').getContext('2d'), {
-            type: 'line',
-            data: { labels: timeLabels, datasets: [{ label: 'pH', data: dataPH, borderColor: '#10b981', tension: 0.2, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.05)' }] },
-            options: commonOptions
-        });
-        const chartTurbidity = new Chart(document.getElementById('chart-turbidity').getContext('2d'), {
-            type: 'line',
-            data: { labels: timeLabels, datasets: [{ label: 'NTU', data: dataTurbidity, borderColor: '#f59e0b', tension: 0.2, fill: true, backgroundColor: 'rgba(245, 158, 11, 0.05)' }] },
-            options: commonOptions
-        });
-        const chartLevel = new Chart(document.getElementById('chart-level').getContext('2d'), {
-            type: 'line',
-            data: { labels: timeLabels, datasets: [{ label: 'Tinggi (cm)', data: dataLevel, borderColor: '#3b82f6', tension: 0.2, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.05)' }] },
-            options: commonOptions
-        });
+        const cPh = buatLineChart('chart-ph', 'pH Air', '#10b981');
+        const cTb = buatLineChart('chart-turbidity', 'Kekeruhan (NTU)', '#f59e0b');
+        const cLv = buatLineChart('chart-level', 'Tinggi Air (cm)', '#3b82f6');
 
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                const now = new Date();
-                const timeString = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+                const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
 
-                timeLabels.push(timeString);
-                dataPH.push(data.pH || 0);
-                dataTurbidity.push(data.turbidity || 0);
-                dataLevel.push(data.tinggiAir || 0);
-
-                if(timeLabels.length > 15) {
-                    timeLabels.shift(); dataPH.shift(); dataTurbidity.shift(); dataLevel.shift();
-                }
-
-                chartPH.update(); chartTurbidity.update(); chartLevel.update();
-                document.getElementById('text-status').innerText = "🟢 Grafik Berjalan Real-Time";
+                [ [cPh, data.pH], [cTb, data.turbidity], [cLv, data.tinggiAir] ].forEach(([chart, val]) => {
+                    chart.data.labels.push(waktu);
+                    chart.data.datasets[0].data.push(val || 0);
+                    if(chart.data.labels.length > 12) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+                    chart.update();
+                });
             }
         });
     </script>
