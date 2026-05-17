@@ -2,15 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <script>
-        if (sessionStorage.getItem("statusLogin") !== "sukses") {
-            window.location.href = "login.html";
-        }
-    </script>
+    <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log Riwayat - Monitoring Air</title>
+    <title>Riwayat Log Sensor</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=final">
 </head>
 <body>
 
@@ -21,95 +17,56 @@
             <a href="speedometer.html">Speedometer</a>
             <a href="grafik.html">Grafik</a>
             <a href="history.html" class="active">History</a>
-            <a href="login.html" class="btn-login"><i class="fa-solid fa-lock"></i> Login Admin</a>
+            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </div>
     </nav>
 
     <div class="container">
-        <div class="page-header">
-            <div class="page-title">
-                <h1><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Log Sensor</h1>
-                <p>Data rekaman berkala dari modul mikrokontroler di lapangan</p>
-            </div>
-        </div>
-
         <div class="table-container">
             <div class="header-action">
-                <div class="section-title" style="margin:0;"><i class="fa-solid fa-database"></i> Bank Data Tabel</div>
-                <button class="btn-export" onclick="exportKeCSV()"><i class="fa-solid fa-file-excel"></i> Download File CSV (Excel)</button>
+                <div class="section-title" style="margin:0"><i class="fa-solid fa-database"></i> Database Tabel</div>
+                <button class="btn-export" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> Download CSV</button>
             </div>
-
-            <table class="data-table" id="tabel-log">
-                <thead>
-                    <tr>
-                        <th>Jam Operasional</th>
-                        <th>Tanggal Pengukuran</th>
-                        <th>Nilai pH</th>
-                        <th>Kekeruhan (NTU)</th>
-                        <th>Tinggi Fluida (cm)</th>
-                    </tr>
-                </thead>
-                <tbody id="badan-tabel">
-                    </tbody>
+            <table class="data-table">
+                <thead><tr><th>Jam</th><th>Tanggal</th><th>pH</th><th>Turbidity</th><th>Water Level</th></tr></thead>
+                <tbody id="badan-tabel"></tbody>
             </table>
         </div>
     </div>
 
+    <script>
+        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+        function exportCSV() {
+            let csv = []; let rows = document.querySelectorAll("table tr");
+            for(let i=0; i<rows.length; i++) {
+                let cols = rows[i].querySelectorAll("td, th"), row = [];
+                for(let j=0; j<cols.length; j++) row.push(cols[j].innerText.replace(/ NTU| cm/g, ""));
+                csv.push(row.join(","));
+            }
+            let a = document.createElement("a");
+            a.href = window.URL.createObjectURL(new Blob([csv.join("\n")], {type: "text/csv"}));
+            a.download = "Laporan_Air.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
-            databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
-        initializeApp(firebaseConfig);
-        const db = getDatabase();
-        const tbody = document.getElementById('badan-tabel');
-        let counter = 0;
-
-        onValue(ref(db, 'SistemAir'), (snapshot) => {
+        initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        
+        let tb = document.getElementById('badan-tabel'), cnt = 0;
+        onValue(ref(getDatabase(), 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
-                const data = snapshot.val();
-                const d = new Date();
-                const waktu = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
-                const tgl = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+                let d = snapshot.val(), now = new Date();
+                let time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+                let date = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${waktu}</td>
-                    <td>${tgl}</td>
-                    <td style="color:${data.pH < 6.5 || data.pH > 8.5 ? '#ef4444':'#10b981'};">${data.pH || 0}</td>
-                    <td>${data.turbidity || 0} NTU</td>
-                    <td>${data.tinggiAir || 0} cm</td>
-                `;
-                tbody.insertBefore(tr, tbody.firstChild);
-                counter++;
-                if(counter > 50) { tbody.removeChild(tbody.lastChild); }
+                let tr = document.createElement('tr');
+                tr.innerHTML = `<td>${time}</td><td>${date}</td><td style="color:${d.pH<6.5||d.pH>8.5?'#ef4444':'#10b981'}">${d.pH||0}</td><td>${d.turbidity||0} NTU</td><td>${d.tinggiAir||0} cm</td>`;
+                tb.insertBefore(tr, tb.firstChild); cnt++;
+                if(cnt > 50) tb.removeChild(tb.lastChild);
             }
         });
-    </script>
-
-    <script>
-        function exportKeCSV() {
-            let csv = [];
-            let baris = document.querySelectorAll("table tr");
-            for(let i=0; i<baris.length; i++) {
-                let kolom = baris[i].querySelectorAll("td, th"), dataBaris = [];
-                for(let j=0; j<kolom.length; j++) {
-                    dataBaris.push(kolom[j].innerText.replace(" NTU","").replace(" cm",""));
-                }
-                csv.push(dataBaris.join(","));
-            }
-            let fileCsv = new Blob([csv.join("\n")], {type: "text/csv"});
-            let link = document.createElement("a");
-            link.download = "Laporan_Kualitas_Air.csv";
-            link.href = window.URL.createObjectURL(fileCsv);
-            link.style.display = "none";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
     </script>
 </body>
 </html>
