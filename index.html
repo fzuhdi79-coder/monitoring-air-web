@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Kualitas Air</title>
+    <title>Dashboard Utama - Monitoring Air</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING
-        </div>
+        <div class="nav-brand"><i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING</div>
         <div class="nav-links">
             <a href="index.html" class="active">Dashboard</a>
             <a href="speedometer.html">Speedometer</a>
@@ -25,36 +23,32 @@
     <div class="container">
         <div class="page-header">
             <div class="page-title">
-                <h1><i class="fa-solid fa-house"></i> Pemantauan Real-time</h1>
-                <p>Sistem Monitoring Kualitas Air Tambak/Kolam</p>
+                <h1><i class="fa-solid fa-square-poll-vertical"></i> Pemantauan Real-time</h1>
+                <p>Status kondisi kualitas air tambak/kolam saat ini</p>
             </div>
-            <div class="status-badge" id="koneksi-status">
-                <i class="fa-solid fa-cloud"></i> MENGHUBUNGKAN...
-            </div>
+            <div class="status-badge" id="koneksi-status"><i class="fa-solid fa-cloud"></i> MENGHUBUNGKAN...</div>
         </div>
 
-        <div class="section-title"><i class="fa-solid fa-satellite-dish"></i> INDIKATOR SENSOR AIR</div>
+        <div class="section-title"><i class="fa-solid fa-satellite-dish"></i> Parameter Sensor Aktual</div>
         
-        <div class="grid-indicators">
+        <div class="grid-layout">
             <div class="card">
-                <div class="card-title">KONDISI pH (POTENSIAL HIDROGEN)</div>
+                <div class="card-title">Kondisi derajat keasaman (pH)</div>
                 <div class="card-value" id="val-ph">0.00</div>
                 <div class="card-emoji" id="emoji-ph">⏳</div>
-                <div class="card-status" id="status-ph">MENUNGGU DATA</div>
+                <div class="card-status" id="status-ph">MEMUAT DATA...</div>
             </div>
-
             <div class="card">
-                <div class="card-title">KEKERUHAN AIR (TURBIDITY)</div>
+                <div class="card-title">Tingkat Kekeruhan Air (Turbidity)</div>
                 <div class="card-value" id="val-turbidity">0 NTU</div>
                 <div class="card-emoji" id="emoji-turbidity">⏳</div>
-                <div class="card-status" id="status-turbidity">MENUNGGU DATA</div>
+                <div class="card-status" id="status-turbidity">MEMUAT DATA...</div>
             </div>
-
             <div class="card">
-                <div class="card-title">KETINGGIAN AIR (WATER LEVEL)</div>
+                <div class="card-title">Ketinggian Permukaan Air</div>
                 <div class="card-value" id="val-level">0 cm</div>
                 <div class="card-emoji" id="emoji-level">⏳</div>
-                <div class="card-status" id="status-level">MENUNGGU DATA</div>
+                <div class="card-status" id="status-level">MEMUAT DATA...</div>
             </div>
         </div>
     </div>
@@ -74,52 +68,30 @@
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 
-                // Update Teks Koneksi
-                const badge = document.getElementById('koneksi-status');
-                badge.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> TERHUBUNG (LIVE)';
-                badge.style.backgroundColor = '#f0fdf4';
-                badge.style.color = '#166534';
-                badge.style.borderColor = '#bbf7d0';
+                document.getElementById('koneksi-status').innerHTML = '<i class="fa-solid fa-circle" style="color: #10b981; font-size: 10px;"></i> TERHUBUNG (LIVE)';
 
-                // --- LOGIKA pH AIR ---
+                // pH
                 let ph = data.pH || 0;
                 document.getElementById('val-ph').innerText = ph;
-                let elPhStat = document.getElementById('status-ph');
-                let elPhEmoji = document.getElementById('emoji-ph');
-                
-                if (ph < 6.5) {
-                    elPhStat.innerText = "ASAM (TIDAK SEHAT)"; elPhStat.className = "card-status status-buruk"; elPhEmoji.innerText = "😷";
-                } else if (ph > 8.5) {
-                    elPhStat.innerText = "BASA (TIDAK SEHAT)"; elPhStat.className = "card-status status-buruk"; elPhEmoji.innerText = "😷";
-                } else {
-                    elPhStat.innerText = "NORMAL (SEHAT)"; elPhStat.className = "card-status status-baik"; elPhEmoji.innerText = "🤩";
-                }
+                let sPh = document.getElementById('status-ph'), ePh = document.getElementById('emoji-ph');
+                if (ph < 6.5) { sPh.innerText = "ASAM (TIDAK SEHAT)"; sPh.className = "card-status status-buruk"; ePh.innerText = "😷"; }
+                else if (ph > 8.5) { sPh.innerText = "BASA (TIDAK SEHAT)"; sPh.className = "card-status status-buruk"; ePh.innerText = "😷"; }
+                else { sPh.innerText = "NORMAL (SEHAT)"; sPh.className = "card-status status-baik"; ePh.innerText = "🤩"; }
 
-                // --- LOGIKA KEKERUHAN ---
-                let turbidity = data.turbidity || 0;
-                document.getElementById('val-turbidity').innerText = turbidity + " NTU";
-                let elTurbStat = document.getElementById('status-turbidity');
-                let elTurbEmoji = document.getElementById('emoji-turbidity');
+                // Turbidity
+                let turb = data.turbidity || 0;
+                document.getElementById('val-turbidity').innerText = turb + " NTU";
+                let sTb = document.getElementById('status-turbidity'), eTb = document.getElementById('emoji-turbidity');
+                if (turb < 25) { sTb.innerText = "JERNIH (BAIK)"; sTb.className = "card-status status-baik"; eTb.innerText = "🤩"; }
+                else if (turb < 100) { sTb.innerText = "KERUH (SEDANG)"; sTb.className = "card-status status-sedang"; eTb.innerText = "😐"; }
+                else { sTb.innerText = "SANGAT KERUH (BAHAYA)"; sTb.className = "card-status status-buruk"; eTb.innerText = "🤢"; }
 
-                if (turbidity < 25) {
-                    elTurbStat.innerText = "JERNIH (BAIK)"; elTurbStat.className = "card-status status-baik"; elTurbEmoji.innerText = "🤩";
-                } else if (turbidity < 100) {
-                    elTurbStat.innerText = "SEDIKIT KERUH (SEDANG)"; elTurbStat.className = "card-status status-sedang"; elTurbEmoji.innerText = "😐";
-                } else {
-                    elTurbStat.innerText = "SANGAT KERUH (BURUK)"; elTurbStat.className = "card-status status-buruk"; elTurbEmoji.innerText = "🤢";
-                }
-
-                // --- LOGIKA TINGGI AIR ---
-                let level = data.tinggiAir || 0;
-                document.getElementById('val-level').innerText = level + " cm";
-                let elLevelStat = document.getElementById('status-level');
-                let elLevelEmoji = document.getElementById('emoji-level');
-
-                if (level < 20) {
-                    elLevelStat.innerText = "AIR SURUT (WASPADA)"; elLevelStat.className = "card-status status-buruk"; elLevelEmoji.innerText = "😨";
-                } else {
-                    elLevelStat.innerText = "VOLUME AMAN"; elLevelStat.className = "card-status status-baik"; elLevelEmoji.innerText = "🌊";
-                }
+                // Water Level
+                let lvl = data.tinggiAir || 0;
+                document.getElementById('val-level').innerText = lvl + " cm";
+                let sLv = document.getElementById('status-level'), eLv = document.getElementById('emoji-level');
+                if (lvl < 20) { sLv.innerText = "AIR SURUT (WASPADA)"; sLv.className = "card-status status-buruk"; eLv.innerText = "😨"; }
+                else { sLv.innerText = "VOLUME AMAN"; sLv.className = "card-status status-baik"; eLv.innerText = "🌊"; }
             }
         });
     </script>
