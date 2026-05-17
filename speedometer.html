@@ -2,6 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <script>
+        if (sessionStorage.getItem("statusLogin") !== "sukses") {
+            window.location.href = "login.html";
+        }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speedometer Indikator - Monitoring Air</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
