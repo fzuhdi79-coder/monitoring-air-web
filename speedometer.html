@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speedometer Sensor</title>
+    <title>Gauges - WQ System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=final">
+    <link rel="stylesheet" href="style.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.6.1/justgage.min.js"></script>
@@ -14,23 +14,23 @@
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand"><i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING</div>
+        <div class="nav-brand"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> WQ-SYSTEM</div>
         <div class="nav-links">
-            <a href="index.html">Dashboard</a>
-            <a href="speedometer.html" class="active">Speedometer</a>
-            <a href="grafik.html">Grafik</a>
-            <a href="history.html">History</a>
-            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            <a href="index.html">Overview</a>
+            <a href="speedometer.html" class="active">Gauges</a>
+            <a href="grafik.html">Analytics</a>
+            <a href="history.html">Data Log</a>
+            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i></a>
         </div>
     </nav>
 
     <div class="container">
-        <div class="page-header"><div class="page-title"><h1><i class="fa-solid fa-gauge-high"></i> Speedometer</h1></div></div>
+        <div class="page-header"><div class="page-title"><h1>Instrument Gauges</h1><p>Visualisasi radial parameter operasional</p></div></div>
 
         <div class="grid-layout">
-            <div class="card"><div class="card-title">pH Meter</div><div id="gauge-ph" class="gauge-container"></div></div>
-            <div class="card"><div class="card-title">Turbidity (NTU)</div><div id="gauge-turbidity" class="gauge-container"></div></div>
-            <div class="card"><div class="card-title">Water Level (cm)</div><div id="gauge-level" class="gauge-container"></div></div>
+            <div class="card"><div class="card-title">pH Sensor</div><div id="gauge-ph" style="width:100%; height:200px;"></div></div>
+            <div class="card"><div class="card-title">Turbidity Sensor</div><div id="gauge-turbidity" style="width:100%; height:200px;"></div></div>
+            <div class="card"><div class="card-title">Level Sensor</div><div id="gauge-level" style="width:100%; height:200px;"></div></div>
         </div>
     </div>
 
@@ -41,9 +41,10 @@
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         
-        const gPh = new JustGage({ id: "gauge-ph", value: 0, min: 0, max: 14, label: "pH", levelColors: ["#ef4444","#10b981","#ef4444"], pointer: true });
-        const gTb = new JustGage({ id: "gauge-turbidity", value: 0, min: 0, max: 3000, label: "NTU", levelColors: ["#10b981","#f59e0b","#ef4444"], pointer: true });
-        const gLv = new JustGage({ id: "gauge-level", value: 0, min: 0, max: 100, label: "cm", levelColors: ["#ef4444","#3b82f6","#10b981"], pointer: true });
+        let pColor = "#475569"; // Slate gray untuk jarum
+        const gPh = new JustGage({ id: "gauge-ph", value: 0, min: 0, max: 14, label: "pH", levelColors: ["#ef4444","#10b981","#ef4444"], pointer: true, pointerOptions: {color: pColor}, valueFontColor: "#0f172a" });
+        const gTb = new JustGage({ id: "gauge-turbidity", value: 0, min: 0, max: 3000, label: "NTU", levelColors: ["#10b981","#f59e0b","#ef4444"], pointer: true, pointerOptions: {color: pColor}, valueFontColor: "#0f172a" });
+        const gLv = new JustGage({ id: "gauge-level", value: 0, min: 0, max: 100, label: "cm", levelColors: ["#ef4444","#3b82f6","#10b981"], pointer: true, pointerOptions: {color: pColor}, valueFontColor: "#0f172a" });
 
         onValue(ref(getDatabase(), 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
