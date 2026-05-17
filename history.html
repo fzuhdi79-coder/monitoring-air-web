@@ -4,31 +4,31 @@
     <meta charset="UTF-8">
     <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Log Sensor</title>
+    <title>Data Log - WQ System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=final">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand"><i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING</div>
+        <div class="nav-brand"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> WQ-SYSTEM</div>
         <div class="nav-links">
-            <a href="index.html">Dashboard</a>
-            <a href="speedometer.html">Speedometer</a>
-            <a href="grafik.html">Grafik</a>
-            <a href="history.html" class="active">History</a>
-            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            <a href="index.html">Overview</a>
+            <a href="speedometer.html">Gauges</a>
+            <a href="grafik.html">Analytics</a>
+            <a href="history.html" class="active">Data Log</a>
+            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i></a>
         </div>
     </nav>
 
     <div class="container">
         <div class="table-container">
             <div class="header-action">
-                <div class="section-title" style="margin:0"><i class="fa-solid fa-database"></i> Database Tabel</div>
-                <button class="btn-export" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> Download CSV</button>
+                <div class="section-title" style="margin:0"><i class="fa-solid fa-server"></i> Database Entry</div>
+                <button class="btn-export" onclick="exportCSV()"><i class="fa-solid fa-download"></i> EXPORT TO CSV</button>
             </div>
             <table class="data-table">
-                <thead><tr><th>Jam</th><th>Tanggal</th><th>pH</th><th>Turbidity</th><th>Water Level</th></tr></thead>
+                <thead><tr><th>Timestamp</th><th>Date</th><th>pH Level</th><th>Turbidity (NTU)</th><th>Water Level (cm)</th></tr></thead>
                 <tbody id="badan-tabel"></tbody>
             </table>
         </div>
@@ -40,12 +40,12 @@
             let csv = []; let rows = document.querySelectorAll("table tr");
             for(let i=0; i<rows.length; i++) {
                 let cols = rows[i].querySelectorAll("td, th"), row = [];
-                for(let j=0; j<cols.length; j++) row.push(cols[j].innerText.replace(/ NTU| cm/g, ""));
+                for(let j=0; j<cols.length; j++) row.push(cols[j].innerText);
                 csv.push(row.join(","));
             }
             let a = document.createElement("a");
             a.href = window.URL.createObjectURL(new Blob([csv.join("\n")], {type: "text/csv"}));
-            a.download = "Laporan_Air.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            a.download = "WQ_System_Log.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
     </script>
 
@@ -62,9 +62,9 @@
                 let date = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
 
                 let tr = document.createElement('tr');
-                tr.innerHTML = `<td>${time}</td><td>${date}</td><td style="color:${d.pH<6.5||d.pH>8.5?'#ef4444':'#10b981'}">${d.pH||0}</td><td>${d.turbidity||0} NTU</td><td>${d.tinggiAir||0} cm</td>`;
+                tr.innerHTML = `<td>${time}</td><td>${date}</td><td style="font-weight:800; color:${d.pH<6.5||d.pH>8.5?'var(--color-danger)':'var(--color-safe)'}">${d.pH||0}</td><td>${d.turbidity||0}</td><td>${d.tinggiAir||0}</td>`;
                 tb.insertBefore(tr, tb.firstChild); cnt++;
-                if(cnt > 50) tb.removeChild(tb.lastChild);
+                if(cnt > 50) tb.removeChild(tb.lastChild); // Batasi 50 log terbaru
             }
         });
     </script>
