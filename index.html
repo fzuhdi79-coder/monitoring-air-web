@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        if (sessionStorage.getItem("statusLogin") !== "sukses") {
-            window.location.href = "login.html";
-        }
+        // KUNCI: Jika BELUM login, lempar ke login.html
+        if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Utama - Monitoring Air</title>
+    <title>Dashboard Utama</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=final">
 </head>
 <body>
 
@@ -21,82 +20,53 @@
             <a href="speedometer.html">Speedometer</a>
             <a href="grafik.html">Grafik</a>
             <a href="history.html">History</a>
-            <a href="login.html" class="btn-login"><i class="fa-solid fa-lock"></i> Login Admin</a>
+            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
         </div>
     </nav>
 
     <div class="container">
         <div class="page-header">
             <div class="page-title">
-                <h1><i class="fa-solid fa-square-poll-vertical"></i> Pemantauan Real-time</h1>
-                <p>Status kondisi kualitas air tambak/kolam saat ini</p>
+                <h1><i class="fa-solid fa-house"></i> Pemantauan Real-time</h1>
+                <p>Status kondisi air tambak/kolam saat ini</p>
             </div>
             <div class="status-badge" id="koneksi-status"><i class="fa-solid fa-cloud"></i> MENGHUBUNGKAN...</div>
         </div>
 
-        <div class="section-title"><i class="fa-solid fa-satellite-dish"></i> Parameter Sensor Aktual</div>
-        
         <div class="grid-layout">
-            <div class="card">
-                <div class="card-title">Kondisi derajat keasaman (pH)</div>
-                <div class="card-value" id="val-ph">0.00</div>
-                <div class="card-emoji" id="emoji-ph">⏳</div>
-                <div class="card-status" id="status-ph">MEMUAT DATA...</div>
-            </div>
-            <div class="card">
-                <div class="card-title">Tingkat Kekeruhan Air (Turbidity)</div>
-                <div class="card-value" id="val-turbidity">0 NTU</div>
-                <div class="card-emoji" id="emoji-turbidity">⏳</div>
-                <div class="card-status" id="status-turbidity">MEMUAT DATA...</div>
-            </div>
-            <div class="card">
-                <div class="card-title">Ketinggian Permukaan Air</div>
-                <div class="card-value" id="val-level">0 cm</div>
-                <div class="card-emoji" id="emoji-level">⏳</div>
-                <div class="card-status" id="status-level">MEMUAT DATA...</div>
-            </div>
+            <div class="card"><div class="card-title">Derajat Keasaman (pH)</div><div class="card-value" id="val-ph">0.00</div><div class="card-emoji" id="emoji-ph">⏳</div><div class="card-status" id="status-ph">MEMUAT...</div></div>
+            <div class="card"><div class="card-title">Kekeruhan (Turbidity)</div><div class="card-value" id="val-turbidity">0 NTU</div><div class="card-emoji" id="emoji-turbidity">⏳</div><div class="card-status" id="status-turbidity">MEMUAT...</div></div>
+            <div class="card"><div class="card-title">Ketinggian Permukaan</div><div class="card-value" id="val-level">0 cm</div><div class="card-emoji" id="emoji-level">⏳</div><div class="card-status" id="status-level">MEMUAT...</div></div>
         </div>
     </div>
+
+    <script>
+        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
-            databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
-                const data = snapshot.val();
-                
-                document.getElementById('koneksi-status').innerHTML = '<i class="fa-solid fa-circle" style="color: #10b981; font-size: 10px;"></i> TERHUBUNG (LIVE)';
+                const d = snapshot.val();
+                document.getElementById('koneksi-status').innerHTML = '<i class="fa-solid fa-check"></i> TERHUBUNG (LIVE)';
 
-                // pH
-                let ph = data.pH || 0;
-                document.getElementById('val-ph').innerText = ph;
+                let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph;
                 let sPh = document.getElementById('status-ph'), ePh = document.getElementById('emoji-ph');
-                if (ph < 6.5) { sPh.innerText = "ASAM (TIDAK SEHAT)"; sPh.className = "card-status status-buruk"; ePh.innerText = "😷"; }
-                else if (ph > 8.5) { sPh.innerText = "BASA (TIDAK SEHAT)"; sPh.className = "card-status status-buruk"; ePh.innerText = "😷"; }
-                else { sPh.innerText = "NORMAL (SEHAT)"; sPh.className = "card-status status-baik"; ePh.innerText = "🤩"; }
+                if(ph < 6.5 || ph > 8.5) { sPh.innerText = "TIDAK SEHAT"; sPh.className = "card-status status-buruk"; ePh.innerText = "😷"; } else { sPh.innerText = "NORMAL"; sPh.className = "card-status status-baik"; ePh.innerText = "🤩"; }
 
-                // Turbidity
-                let turb = data.turbidity || 0;
-                document.getElementById('val-turbidity').innerText = turb + " NTU";
+                let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerText = tb + " NTU";
                 let sTb = document.getElementById('status-turbidity'), eTb = document.getElementById('emoji-turbidity');
-                if (turb < 25) { sTb.innerText = "JERNIH (BAIK)"; sTb.className = "card-status status-baik"; eTb.innerText = "🤩"; }
-                else if (turb < 100) { sTb.innerText = "KERUH (SEDANG)"; sTb.className = "card-status status-sedang"; eTb.innerText = "😐"; }
-                else { sTb.innerText = "SANGAT KERUH (BAHAYA)"; sTb.className = "card-status status-buruk"; eTb.innerText = "🤢"; }
+                if(tb < 25) { sTb.innerText = "JERNIH"; sTb.className = "card-status status-baik"; eTb.innerText = "🤩"; } else if(tb < 100) { sTb.innerText = "SEDANG"; sTb.className = "card-status status-sedang"; eTb.innerText = "😐"; } else { sTb.innerText = "KERUH"; sTb.className = "card-status status-buruk"; eTb.innerText = "🤢"; }
 
-                // Water Level
-                let lvl = data.tinggiAir || 0;
-                document.getElementById('val-level').innerText = lvl + " cm";
+                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerText = lv + " cm";
                 let sLv = document.getElementById('status-level'), eLv = document.getElementById('emoji-level');
-                if (lvl < 20) { sLv.innerText = "AIR SURUT (WASPADA)"; sLv.className = "card-status status-buruk"; eLv.innerText = "😨"; }
-                else { sLv.innerText = "VOLUME AMAN"; sLv.className = "card-status status-baik"; eLv.innerText = "🌊"; }
+                if(lv < 20) { sLv.innerText = "SURUT"; sLv.className = "card-status status-buruk"; eLv.innerText = "😨"; } else { sLv.innerText = "AMAN"; sLv.className = "card-status status-baik"; eLv.innerText = "🌊"; }
             }
         });
     </script>
