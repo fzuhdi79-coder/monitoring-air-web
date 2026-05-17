@@ -3,67 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Data Kualitas Air</title>
+    <title>Log Riwayat - Monitoring Air</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=3">
-    <style>
-        /* CSS KHUSUS UNTUK TABEL */
-        .table-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            overflow-x: auto;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            margin-top: 15px;
-        }
-        .data-table th {
-            background-color: #f1f5f9;
-            color: var(--text-muted);
-            font-weight: 700;
-            padding: 12px 15px;
-            border-bottom: 2px solid var(--border-color);
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-        .data-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 15px;
-            font-weight: 600;
-        }
-        .data-table tbody tr:hover {
-            background-color: #f8fafc;
-        }
-        .btn-export {
-            background-color: #10b981;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-family: 'Nunito', sans-serif;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
-        .btn-export:hover { background-color: #059669; }
-        .header-action { display: flex; justify-content: space-between; align-items: center; }
-    </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING
-        </div>
+        <div class="nav-brand"><i class="fa-solid fa-leaf" style="color: #2563eb;"></i> WATER QUALITY MONITORING</div>
         <div class="nav-links">
             <a href="index.html">Dashboard</a>
             <a href="speedometer.html">Speedometer</a>
@@ -76,30 +23,28 @@
     <div class="container">
         <div class="page-header">
             <div class="page-title">
-                <h1><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Data</h1>
-                <p>Log pencatatan sensor air secara real-time</p>
+                <h1><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Log Sensor</h1>
+                <p>Data rekaman berkala dari modul mikrokontroler di lapangan</p>
             </div>
         </div>
 
         <div class="table-container">
             <div class="header-action">
-                <div class="section-title" style="margin: 0;"><i class="fa-solid fa-table-list"></i> Tabel Log Sensor</div>
-                <button class="btn-export" onclick="exportTableToCSV('Data_Kualitas_Air.csv')">
-                    <i class="fa-solid fa-file-csv"></i> Download CSV
-                </button>
+                <div class="section-title" style="margin:0;"><i class="fa-solid fa-database"></i> Bank Data Tabel</div>
+                <button class="btn-export" onclick="exportKeCSV()"><i class="fa-solid fa-file-excel"></i> Download File CSV (Excel)</button>
             </div>
 
-            <table class="data-table" id="tabel-history">
+            <table class="data-table" id="tabel-log">
                 <thead>
                     <tr>
-                        <th>Waktu (Jam)</th>
-                        <th>Tanggal</th>
-                        <th>Kondisi pH</th>
+                        <th>Jam Operasional</th>
+                        <th>Tanggal Pengukuran</th>
+                        <th>Nilai pH</th>
                         <th>Kekeruhan (NTU)</th>
-                        <th>Tinggi Air (cm)</th>
+                        <th>Tinggi Fluida (cm)</th>
                     </tr>
                 </thead>
-                <tbody id="table-body">
+                <tbody id="badan-tabel">
                     </tbody>
             </table>
         </div>
@@ -113,72 +58,52 @@
             apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",
             databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        const tbody = document.getElementById('table-body');
+        initializeApp(firebaseConfig);
+        const db = getDatabase();
+        const tbody = document.getElementById('badan-tabel');
         let counter = 0;
 
-        // Ambil data dari Firebase
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                
-                // Dapatkan waktu saat ini
-                const now = new Date();
-                const waktu = String(now.getHours()).padStart(2, '0') + ':' + 
-                              String(now.getMinutes()).padStart(2, '0') + ':' + 
-                              String(now.getSeconds()).padStart(2, '0');
-                const tanggal = String(now.getDate()).padStart(2, '0') + '/' + 
-                                String(now.getMonth() + 1).padStart(2, '0') + '/' + 
-                                now.getFullYear();
+                const d = new Date();
+                const waktu = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+                const tgl = String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
 
-                // Buat baris tabel baru
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${waktu}</td>
-                    <td>${tanggal}</td>
-                    <td style="color: ${data.pH < 6.5 || data.pH > 8.5 ? '#ef4444' : '#10b981'};">${data.pH || 0}</td>
+                    <td>${tgl}</td>
+                    <td style="color:${data.pH < 6.5 || data.pH > 8.5 ? '#ef4444':'#10b981'};">${data.pH || 0}</td>
                     <td>${data.turbidity || 0} NTU</td>
                     <td>${data.tinggiAir || 0} cm</td>
                 `;
-
-                // Tambahkan baris baru ke paling atas
                 tbody.insertBefore(tr, tbody.firstChild);
                 counter++;
-
-                // Batasi maksimal 50 baris agar browser tidak berat
-                if(counter > 50) {
-                    tbody.removeChild(tbody.lastChild);
-                }
+                if(counter > 50) { tbody.removeChild(tbody.lastChild); }
             }
         });
     </script>
 
     <script>
-        function exportTableToCSV(filename) {
+        function exportKeCSV() {
             let csv = [];
-            let rows = document.querySelectorAll("table tr");
-            
-            for (let i = 0; i < rows.length; i++) {
-                let row = [], cols = rows[i].querySelectorAll("td, th");
-                
-                for (let j = 0; j < cols.length; j++) 
-                    row.push(cols[j].innerText.replace(" NTU", "").replace(" cm", ""));
-                
-                csv.push(row.join(","));        
+            let baris = document.querySelectorAll("table tr");
+            for(let i=0; i<baris.length; i++) {
+                let kolom = baris[i].querySelectorAll("td, th"), dataBaris = [];
+                for(let j=0; j<kolom.length; j++) {
+                    dataBaris.push(kolom[j].innerText.replace(" NTU","").replace(" cm",""));
+                }
+                csv.push(dataBaris.join(","));
             }
-            downloadCSV(csv.join("\n"), filename);
-        }
-
-        function downloadCSV(csv, filename) {
-            let csvFile = new Blob([csv], {type: "text/csv"});
-            let downloadLink = document.createElement("a");
-            downloadLink.download = filename;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
+            let fileCsv = new Blob([csv.join("\n")], {type: "text/csv"});
+            let link = document.createElement("a");
+            link.download = "Laporan_Kualitas_Air.csv";
+            link.href = window.URL.createObjectURL(fileCsv);
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
