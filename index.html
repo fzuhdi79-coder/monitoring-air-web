@@ -98,7 +98,7 @@
                 setOnlineUI(); // Saat ada data masuk, status berubah jadi Hijau
                 clearTimeout(timerSensor); // Hapus hitungan mundur sebelumnya
                 
-                // Mulai hitung mundur 15 detik. Jika 15 detik tidak ada data masuk, berarti alat/ESP mati!
+                // Mulai hitung mundur 3 detik. Jika 3 detik tidak ada data masuk, berarti alat/ESP mati!
                 timerSensor = setTimeout(() => {
                     setOfflineUI("SENSOR OFFLINE");
                 }, 3000); 
