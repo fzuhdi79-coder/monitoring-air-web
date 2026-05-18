@@ -8,7 +8,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style> .grid-grafik { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; } </style>
 </head>
 <body>
 
@@ -24,12 +23,26 @@
     </nav>
 
     <div class="container">
-        <div class="page-header"><div class="page-title"><h1>Data Analytics</h1><p>Pemantauan fluktuasi parameter historis (Line Chart)</p></div></div>
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Data Analytics</h1>
+                <p>Pemantauan fluktuasi parameter historis (Line Chart)</p>
+            </div>
+        </div>
 
         <div class="grid-grafik">
-            <div class="chart-container"><div class="section-title"><i class="fa-solid fa-chart-area" style="color:#10b981"></i> pH Metrics</div><div class="chart-wrapper"><canvas id="c-ph"></canvas></div></div>
-            <div class="chart-container"><div class="section-title"><i class="fa-solid fa-chart-area" style="color:#f59e0b"></i> Turbidity Metrics</div><div class="chart-wrapper"><canvas id="c-tb"></canvas></div></div>
-            <div class="chart-container"><div class="section-title"><i class="fa-solid fa-chart-area" style="color:#3b82f6"></i> Level Metrics</div><div class="chart-wrapper"><canvas id="c-lv"></canvas></div></div>
+            <div class="chart-container">
+                <div class="section-title"><i class="fa-solid fa-chart-area" style="color:#10b981"></i> pH Metrics</div>
+                <div class="chart-wrapper"><canvas id="c-ph"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <div class="section-title"><i class="fa-solid fa-chart-area" style="color:#f59e0b"></i> Turbidity Metrics</div>
+                <div class="chart-wrapper"><canvas id="c-tb"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <div class="section-title"><i class="fa-solid fa-chart-area" style="color:#3b82f6"></i> Level Metrics</div>
+                <div class="chart-wrapper"><canvas id="c-lv"></canvas></div>
+            </div>
         </div>
     </div>
 
