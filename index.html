@@ -90,7 +90,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        // TAMBAHAN: import 'set' untuk mengirim perintah
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
@@ -99,13 +98,8 @@
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
-        // FUNGSI KONTROL SISTEM (KIRIM KE FIREBASE)
-        window.ubahMode = function(mode) {
-            set(ref(db, 'SistemAir/modeSistem'), mode);
-        }
-        window.ubahPompa = function(perintah) {
-            set(ref(db, 'SistemAir/pompaStatus'), perintah);
-        }
+        window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
+        window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
 
         function setOfflineUI(pesan) {
             statusBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${pesan}`;
@@ -122,9 +116,7 @@
         }
 
         const connectedRef = ref(db, ".info/connected");
-        onValue(connectedRef, (snap) => {
-            if (snap.val() !== true) { setOfflineUI("WEB OFFLINE"); }
-        });
+        onValue(connectedRef, (snap) => { if (snap.val() !== true) { setOfflineUI("WEB OFFLINE"); } });
 
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
@@ -133,7 +125,6 @@
                 
                 setOnlineUI(); 
                 clearTimeout(timerSensor); 
-                
                 timerSensor = setTimeout(() => { setOfflineUI("SENSOR OFFLINE"); }, 3000); 
                 
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
@@ -157,10 +148,7 @@
                 if(lv < 20) { document.getElementById('status-level').innerHTML = '<span class="dot dot-buruk"></span> LOW LEVEL'; document.getElementById('status-level').style.color = 'var(--color-danger)'; }
                 else { document.getElementById('status-level').innerHTML = '<span class="dot dot-baik"></span> SAFE LEVEL'; document.getElementById('status-level').style.color = 'var(--color-safe)'; }
 
-
-                // --- LOGIKA UPDATE UI KONTROL SISTEM ---
-                
-                // 1. Update Mode Sistem
+                // Update Mode Sistem UI
                 let modeSistem = d.modeSistem || "AUTO";
                 const btnAuto = document.getElementById('btn-mode-auto');
                 const btnManual = document.getElementById('btn-mode-manual');
@@ -169,38 +157,24 @@
                 if (modeSistem === "AUTO") {
                     btnAuto.classList.add('active-auto');
                     btnManual.classList.remove('active-manual');
-                    
-                    // Kunci tombol pompa di web saat otomatis
-                    btnPompas.forEach(btn => {
-                        btn.style.opacity = '0.5';
-                        btn.style.pointerEvents = 'none';
-                    });
+                    btnPompas.forEach(btn => { btn.style.opacity = '0.5'; btn.style.pointerEvents = 'none'; });
                 } else {
                     btnAuto.classList.remove('active-auto');
                     btnManual.classList.add('active-manual');
-                    
-                    // Buka kunci tombol pompa saat manual
-                    btnPompas.forEach(btn => {
-                        btn.style.opacity = '1';
-                        btn.style.pointerEvents = 'auto';
-                    });
+                    btnPompas.forEach(btn => { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; });
                 }
 
-                // 2. Update Indikator Pompa
+                // Update Indikator Pompa
                 let statusPompa = d.pompaStatus || "OFF";
-                
-                // Reset semua warna pompa
                 btnPompas.forEach(btn => btn.classList.remove('active-pump'));
 
                 if (statusPompa === "KURAS" || statusPompa === "KRS") {
                     document.getElementById('btn-p1-on').classList.add('active-pump');
                     document.getElementById('btn-p2-off').classList.add('active-pump');
-                } 
-                else if (statusPompa === "ISI") {
+                } else if (statusPompa === "ISI") {
                     document.getElementById('btn-p1-off').classList.add('active-pump');
                     document.getElementById('btn-p2-on').classList.add('active-pump');
-                } 
-                else { // OFF
+                } else {
                     document.getElementById('btn-p1-off').classList.add('active-pump');
                     document.getElementById('btn-p2-off').classList.add('active-pump');
                 }
