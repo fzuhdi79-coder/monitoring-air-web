@@ -5,51 +5,88 @@
     <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Log - WQ System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <nav class="navbar">
-        <div class="nav-brand"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> WQ-SYSTEM</div>
-        <div class="nav-links">
-            <a href="index.html">Overview</a>
-            <a href="speedometer.html">Gauges</a>
-            <a href="grafik.html">Analytics</a>
-            <a href="history.html" class="active">Data Log</a>
-            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i></a>
+    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-blue-600/10 p-2 rounded-lg text-blue-400 border border-blue-500/20">
+                        <i class="fa-solid fa-droplet text-base"></i>
+                    </div>
+                    <span class="text-md font-extrabold tracking-wider text-white">WQ-SYSTEM</span>
+                </div>
+
+                <div class="flex space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700/30">
+                    <a href="index.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Overview</a>
+                    <a href="speedometer.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Gauges</a>
+                    <a href="grafik.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Analytics</a>
+                    <a href="history.html" class="bg-blue-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition">Data Log</a>
+                </div>
+
+                <div>
+                    <button onclick="logout()" class="h-9 w-9 bg-slate-800 hover:bg-rose-900/40 border border-slate-700/50 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 rounded-xl flex items-center justify-center transition active:scale-95" title="Keluar">
+                        <i class="fa-solid fa-power-off text-sm"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <div class="page-title">
-                <h1>Database Entry Log</h1>
-                <p>Riwayat parameter kualitas air yang terekam pada sistem cloud</p>
-            </div>
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        
+        <div class="border-b border-slate-200 pb-5">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">Database Entry Log</h1>
+            <p class="text-xs text-slate-500 mt-1">Riwayat parameter kualitas air yang terekam pada sistem cloud secara real-time.</p>
         </div>
 
-        <div class="table-container">
-            <div class="header-action">
-                <div class="section-title" style="margin:0"><i class="fa-solid fa-server" style="color: var(--primary-blue)"></i> Live Records Storage</div>
-                <button class="btn-export" onclick="exportCSV()"><i class="fa-solid fa-download"></i> EXPORT TO CSV</button>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            
+            <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/50">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-blue-50 text-blue-600 p-2 rounded-xl border border-blue-100 text-xs">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Live Records Storage</h2>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Penyimpanan terenkripsi maksimal 50 baris data aktif.</p>
+                    </div>
+                </div>
+                <button onclick="exportCSV()" class="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition active:scale-95">
+                    <i class="fa-solid fa-download text-blue-600 text-sm"></i>
+                    <span>EXPORT TO CSV</span>
+                </button>
             </div>
-            <div style="overflow-x: auto;">
-                <table class="data-table">
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr>
-                            <th>Timestamp</th>
-                            <th>Date</th>
-                            <th>pH Level</th>
-                            <th>Turbidity (NTU)</th>
-                            <th>Water Level (cm)</th>
+                        <tr class="border-b border-slate-200 bg-slate-100/60 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+                            <th class="py-3 px-6">Timestamp</th>
+                            <th class="py-3 px-6">Date</th>
+                            <th class="py-3 px-6">pH Level</th>
+                            <th class="py-3 px-6">Turbidity</th>
+                            <th class="py-3 px-6">Water Level</th>
                         </tr>
                     </thead>
-                    <tbody id="badan-tabel"></tbody>
+                    <tbody id="badan-tabel" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                        </tbody>
                 </table>
             </div>
         </div>
-    </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[11px] text-slate-400 font-medium">
+        &copy; 2026 WQ-SYSTEM Team. System Live Logs Cloud Service.
+    </footer>
 
     <script>
         function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
@@ -57,7 +94,7 @@
             let csv = []; let rows = document.querySelectorAll("table tr");
             for(let i=0; i<rows.length; i++) {
                 let cols = rows[i].querySelectorAll("td, th"), row = [];
-                for(let j=0; j<cols.length; j++) row.push(cols[j].innerText);
+                for(let j=0; j<cols.length; j++) row.push(cols[j].innerText.replace(/[\n\r]+/g, ' '));
                 csv.push(row.join(","));
             }
             let a = document.createElement("a");
@@ -79,14 +116,25 @@
                 let date = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
 
                 let tr = document.createElement('tr');
-                let phColor = (d.pH < 6.5 || d.pH > 8.5) ? 'var(--color-danger)' : 'var(--color-safe)';
+                tr.className = "hover:bg-slate-50/80 transition border-b border-slate-100";
+                
+                // Professional conditional status badges for pH column
+                let isAbnormal = (d.pH < 6.5 || d.pH > 8.5);
+                let phTextColor = isAbnormal ? 'text-rose-600' : 'text-emerald-600';
+                let phBgColor = isAbnormal ? 'bg-rose-50 border-rose-150 text-rose-700' : 'bg-emerald-50 border-emerald-150 text-emerald-700';
+                let phLabel = isAbnormal ? 'Abnormal' : 'Optimal';
                 
                 tr.innerHTML = `
-                    <td style="color: var(--text-muted); font-weight: normal;">${time}</td>
-                    <td>${date}</td>
-                    <td style="font-weight:800; color:${phColor}">${(d.pH || 0).toFixed(2)}</td>
-                    <td>${Math.round(d.turbidity || 0)} NTU</td>
-                    <td>${Math.round(d.tinggiAir || 0)} cm</td>
+                    <td class="py-3.5 px-6 font-mono text-slate-500">${time}</td>
+                    <td class="py-3.5 px-6 text-slate-600">${date}</td>
+                    <td class="py-3.5 px-6">
+                        <div class="inline-flex items-center space-x-2">
+                            <span class="${phTextColor} font-bold text-sm">${(d.pH || 0).toFixed(2)}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${phBgColor}">${phLabel}</span>
+                        </div>
+                    </td>
+                    <td class="py-3.5 px-6 text-slate-700 font-semibold">${Math.round(d.turbidity || 0)} <span class="text-[10px] text-slate-400 font-normal">NTU</span></td>
+                    <td class="py-3.5 px-6 text-slate-700 font-semibold">${Math.round(d.tinggiAir || 0)} <span class="text-[10px] text-slate-400 font-normal">cm</span></td>
                 `;
                 tb.insertBefore(tr, tb.firstChild); cnt++;
                 if(cnt > 50) tb.removeChild(tb.lastChild);
