@@ -22,15 +22,32 @@
     </nav>
 
     <div class="container">
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Database Entry Log</h1>
+                <p>Riwayat parameter kualitas air yang terekam pada sistem cloud</p>
+            </div>
+        </div>
+
         <div class="table-container">
             <div class="header-action">
-                <div class="section-title" style="margin:0"><i class="fa-solid fa-server"></i> Database Entry</div>
+                <div class="section-title" style="margin:0"><i class="fa-solid fa-server" style="color: var(--primary-blue)"></i> Live Records Storage</div>
                 <button class="btn-export" onclick="exportCSV()"><i class="fa-solid fa-download"></i> EXPORT TO CSV</button>
             </div>
-            <table class="data-table">
-                <thead><tr><th>Timestamp</th><th>Date</th><th>pH Level</th><th>Turbidity (NTU)</th><th>Water Level (cm)</th></tr></thead>
-                <tbody id="badan-tabel"></tbody>
-            </table>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Date</th>
+                            <th>pH Level</th>
+                            <th>Turbidity (NTU)</th>
+                            <th>Water Level (cm)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="badan-tabel"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -62,9 +79,17 @@
                 let date = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
 
                 let tr = document.createElement('tr');
-                tr.innerHTML = `<td>${time}</td><td>${date}</td><td style="font-weight:800; color:${d.pH<6.5||d.pH>8.5?'var(--color-danger)':'var(--color-safe)'}">${d.pH||0}</td><td>${d.turbidity||0}</td><td>${d.tinggiAir||0}</td>`;
+                let phColor = (d.pH < 6.5 || d.pH > 8.5) ? 'var(--color-danger)' : 'var(--color-safe)';
+                
+                tr.innerHTML = `
+                    <td style="color: var(--text-muted); font-weight: normal;">${time}</td>
+                    <td>${date}</td>
+                    <td style="font-weight:800; color:${phColor}">${(d.pH || 0).toFixed(2)}</td>
+                    <td>${Math.round(d.turbidity || 0)} NTU</td>
+                    <td>${Math.round(d.tinggiAir || 0)} cm</td>
+                `;
                 tb.insertBefore(tr, tb.firstChild); cnt++;
-                if(cnt > 50) tb.removeChild(tb.lastChild); // Batasi 50 log terbaru
+                if(cnt > 50) tb.removeChild(tb.lastChild);
             }
         });
     </script>
