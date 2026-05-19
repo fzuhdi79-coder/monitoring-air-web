@@ -205,40 +205,40 @@
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
                     <div>
                         <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-hourglass-half text-amber-500"></i> Info Harian Alat
+                            <i class="fa-solid fa-chart-pie text-amber-500"></i> Rekap Sensor Harian
                         </h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">*Waktu & saluran otomatis direset jam 00:00</p>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">*Data rata-rata sensor hari ini. Direset jam 00:00</p>
                     </div>
                     <div class="space-y-2.5">
                         <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
                             <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-stopwatch text-slate-400"></i> Durasi Pompa 1
+                                <i class="fa-solid fa-flask text-slate-400"></i> Rata-rata pH
                             </span>
-                            <span id="durasiPompa1" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-blue-600 shadow-sm">00:00:00</span>
+                            <span id="rata-ph" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-emerald-600 shadow-sm">0.00</span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
                             <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-stopwatch text-slate-400"></i> Durasi Pompa 2
+                                <i class="fa-solid fa-virus text-slate-400"></i> Rata-rata Turbidity
                             </span>
-                            <span id="durasiPompa2" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-blue-600 shadow-sm">00:00:00</span>
+                            <span id="rata-tb" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-amber-600 shadow-sm">0 NTU</span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
                             <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-faucet text-slate-400"></i> Waktu Terbuka (Slr)
+                                <i class="fa-solid fa-water text-slate-400"></i> Rata-rata Tinggi Air
                             </span>
-                            <span id="waktuTerbuka" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-emerald-600 shadow-sm">00:00:00</span>
+                            <span id="rata-lv" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-blue-600 shadow-sm">0 cm</span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
                             <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i> Saluran Buka
+                                <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i> pH Max / Min
                             </span>
-                            <span id="saluranBuka" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-amber-600 shadow-sm">0 Kali</span>
+                            <span id="maxmin-ph" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-rose-600 shadow-sm">0.0 / 0.0</span>
                         </div>
                         <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
                             <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-arrow-down-left-and-arrow-up-right-to-center text-slate-400"></i> Saluran Tutup
+                                <i class="fa-solid fa-database text-slate-400"></i> Total Sampel
                             </span>
-                            <span id="saluranTutup" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-rose-600 shadow-sm">0 Kali</span>
+                            <span id="total-sampel" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-slate-600 shadow-sm">0 Data</span>
                         </div>
                     </div>
                 </div>
@@ -289,7 +289,6 @@
         const chartTb = createMiniChart('chart-turbidity', '#f59e0b');
         const chartLv = createMiniChart('chart-level', '#3b82f6');
 
-        // PERBAIKAN: Inisialisasi Chart Pompa Kuras Secara Terpisah
         const ctxKuras = document.getElementById('chart-pompa-kuras').getContext('2d');
         const chartPompaKuras = new Chart(ctxKuras, {
             type: 'line',
@@ -323,7 +322,6 @@
             }
         });
 
-        // PERBAIKAN: Inisialisasi Chart Pompa Isi Secara Terpisah
         const ctxIsi = document.getElementById('chart-pompa-isi').getContext('2d');
         const chartPompaIsi = new Chart(ctxIsi, {
             type: 'line',
@@ -357,7 +355,6 @@
             }
         });
 
-        // Tarik Riwayat ke Grafik Sensor (Grafik Pompa tidak ditarik karena tidak ada di DB)
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
         get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
@@ -389,9 +386,7 @@
             chart.update();
         }
 
-        // PERBAIKAN: Fungsi Update untuk Masing-Masing Grafik Pompa Baru
         function updatePompaChart(waktu, valKuras, valIsi) {
-            // Update Pompa Kuras
             chartPompaKuras.data.labels.push(waktu);
             chartPompaKuras.data.datasets[0].data.push(valKuras);
             if (chartPompaKuras.data.labels.length > 20) {
@@ -400,7 +395,6 @@
             }
             chartPompaKuras.update();
 
-            // Update Pompa Isi
             chartPompaIsi.data.labels.push(waktu);
             chartPompaIsi.data.datasets[0].data.push(valIsi);
             if (chartPompaIsi.data.labels.length > 20) {
@@ -531,17 +525,35 @@
                     }
                 }
 
-                // DILENGKAPI: Pemetaan data Info Harian dari Firebase Realtime Database
-                document.getElementById('durasiPompa1').innerText = d.durasiPompa1 || d.durasi_pompa1 || "00:00:00";
-                document.getElementById('durasiPompa2').innerText = d.durasiPompa2 || d.durasi_pompa2 || "00:00:00";
-                document.getElementById('waktuTerbuka').innerText = d.waktuTerbuka || d.waktu_terbuka || "00:00:00";
-                
-                const sb = d.saluranBuka !== undefined ? d.saluranBuka : (d.saluran_buka !== undefined ? d.saluran_buka : 0);
-                const st = d.saluranTutup !== undefined ? d.saluranTutup : (d.saluran_tutup !== undefined ? d.saluran_tutup : 0);
-                document.getElementById('saluranBuka').innerText = sb + " Kali";
-                document.getElementById('saluranTutup').innerText = st + " Kali";
-
                 updatePompaChart(waktu, binaryKuras, binaryIsi);
+            }
+        });
+
+        // ==========================================
+        // TAMBAHAN: Logika Panggil Data Info Rekap Harian
+        // ==========================================
+        const dateNow = new Date();
+        const yyyy = dateNow.getFullYear();
+        const mm = String(dateNow.getMonth() + 1).padStart(2, '0');
+        const dd = String(dateNow.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+
+        const harianRef = ref(db, `SistemAir_Harian/${todayStr}`);
+        onValue(harianRef, (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                document.getElementById('rata-ph').innerText = (data.rata_pH || 0).toFixed(2);
+                document.getElementById('rata-tb').innerText = Math.round(data.rata_turbidity || 0) + " NTU";
+                document.getElementById('rata-lv').innerText = Math.round(data.rata_tinggiAir || 0) + " cm";
+                document.getElementById('maxmin-ph').innerText = (data.pH_maksimum || 0).toFixed(2) + " / " + (data.pH_minimum || 0).toFixed(2);
+                document.getElementById('total-sampel').innerText = (data.total_sampel_hari_ini || 0) + " Data";
+            } else {
+                // Jika belum ada rekaman hari ini
+                document.getElementById('rata-ph').innerText = "0.00";
+                document.getElementById('rata-tb').innerText = "0 NTU";
+                document.getElementById('rata-lv').innerText = "0 cm";
+                document.getElementById('maxmin-ph').innerText = "0.0 / 0.0";
+                document.getElementById('total-sampel').innerText = "0 Data";
             }
         });
     </script>
