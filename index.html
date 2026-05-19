@@ -348,7 +348,7 @@
                 setOnlineUI(); 
                 clearTimeout(timerSensor); 
                 // Diubah menjadi 10 detik agar web tidak mudah memunculkan status "Offline"
-                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 10000); 
+                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 30000); 
                 
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
                 document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
