@@ -208,6 +208,10 @@
                             <i class="fa-solid fa-chart-pie text-amber-500"></i> Rekap Sensor Harian
                         </h3>
                         <p class="text-[11px] sm:text-xs text-slate-400 mt-1">*Data rata-rata sensor hari ini. Direset jam 00:00</p>
+                        
+                        <button onclick="downloadHarianCSV()" class="mt-2 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95 shadow-sm border border-emerald-500/20">
+                            <i class="fa-solid fa-file-csv text-sm"></i> Unduh Riwayat (CSV)
+                        </button>
                     </div>
                     <div class="space-y-2.5">
                         <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
@@ -529,9 +533,7 @@
             }
         });
 
-        // ==========================================
-        // TAMBAHAN: Logika Panggil Data Info Rekap Harian
-        // ==========================================
+        // Logika Panggil Data Info Rekap Hari Ini
         const dateNow = new Date();
         const yyyy = dateNow.getFullYear();
         const mm = String(dateNow.getMonth() + 1).padStart(2, '0');
@@ -548,7 +550,6 @@
                 document.getElementById('maxmin-ph').innerText = (data.pH_maksimum || 0).toFixed(2) + " / " + (data.pH_minimum || 0).toFixed(2);
                 document.getElementById('total-sampel').innerText = (data.total_sampel_hari_ini || 0) + " Data";
             } else {
-                // Jika belum ada rekaman hari ini
                 document.getElementById('rata-ph').innerText = "0.00";
                 document.getElementById('rata-tb').innerText = "0 NTU";
                 document.getElementById('rata-lv').innerText = "0 cm";
@@ -556,6 +557,56 @@
                 document.getElementById('total-sampel').innerText = "0 Data";
             }
         });
+
+        // =============================================================
+        // LOGIKA BARU: FITUR UNDUH RIWAYAT HARIAN KE FILE .CSV (EXCEL)
+        // =============================================================
+        window.downloadHarianCSV = function() {
+            const allHarianRef = ref(db, 'SistemAir_Harian');
+            
+            get(allHarianRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    // Membuat Header Tabel CSV
+                    const rows = [
+                        ["Tanggal", "Rata-rata pH", "Rata-rata Turbidity (NTU)", "Rata-rata Ketinggian Air (cm)", "pH Maksimum", "pH Minimum", "Total Sampel Data"]
+                    ];
+                    
+                    // Melakukan perulangan untuk mengambil semua data tanggal di Firebase
+                    snapshot.forEach((childSnapshot) => {
+                        const tanggal = childSnapshot.key; // Nama Key berupa Tanggal (YYYY-MM-DD)
+                        const data = childSnapshot.val();
+                        
+                        rows.push([
+                            tanggal,
+                            (data.rata_pH || 0).toFixed(2),
+                            Math.round(data.rata_turbidity || 0),
+                            Math.round(data.rata_tinggiAir || 0),
+                            (data.pH_maksimum || 0).toFixed(2),
+                            (data.pH_minimum || 0).toFixed(2),
+                            data.total_sampel_hari_ini || 0
+                        ]);
+                    });
+                    
+                    // Mengubah array menjadi string format CSV resmi dengan pemisah koma
+                    const csvString = rows.map(e => e.join(",")).join("\n");
+                    
+                    // Mengunduh secara otomatis via browser sebagai Blob File
+                    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", `Riwayat_Harian_WQSystem_${todayStr}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert("Maaf, tidak ditemukan data riwayat harian di Firebase Anda.");
+                }
+            }).catch((error) => {
+                console.error("Error download:", error);
+                alert("Gagal mengambil data dari Firebase. Cek koneksi Anda.");
+            });
+        }
     </script>
 </body>
 </html>
