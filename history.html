@@ -8,136 +8,156 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-sm">
+    <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-2.5">
-                    <div class="bg-blue-600/10 p-2 rounded-lg text-blue-400 border border-blue-500/20">
-                        <i class="fa-solid fa-droplet text-base"></i>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
+                        <i class="fa-solid fa-droplet text-lg"></i>
                     </div>
-                    <span class="text-md font-extrabold tracking-wider text-white">WQ-SYSTEM</span>
+                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
                 </div>
 
-                <div class="flex space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700/30">
-                    <a href="index.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Overview</a>
-                    <a href="speedometer.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Gauges</a>
-                    <a href="grafik.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Analytics</a>
-                    <a href="history.html" class="bg-blue-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition">Data Log</a>
+                <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
+                    <a href="index.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Overview</a>
+                    <a href="speedometer.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Gauges</a>
+                    <a href="grafik.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Analytics</a>
+                    <a href="history.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Data Log</a>
                 </div>
 
-                <div>
-                    <button onclick="logout()" class="h-9 w-9 bg-slate-800 hover:bg-rose-900/40 border border-slate-700/50 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 rounded-xl flex items-center justify-center transition active:scale-95" title="Keluar">
-                        <i class="fa-solid fa-power-off text-sm"></i>
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
+                        <i class="fa-solid fa-power-off"></i> Sign Out
+                    </button>
+                </div>
+
+                <div class="flex md:hidden">
+                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
+                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
+
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
+            <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
+            </a>
+            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
+            </a>
+            <a href="grafik.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-chart-area mr-2 text-slate-500"></i> Analytics
+            </a>
+            <a href="history.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                <i class="fa-solid fa-database mr-2 text-blue-200"></i> Data Log
+            </a>
+            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
+            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
+                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
+            </button>
+        </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         <div class="border-b border-slate-200 pb-5">
-            <h1 class="text-xl font-bold text-slate-900 tracking-tight">Database Entry Log</h1>
-            <p class="text-xs text-slate-500 mt-1">Riwayat parameter kualitas air yang terekam pada sistem cloud secara real-time.</p>
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">System Data Logger</h1>
+            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Histori rekaman data telemetri yang terdaftar secara kronologis di database.</p>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            
-            <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-50/50">
-                <div class="flex items-center space-x-2.5">
-                    <div class="bg-blue-50 text-blue-600 p-2 rounded-xl border border-blue-100 text-xs">
-                        <i class="fa-solid fa-server"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Live Records Storage</h2>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Penyimpanan terenkripsi maksimal 50 baris data aktif.</p>
-                    </div>
-                </div>
-                <button onclick="exportCSV()" class="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:text-slate-900 transition active:scale-95">
-                    <i class="fa-solid fa-download text-blue-600 text-sm"></i>
-                    <span>EXPORT TO CSV</span>
-                </button>
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-blue-500"></i> Telemetry Database Records
+                </span>
+                <span class="text-[10px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg font-bold border border-blue-100">AUTO REFRESH</span>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-200 bg-slate-100/60 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
-                            <th class="py-3 px-6">Timestamp</th>
-                            <th class="py-3 px-6">Date</th>
-                            <th class="py-3 px-6">pH Level</th>
-                            <th class="py-3 px-6">Turbidity</th>
-                            <th class="py-3 px-6">Water Level</th>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="px-6 py-3.5">Timestamp</th>
+                            <th class="px-6 py-3.5">Kadar pH</th>
+                            <th class="px-6 py-3.5">Turbidity (NTU)</th>
+                            <th class="px-6 py-3.5">Water Level (cm)</th>
+                            <th class="px-6 py-3.5">System Mode</th>
+                            <th class="px-6 py-3.5">Actuator Status</th>
                         </tr>
                     </thead>
-                    <tbody id="badan-tabel" class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                    <tbody id="table-body" class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
                         </tbody>
                 </table>
             </div>
         </div>
-
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[11px] text-slate-400 font-medium">
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
         &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
     </footer>
 
     <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            hamburgerIcon.className = mobileMenu.classList.contains('hidden') ? "fa-solid fa-bars text-xl" : "fa-solid fa-xmark text-xl";
+        });
         function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
-        function exportCSV() {
-            let csv = []; let rows = document.querySelectorAll("table tr");
-            for(let i=0; i<rows.length; i++) {
-                let cols = rows[i].querySelectorAll("td, th"), row = [];
-                for(let j=0; j<cols.length; j++) row.push(cols[j].innerText.replace(/[\n\r]+/g, ' '));
-                csv.push(row.join(","));
-            }
-            let a = document.createElement("a");
-            a.href = window.URL.createObjectURL(new Blob([csv.join("\n")], {type: "text/csv"}));
-            a.download = "WQ_System_Log.csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        }
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
-        initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         
-        let tb = document.getElementById('badan-tabel'), cnt = 0;
-        onValue(ref(getDatabase(), 'SistemAir'), (snapshot) => {
-            if (snapshot.exists()) {
-                let d = snapshot.val(), now = new Date();
-                let time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
-                let date = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
+        const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        const db = getDatabase(app);
 
-                let tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition border-b border-slate-100";
-                
-                // Professional conditional status badges for pH column
-                let isAbnormal = (d.pH < 6.5 || d.pH > 8.5);
-                let phTextColor = isAbnormal ? 'text-rose-600' : 'text-emerald-600';
-                let phBgColor = isAbnormal ? 'bg-rose-50 border-rose-150 text-rose-700' : 'bg-emerald-50 border-emerald-150 text-emerald-700';
-                let phLabel = isAbnormal ? 'Abnormal' : 'Optimal';
-                
+        const tbody = document.getElementById('table-body');
+
+        onValue(ref(db, 'SistemAir'), (snapshot) => {
+            if (snapshot.exists()) {
+                const d = snapshot.val();
+                const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+
+                // Penyesuaian UI Badge Mode
+                let modeBadge = d.modeSistem === "AUTO" 
+                    ? `<span class="bg-slate-900 text-white px-2 py-0.5 rounded text-[10px] font-bold">AUTOMATED</span>`
+                    : `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold">MANUAL</span>`;
+
+                // Penyesuaian UI Badge Pompa
+                let pompaBadge = "";
+                if (d.pompaStatus === "KURAS" || d.pompaStatus === "KRS") {
+                    pompaBadge = `<span class="bg-rose-50 border border-rose-200 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-arrow-down-long animate-pulse"></i> DRAINING</span>`;
+                } else if (d.pompaStatus === "ISI") {
+                    pompaBadge = `<span class="bg-blue-50 border border-blue-200 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-arrow-up-long animate-pulse"></i> INFLOW</span>`;
+                } else {
+                    pompaBadge = `<span class="bg-slate-100 text-slate-400 px-2 py-0.5 rounded text-[10px] font-bold">STANDBY</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
                 tr.innerHTML = `
-                    <td class="py-3.5 px-6 font-mono text-slate-500">${time}</td>
-                    <td class="py-3.5 px-6 text-slate-600">${date}</td>
-                    <td class="py-3.5 px-6">
-                        <div class="inline-flex items-center space-x-2">
-                            <span class="${phTextColor} font-bold text-sm">${(d.pH || 0).toFixed(2)}</span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${phBgColor}">${phLabel}</span>
-                        </div>
-                    </td>
-                    <td class="py-3.5 px-6 text-slate-700 font-semibold">${Math.round(d.turbidity || 0)} <span class="text-[10px] text-slate-400 font-normal">NTU</span></td>
-                    <td class="py-3.5 px-6 text-slate-700 font-semibold">${Math.round(d.tinggiAir || 0)} <span class="text-[10px] text-slate-400 font-normal">cm</span></td>
+                    <td class="px-6 py-3.5 text-slate-400 font-mono text-[11px]">${waktu}</td>
+                    <td class="px-6 py-3.5 font-bold text-slate-800">${(d.pH || 0).toFixed(2)}</td>
+                    <td class="px-6 py-3.5 font-bold text-slate-800">${Math.round(d.turbidity || 0)} NTU</td>
+                    <td class="px-6 py-3.5 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} cm</td>
+                    <td class="px-6 py-3.5">${modeBadge}</td>
+                    <td class="px-6 py-3.5">${pompaBadge}</td>
                 `;
-                tb.insertBefore(tr, tb.firstChild); cnt++;
-                if(cnt > 50) tb.removeChild(tb.lastChild);
+
+                tbody.insertBefore(tr, tbody.firstChild);
+
+                // Batasi baris tabel maksimal 25 record biar gak membebani browser laptop/HP
+                if (tbody.children.length > 25) {
+                    tbody.removeChild(tbody.lastChild);
+                }
             }
         });
     </script>
