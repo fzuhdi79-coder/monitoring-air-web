@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Log - WQ System</title>
+    <title>WQ-SYSTEM - Data Log</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -12,150 +12,168 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
-                        <i class="fa-solid fa-droplet text-lg"></i>
-                    </div>
-                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
-                </div>
-
-                <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
-                    <a href="index.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Overview</a>
-                    <a href="speedometer.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Gauges</a>
-                    <a href="grafik.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Analytics</a>
-                    <a href="history.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Data Log</a>
-                </div>
-
-                <div class="hidden md:flex items-center space-x-4">
-                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
-                        <i class="fa-solid fa-power-off"></i> Sign Out
-                    </button>
-                </div>
-
-                <div class="flex md:hidden">
-                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
-                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
+    <nav class="bg-[#0f172a] text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-droplet text-blue-500 text-lg"></i>
+                <span class="font-bold tracking-wider text-base">WQ-SYSTEM</span>
             </div>
-        </div>
 
-        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
-            <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
-            </a>
-            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
-            </a>
-            <a href="grafik.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-chart-area mr-2 text-slate-500"></i> Analytics
-            </a>
-            <a href="history.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
-                <i class="fa-solid fa-database mr-2 text-blue-200"></i> Data Log
-            </a>
-            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
-                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
+            <div class="flex items-center space-x-6 text-sm font-medium text-slate-300">
+                <a href="index.html" class="hover:text-white transition">Overview</a>
+                <a href="speedometer.html" class="hover:text-white transition">Gauges</a>
+                <a href="grafik.html" class="hover:text-white transition">Analytics</a>
+                <a href="history.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-md font-semibold shadow shadow-blue-500/20">Data Log</a>
+            </div>
+
+            <button onclick="logout()" class="text-slate-400 hover:text-rose-400 transition text-lg">
+                <i class="fa-solid fa-power-off"></i>
             </button>
         </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        <div class="border-b border-slate-200 pb-5">
-            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">System Data Logger</h1>
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Histori rekaman data telemetri yang terdaftar secara kronologis di database.</p>
+    <main class="flex-grow max-w-7xl w-full mx-auto px-6 py-8 space-y-6">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Database Entry Log</h1>
+            <p class="text-sm text-slate-500 mt-1">Riwayat parameter kualitas air yang terekam pada sistem cloud secara real-time.</p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-blue-500"></i> Telemetry Database Records
-                </span>
-                <span class="text-[10px] bg-blue-50 text-blue-600 px-2.5 py-1 rounded-lg font-bold border border-blue-100">AUTO REFRESH</span>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-6">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-100 mb-4">
+                <div class="flex items-start space-x-3">
+                    <div class="bg-blue-50 p-2.5 rounded-xl text-blue-600 mt-0.5 shadow-inner">
+                        <i class="fa-solid fa-database text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">LIVE RECORDS STORAGE</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Penyimpanan terenkripsi maksimal 50 baris data aktif.</p>
+                    </div>
+                </div>
+                
+                <button onclick="unduhCSV()" class="inline-flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-blue-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 self-start sm:self-auto">
+                    <i class="fa-solid fa-download text-sm"></i> EXPORT TO CSV
+                </button>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table id="tabel-log" class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                            <th class="px-6 py-3.5">Timestamp</th>
-                            <th class="px-6 py-3.5">Kadar pH</th>
-                            <th class="px-6 py-3.5">Turbidity (NTU)</th>
-                            <th class="px-6 py-3.5">Water Level (cm)</th>
-                            <th class="px-6 py-3.5">System Mode</th>
-                            <th class="px-6 py-3.5">Actuator Status</th>
+                        <tr class="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100">
+                            <th class="pb-3 pt-2 font-semibold">TIMESTAMP</th>
+                            <th class="pb-3 pt-2 font-semibold">DATE</th>
+                            <th class="pb-3 pt-2 font-semibold">PH LEVEL</th>
+                            <th class="pb-3 pt-2 font-semibold">TURBIDITY</th>
+                            <th class="pb-3 pt-2 font-semibold">WATER LEVEL</th>
                         </tr>
                     </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-100 text-xs text-slate-600 font-medium">
+                    <tbody id="table-body" class="divide-y divide-slate-50 text-xs text-slate-600 font-medium">
                         </tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
+    <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 font-medium mt-auto">
+        &copy; 2026 WQ-SYSTEM Team. System Live Logs Cloud Service.
     </footer>
 
     <script>
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        hamburgerBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            hamburgerIcon.className = mobileMenu.classList.contains('hidden') ? "fa-solid fa-bars text-xl" : "fa-solid fa-xmark text-xl";
-        });
-        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+        function logout() { 
+            sessionStorage.removeItem("statusLogin"); 
+            window.location.href = "login.html"; 
+        }
+
+        // FUNGSI UNTUK MERUBAH ISI TABEL MENJADI FILE CSV & DIUNDUH AUTOMATIS
+        function unduhCSV() {
+            const tabel = document.getElementById("tabel-log");
+            let barisCsv = [];
+            
+            // 1. Mengambil judul kolom header
+            const header = tabel.querySelectorAll("thead th");
+            let dataHeader = [];
+            header.forEach(th => dataHeader.push(th.innerText));
+            barisCsv.push(dataHeader.join(","));
+
+            // 2. Mengambil seluruh baris data dari body tabel
+            const barisData = tabel.querySelectorAll("tbody tr");
+            if(barisData.length === 0) {
+                alert("Belum ada data log real-time yang terekam untuk diunduh!");
+                return;
+            }
+
+            barisData.forEach(tr => {
+                const kolom = tr.querySelectorAll("td");
+                let dataKolom = [];
+                kolom.forEach(td => {
+                    // Membersihkan baris baru atau spasi berlebih akibat teks badge status
+                    let teksBersih = td.innerText.replace(/\n/g, " ").trim();
+                    dataKolom.push(`"${teksBersih}"`);
+                });
+                barisCsv.push(dataKolom.join(","));
+            });
+
+            // 3. Konversi data teks menjadi file Blob CSV
+            const isiCsv = barisCsv.join("\n");
+            const blob = new Blob([isiCsv], { type: "text/csv;charset=utf-8;" });
+            
+            // 4. Trigger download instant pada browser
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            const tglSekarang = new Date().toISOString().slice(0,10);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", `WQ_System_Database_Log_${tglSekarang}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
-        const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        // Firebase Konfigurasi Asli Anda
+        const app = initializeApp({ 
+            apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", 
+            databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" 
+        });
         const db = getDatabase(app);
-
         const tbody = document.getElementById('table-body');
 
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
-                const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+                
+                // Membuat penanggalan & waktu real-time komputer klien saat data masuk
+                const waktuSekarang = new Date();
+                const jam = waktuSekarang.toLocaleTimeString('id-ID', { hour12: false });
+                const tanggal = waktuSekarang.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
-                // Penyesuaian UI Badge Mode
-                let modeBadge = d.modeSistem === "AUTO" 
-                    ? `<span class="bg-slate-900 text-white px-2 py-0.5 rounded text-[10px] font-bold">AUTOMATED</span>`
-                    : `<span class="bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold">MANUAL</span>`;
-
-                // Penyesuaian UI Badge Pompa
-                let pompaBadge = "";
-                if (d.pompaStatus === "KURAS" || d.pompaStatus === "KRS") {
-                    pompaBadge = `<span class="bg-rose-50 border border-rose-200 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-arrow-down-long animate-pulse"></i> DRAINING</span>`;
-                } else if (d.pompaStatus === "ISI") {
-                    pompaBadge = `<span class="bg-blue-50 border border-blue-200 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold"><i class="fa-solid fa-arrow-up-long animate-pulse"></i> INFLOW</span>`;
-                } else {
-                    pompaBadge = `<span class="bg-slate-100 text-slate-400 px-2 py-0.5 rounded text-[10px] font-bold">STANDBY</span>`;
-                }
+                // Penentuan badge dinamis berdasarkan nilai pH seperti contoh gambar Anda
+                let ph = d.pH || 0;
+                let phBadge = (ph >= 6.5 && ph <= 8.5)
+                    ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-100 ml-2">Optimal</span>`
+                    : `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold border border-rose-100 ml-2">Bad</span>`;
 
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition-colors";
+                tr.className = "hover:bg-slate-50/50 transition-colors py-3";
                 tr.innerHTML = `
-                    <td class="px-6 py-3.5 text-slate-400 font-mono text-[11px]">${waktu}</td>
-                    <td class="px-6 py-3.5 font-bold text-slate-800">${(d.pH || 0).toFixed(2)}</td>
-                    <td class="px-6 py-3.5 font-bold text-slate-800">${Math.round(d.turbidity || 0)} NTU</td>
-                    <td class="px-6 py-3.5 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} cm</td>
-                    <td class="px-6 py-3.5">${modeBadge}</td>
-                    <td class="px-6 py-3.5">${pompaBadge}</td>
+                    <td class="py-4 text-slate-400 font-mono">${jam}</td>
+                    <td class="py-4 text-slate-600 font-medium">${tanggal}</td>
+                    <td class="py-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
+                    <td class="py-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
+                    <td class="py-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
                 `;
 
+                // Menyisipkan baris terbaru di posisi paling atas tabel log (Kornologis terbalik)
                 tbody.insertBefore(tr, tbody.firstChild);
 
-                // Batasi baris tabel maksimal 25 record biar gak membebani browser laptop/HP
-                if (tbody.children.length > 25) {
+                // Batasi baris data maksimum hingga 50 baris sesuai sub-header teks halaman Anda
+                if (tbody.children.length > 50) {
                     tbody.removeChild(tbody.lastChild);
                 }
             }
