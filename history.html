@@ -40,7 +40,7 @@
 
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-6">
             
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b border-slate-100 mb-4">
+            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pb-6 border-b border-slate-100 mb-4">
                 <div class="flex items-start space-x-3">
                     <div class="bg-blue-50 p-2.5 rounded-xl text-blue-600 mt-0.5 shadow-inner">
                         <i class="fa-solid fa-database text-sm"></i>
@@ -52,10 +52,20 @@
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-3">
-                    <div class="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-                        <label for="filter-tanggal" class="text-[11px] font-bold text-slate-400 uppercase">Filter Hari:</label>
-                        <input type="date" id="filter-tanggal" onchange="filterHari()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
-                        <button onclick="resetFilter()" class="text-slate-400 hover:text-rose-500 transition text-xs pl-1" title="Reset Filter">
+                    
+                    <div class="flex items-center space-x-3 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+                        
+                        <div class="flex items-center space-x-2" title="Filter Berdasarkan Hari">
+                            <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
+                            <input type="date" id="filter-tanggal" onchange="terapkanFilter()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
+                        </div>
+
+                        <div class="h-4 w-px bg-slate-300"></div> <div class="flex items-center space-x-2" title="Filter Berdasarkan Jam/Menit/Detik">
+                            <i class="fa-regular fa-clock text-slate-400 text-xs"></i>
+                            <input type="text" id="filter-waktu" oninput="terapkanFilter()" placeholder="Jam (Cth: 18:30)" class="bg-transparent text-xs font-semibold text-slate-700 outline-none w-28 placeholder:text-slate-400 placeholder:font-normal">
+                        </div>
+
+                        <div class="h-4 w-px bg-slate-300"></div> <button onclick="resetFilter()" class="text-slate-400 hover:text-rose-500 transition text-xs" title="Reset Semua Filter">
                             <i class="fa-solid fa-circle-xmark"></i>
                         </button>
                     </div>
@@ -94,15 +104,31 @@
             window.location.href = "login.html"; 
         }
 
-        function filterHari() {
+        // FUNGSI GABUNGAN: Filter Tanggal & Filter Jam/Menit/Detik
+        function terapkanFilter() {
             const inputTanggal = document.getElementById("filter-tanggal").value; 
+            const inputWaktu = document.getElementById("filter-waktu").value.trim(); 
             const barisTabel = document.querySelectorAll("#table-body tr");
-
-            if (!inputTanggal) return;
 
             barisTabel.forEach(tr => {
                 const tanggalData = tr.getAttribute("data-date"); 
-                if (tanggalData === inputTanggal) {
+                const waktuData = tr.getAttribute("data-time"); 
+                
+                let tampilTanggal = true;
+                let tampilWaktu = true;
+
+                // Cek kesesuaian tanggal
+                if (inputTanggal !== "") {
+                    tampilTanggal = (tanggalData === inputTanggal);
+                }
+                
+                // Cek kesesuaian waktu (menggunakan sistem "mengandung kata" agar pintar)
+                if (inputWaktu !== "") {
+                    tampilWaktu = waktuData.includes(inputWaktu);
+                }
+
+                // Tampilkan baris HANYA jika lolos kedua kondisi (Tanggal & Waktu)
+                if (tampilTanggal && tampilWaktu) {
                     tr.classList.remove("hidden");
                 } else {
                     tr.classList.add("hidden");
@@ -110,10 +136,11 @@
             });
         }
 
+        // FUNGSI RESET: Membersihkan kedua input filter sekaligus
         function resetFilter() {
             document.getElementById("filter-tanggal").value = "";
-            const barisTabel = document.querySelectorAll("#table-body tr");
-            barisTabel.forEach(tr => tr.classList.remove("hidden"));
+            document.getElementById("filter-waktu").value = "";
+            terapkanFilter(); 
         }
 
         function unduhCSV() {
@@ -142,7 +169,7 @@
             });
 
             if(counterData === 0) {
-                alert("Tidak ada data yang cocok dengan tanggal filter untuk diunduh!");
+                alert("Tidak ada data yang cocok dengan tanggal & jam filter untuk diunduh!");
                 return;
             }
 
@@ -151,6 +178,7 @@
             
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
+            
             const inputTanggal = document.getElementById("filter-tanggal").value;
             const tglFile = inputTanggal ? inputTanggal : new Date().toISOString().slice(0,10);
             
@@ -190,14 +218,19 @@
                 dataRiwayat.reverse().forEach((d) => {
                     
                     const waktuAsli = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
-                    
-                    const jam = waktuAsli.toLocaleTimeString('id-ID', { hour12: false });
                     const tanggalTampilan = waktuAsli.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
                     
+                    // Format khusus untuk Atribut Filter Hari (YYYY-MM-DD)
                     const tahun = waktuAsli.getFullYear();
                     const bulan = String(waktuAsli.getMonth() + 1).padStart(2, '0');
                     const hari = String(waktuAsli.getDate()).padStart(2, '0');
                     const tanggalAtribut = `${tahun}-${bulan}-${hari}`;
+
+                    // Format standar khusus untuk Jam/Atribut Filter Jam (HH:MM:SS)
+                    const hh = String(waktuAsli.getHours()).padStart(2, '0');
+                    const mm = String(waktuAsli.getMinutes()).padStart(2, '0');
+                    const ss = String(waktuAsli.getSeconds()).padStart(2, '0');
+                    const jamFormat = `${hh}:${mm}:${ss}`;
 
                     let ph = d.pH || 0;
                     let phBadge = (ph >= 6.5 && ph <= 8.5)
@@ -207,10 +240,12 @@
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50/50 transition-colors py-3";
                     
+                    // Tanamkan 2 atribut tersembunyi agar fungsi filter (Javascript) bisa membacanya
                     tr.setAttribute("data-date", tanggalAtribut);
+                    tr.setAttribute("data-time", jamFormat);
                     
                     tr.innerHTML = `
-                        <td class="py-4 text-slate-400 font-mono">${jam}</td>
+                        <td class="py-4 text-slate-400 font-mono">${jamFormat}</td>
                         <td class="py-4 text-slate-600 font-medium">${tanggalTampilan}</td>
                         <td class="py-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
                         <td class="py-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
@@ -220,7 +255,8 @@
                     tbody.appendChild(tr);
                 });
 
-                filterHari();
+                // Jalankan filter ulang saat data direfresh
+                terapkanFilter();
 
             } else {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Belum ada data riwayat yang terekam.</td></tr>`;
