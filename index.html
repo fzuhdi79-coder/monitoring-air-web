@@ -145,45 +145,79 @@
             </div>
         </div>
 
-        <div class="space-y-4">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-blue-500"></i> Actuators Control Center
-            </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Smart Automation Mode</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
+            <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm p-5 sm:p-6 flex flex-col justify-between h-full">
+                <div>
+                    <h3 class="text-base font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-hourglass-half"></i> Info Harian Alat
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-1">*Waktu & saluran otomatis direset jam 00:00</p>
+                </div>
+                <div class="space-y-3.5 mt-5">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                        <span class="text-xs font-semibold text-slate-300">Durasi Pompa 1</span>
+                        <span class="bg-slate-800/80 border border-slate-700/50 text-blue-400 text-[11px] font-bold px-2.5 py-1 rounded-md" id="val-durasi-p1">00:00:00</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">AUTOMATED</button>
-                        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">MANUAL OVERRIDE</button>
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                        <span class="text-xs font-semibold text-slate-300">Durasi Pompa 2</span>
+                        <span class="bg-slate-800/80 border border-slate-700/50 text-blue-400 text-[11px] font-bold px-2.5 py-1 rounded-md" id="val-durasi-p2">00:00:00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                        <span class="text-xs font-semibold text-slate-300">Waktu Terbuka (Slr)</span>
+                        <span class="bg-slate-800/80 border border-slate-700/50 text-emerald-400 text-[11px] font-bold px-2.5 py-1 rounded-md" id="val-waktu-slr">00:00:00</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2.5">
+                        <span class="text-xs font-semibold text-slate-300">Saluran Buka</span>
+                        <span class="bg-slate-800/80 border border-slate-700/50 text-amber-400 text-[11px] font-bold px-2.5 py-1 rounded-md" id="val-buka-slr">0 Kali</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-slate-300">Saluran Tutup</span>
+                        <span class="bg-slate-800/80 border border-slate-700/50 text-rose-400 text-[11px] font-bold px-2.5 py-1 rounded-md" id="val-tutup-slr">0 Kali</span>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol pompa air (Hanya aktif pada mode manual override).</p>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
-                            </div>
+            <div class="lg:col-span-2 space-y-4">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-blue-500"></i> Actuators Control Center
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 h-full">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-900">Smart Automation Mode</h3>
+                            <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
+                        <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                            <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">AUTOMATED</button>
+                            <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">MANUAL OVERRIDE</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
+                        <div>
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3>
+                            <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol pompa air (Hanya aktif pada mode manual override).</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                                <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)
+                                </span>
+                                <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
+                                    <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
+                                    <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                                <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)
+                                </span>
+                                <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
+                                    <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
+                                    <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -238,19 +272,18 @@
         const chartPompaOtomatis = new Chart(ctxPompa, {
             type: 'line',
             data: {
-                // PERBAIKAN: Isi dengan 20 titik kosong sebagai template lebar sumbu x
                 labels: Array(20).fill('--:--:--'), 
                 datasets: [
                     {
                         label: 'Pompa Kuras',
-                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
+                        data: Array(20).fill(0),
                         borderColor: '#f43f5e', 
                         backgroundColor: 'rgba(244, 63, 94, 0.05)',
                         fill: true, stepped: true, pointRadius: 0, borderWidth: 2
                     },
                     {
                         label: 'Pompa Isi',
-                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
+                        data: Array(20).fill(0),
                         borderColor: '#3b82f6', 
                         backgroundColor: 'rgba(59, 130, 246, 0.05)',
                         fill: true, stepped: true, pointRadius: 0, borderWidth: 2
@@ -277,7 +310,6 @@
             }
         });
 
-        // Tarik Riwayat ke Grafik Sensor (Grafik Pompa tidak ditarik karena tidak ada di DB)
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
         get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
@@ -349,6 +381,13 @@
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
                 document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
                 document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
+
+                // TAMBAHAN: UPDATE UI INFO HARIAN ALAT
+                document.getElementById('val-durasi-p1').innerText = d.durasiP1 || "00:00:00";
+                document.getElementById('val-durasi-p2').innerText = d.durasiP2 || "00:00:00";
+                document.getElementById('val-waktu-slr').innerText = d.waktuSlr || "00:00:00";
+                document.getElementById('val-buka-slr').innerText = (d.bukaSlr || 0) + " Kali";
+                document.getElementById('val-tutup-slr').innerText = (d.tutupSlr || 0) + " Kali";
 
                 let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph.toFixed(2);
                 updateChartData(chartPh, ph);
