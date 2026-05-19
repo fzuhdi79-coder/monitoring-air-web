@@ -135,97 +135,31 @@
                     </h3>
                     <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa.</p>
                 </div>
-                <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-start sm:justify-end">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-rose-500 inline-block"></span> Kuras (Drainage)</div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Isi (Inflow)</div>
-                </div>
             </div>
             <div class="relative w-full h-40 sm:h-48 md:h-52">
                 <canvas id="chart-pompa-otomatis"></canvas>
             </div>
         </div>
-
-        <div class="space-y-4">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-blue-500"></i> Actuators Control Center
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Smart Automation Mode</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">AUTOMATED</button>
-                        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">MANUAL OVERRIDE</button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol pompa air (Hanya aktif pada mode manual override).</p>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
-                            </div>
-                        </div>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
-    </footer>
-
-    <script>
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-
-        hamburgerBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            if (mobileMenu.classList.contains('hidden')) {
-                hamburgerIcon.className = "fa-solid fa-bars text-xl";
-            } else {
-                hamburgerIcon.className = "fa-solid fa-xmark text-xl";
-            }
-        });
-    </script>
-
-    <script>function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }</script>
-    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
-        const statusBadge = document.getElementById('koneksi-status');
-        let timerSensor;
+
+        // --- FIX GRAFIK: LOAD DARI STORAGE AGAR TIDAK HILANG SAAT RELOAD ---
+        const getHistory = (key) => JSON.parse(localStorage.getItem(key)) || [];
+        const saveHistory = (key, data) => {
+            if(data.length > 20) data.shift();
+            localStorage.setItem(key, JSON.stringify(data));
+        };
 
         function createMiniChart(canvasId, color) {
             return new Chart(document.getElementById(canvasId), {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
+                data: { labels: Array(20).fill(''), datasets: [{ data: [], borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
             });
         }
@@ -238,212 +172,57 @@
         const chartPompaOtomatis = new Chart(ctxPompa, {
             type: 'line',
             data: {
-                // PERBAIKAN: Isi dengan 20 titik kosong sebagai template lebar sumbu x
-                labels: Array(20).fill('--:--:--'), 
+                labels: Array(20).fill(''), 
                 datasets: [
-                    {
-                        label: 'Pompa Kuras',
-                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
-                        borderColor: '#f43f5e', 
-                        backgroundColor: 'rgba(244, 63, 94, 0.05)',
-                        fill: true, stepped: true, pointRadius: 0, borderWidth: 2
-                    },
-                    {
-                        label: 'Pompa Isi',
-                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
-                        borderColor: '#3b82f6', 
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                        fill: true, stepped: true, pointRadius: 0, borderWidth: 2
-                    }
+                    { label: 'Pompa Kuras', data: getHistory('hist_kuras'), borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.05)', fill: true, stepped: true, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Pompa Isi', data: getHistory('hist_isi'), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, stepped: true, pointRadius: 0, borderWidth: 2 }
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                responsive: true, maintainAspectRatio: false, 
+                plugins: { legend: { display: true } },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                    y: {
-                        min: -0.1, max: 1.1,
-                        ticks: {
-                            stepSize: 1, font: { size: 10, weight: 'bold' }, color: '#64748b',
-                            callback: function(value) {
-                                if (value === 1) return 'ON';
-                                if (value === 0) return 'OFF';
-                                return '';
-                            }
-                        },
-                        grid: { color: '#f1f5f9' }
-                    }
+                    x: { grid: { display: false }, ticks: { display: false } },
+                    y: { min: -0.1, max: 1.1, ticks: { stepSize: 1, callback: (v) => v === 1 ? 'ON' : 'OFF' } }
                 }
             }
         });
 
-        // Tarik Riwayat ke Grafik Sensor (Grafik Pompa tidak ditarik karena tidak ada di DB)
-        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
-        get(logRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const dataLog = childSnapshot.val();
-                    
-                    chartPh.data.labels.push('');
-                    chartPh.data.datasets[0].data.push(dataLog.pH || 0);
-
-                    chartTb.data.labels.push('');
-                    chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
-
-                    chartLv.data.labels.push('');
-                    chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
-                });
-                chartPh.update();
-                chartTb.update();
-                chartLv.update();
-            }
-        });
-
         function updateChartData(chart, newValue) {
-            chart.data.labels.push('');
-            chart.data.datasets[0].data.push(newValue);
-            if (chart.data.datasets[0].data.length > 20) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
-            }
+            let d = chart.data.datasets[0].data;
+            d.push(newValue);
+            if (d.length > 20) d.shift();
             chart.update();
-        }
-
-        function updatePompaChart(waktu, valKuras, valIsi) {
-            chartPompaOtomatis.data.labels.push(waktu);
-            chartPompaOtomatis.data.datasets[0].data.push(valKuras);
-            chartPompaOtomatis.data.datasets[1].data.push(valIsi);
-
-            if (chartPompaOtomatis.data.labels.length > 20) {
-                chartPompaOtomatis.data.labels.shift();
-                chartPompaOtomatis.data.datasets[0].data.shift();
-                chartPompaOtomatis.data.datasets[1].data.shift();
-            }
-            chartPompaOtomatis.update();
         }
 
         window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
         window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
 
-        function setOfflineUI(pesan) {
-            statusBadge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span> ${pesan}`;
-            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 border-rose-200 text-rose-600 shadow-sm";
-        }
-
-        function setOnlineUI() {
-            statusBadge.innerHTML = `<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span> LIVE DATASTREAM`;
-            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm";
-        }
-
-        onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("NETWORK DISCONNECTED"); });
-
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
-                const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+                document.getElementById('val-ph').innerText = (d.pH || 0).toFixed(2);
+                document.getElementById('val-turbidity').innerText = Math.round(d.turbidity || 0) + " NTU";
+                document.getElementById('val-level').innerText = Math.round(d.tinggiAir || 0) + " cm";
+
+                updateChartData(chartPh, d.pH || 0);
+                updateChartData(chartTb, d.turbidity || 0);
+                updateChartData(chartLv, d.tinggiAir || 0);
+
+                // Update Pompa History
+                let k = (d.pompaStatus === "KURAS" ? 1 : 0);
+                let i = (d.pompaStatus === "ISI" ? 1 : 0);
                 
-                setOnlineUI(); 
-                clearTimeout(timerSensor); 
-                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 35000); 
+                let histK = getHistory('hist_kuras');
+                let histI = getHistory('hist_isi');
                 
-                document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
-                document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
-                document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
+                histK.push(k); histI.push(i);
+                saveHistory('hist_kuras', histK);
+                saveHistory('hist_isi', histI);
 
-                let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph.toFixed(2);
-                updateChartData(chartPh, ph);
-                let sph = document.getElementById('status-ph');
-                if(ph < 6.5 || ph > 8.5) {
-                    sph.innerText = "CRITICAL LIMIT";
-                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                } else {
-                    sph.innerText = "OPTIMAL STABLE";
-                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
-                }
-
-                let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span>`;
-                updateChartData(chartTb, tb);
-                let stb = document.getElementById('status-turbidity');
-                if(tb < 25) {
-                    stb.innerText = "CLEAR WATER";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
-                } else if(tb < 100) {
-                    stb.innerText = "WARNING HIGH";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700";
-                } else {
-                    stb.innerText = "HAZARD CRITICAL";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                }
-
-                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
-                updateChartData(chartLv, lv);
-                let slv = document.getElementById('status-level');
-                if(lv < 20) {
-                    slv.innerText = "LOW RESERVOIR";
-                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                } else {
-                    slv.innerText = "SAFE STORAGE";
-                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-600";
-                }
-
-                let modeSistem = d.modeSistem || "AUTO";
-                const bAuto = document.getElementById('btn-mode-auto');
-                const bManual = document.getElementById('btn-mode-manual');
-                const pButtons = document.querySelectorAll('.btn-pump');
-
-                if (modeSistem === "AUTO") {
-                    bAuto.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
-                    bManual.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
-                    pButtons.forEach(b => { 
-                        b.disabled = true; 
-                        b.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-300 cursor-not-allowed"; 
-                    });
-                } else {
-                    bAuto.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
-                    bManual.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
-                    pButtons.forEach(b => { b.disabled = false; });
-                }
-
-                let statusPompa = d.pompaStatus || "OFF";
-                let p1on = document.getElementById('btn-p1-on'), p1off = document.getElementById('btn-p1-off');
-                let p2on = document.getElementById('btn-p2-on'), p2off = document.getElementById('btn-p2-off');
-                let ic1 = document.getElementById('icon-p1'), ic2 = document.getElementById('icon-p2');
-
-                let binaryKuras = 0;
-                let binaryIsi = 0;
-
-                if (statusPompa === "KURAS" || statusPompa === "KRS") {
-                    binaryKuras = 1;
-                    ic1.className = "fa-solid fa-circle-nodes text-rose-500 animate-spin";
-                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
-                    if (modeSistem === "MANUAL") {
-                        p1on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-rose-600 text-white shadow-sm";
-                        p1off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                    }
-                } else if (statusPompa === "ISI") {
-                    binaryIsi = 1;
-                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
-                    ic2.className = "fa-solid fa-circle-nodes text-blue-500 animate-spin";
-                    if (modeSistem === "MANUAL") {
-                        p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                        p2on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-blue-600 text-white shadow-sm";
-                        p2off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                    }
-                } else {
-                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
-                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
-                    if (modeSistem === "MANUAL") {
-                        p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                        p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                    }
-                }
-
-                updatePompaChart(waktu, binaryKuras, binaryIsi);
+                chartPompaOtomatis.data.datasets[0].data = histK;
+                chartPompaOtomatis.data.datasets[1].data = histI;
+                chartPompaOtomatis.update();
             }
         });
     </script>
