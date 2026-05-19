@@ -137,7 +137,7 @@
                     <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-chart-line text-blue-500"></i> Grafik Status Pompa Real-Time
                     </h3>
-                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Memantau visualisasi grafik kondisi ON/OFF pompa otomatis.</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa.</p>
                 </div>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-start sm:justify-end">
                     <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-rose-500 inline-block"></span> Kuras (Drainage)</div>
@@ -157,7 +157,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
                     <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Automation Intelligence Mode</h3>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Smart Automation Mode</h3>
                         <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
@@ -168,13 +168,13 @@
 
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
                     <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Relay Actuator Switch</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol interaktif sakelar daya pompa air (Hanya aktif pada mode manual override).</p>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol pompa air (Hanya aktif pada mode manual override).</p>
                     </div>
                     <div class="space-y-3">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
                             <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa Submersible 1 (Drainage)
+                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)
                             </span>
                             <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
                                 <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
@@ -183,7 +183,7 @@
                         </div>
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
                             <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa Submersible 2 (Inflow)
+                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)
                             </span>
                             <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
                                 <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
