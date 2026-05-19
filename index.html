@@ -215,7 +215,6 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        // Penambahan fungsi get, query, dan limitToLast untuk menarik riwayat ke grafik mini
         import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
@@ -223,7 +222,6 @@
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
-        // Inisialisasi Chart Dikosongkan (Tidak lagi menggunakan Array.fill 0)
         function createMiniChart(canvasId, color) {
             return new Chart(document.getElementById(canvasId), {
                 type: 'line',
@@ -240,18 +238,19 @@
         const chartPompaOtomatis = new Chart(ctxPompa, {
             type: 'line',
             data: {
-                labels: [], 
+                // PERBAIKAN: Isi dengan 20 titik kosong sebagai template lebar sumbu x
+                labels: Array(20).fill('--:--:--'), 
                 datasets: [
                     {
                         label: 'Pompa Kuras',
-                        data: [],
+                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
                         borderColor: '#f43f5e', 
                         backgroundColor: 'rgba(244, 63, 94, 0.05)',
                         fill: true, stepped: true, pointRadius: 0, borderWidth: 2
                     },
                     {
                         label: 'Pompa Isi',
-                        data: [],
+                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
                         borderColor: '#3b82f6', 
                         backgroundColor: 'rgba(59, 130, 246, 0.05)',
                         fill: true, stepped: true, pointRadius: 0, borderWidth: 2
@@ -278,7 +277,7 @@
             }
         });
 
-        // 1. [FITUR BARU] Tarik Riwayat ke Grafik Saat Pertama Kali Dibuka
+        // Tarik Riwayat ke Grafik Sensor (Grafik Pompa tidak ditarik karena tidak ada di DB)
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
         get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
@@ -300,7 +299,6 @@
             }
         });
 
-        // Fungsi Update Grafik
         function updateChartData(chart, newValue) {
             chart.data.labels.push('');
             chart.data.datasets[0].data.push(newValue);
@@ -339,7 +337,6 @@
 
         onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("NETWORK DISCONNECTED"); });
 
-        // 2. Baca Data Real-Time
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
@@ -347,8 +344,7 @@
                 
                 setOnlineUI(); 
                 clearTimeout(timerSensor); 
-                // Diubah menjadi 10 detik agar web tidak mudah memunculkan status "Offline"
-                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 30000); 
+                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 35000); 
                 
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
                 document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
