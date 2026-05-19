@@ -93,7 +93,7 @@
                         
                         <div class="flex items-center space-x-2" title="Filter Berdasarkan Jam/Menit/Detik">
                             <i class="fa-regular fa-clock text-slate-400 text-xs"></i>
-                            <input type="text" id="filter-waktu" oninput="terapkanFilter()" placeholder="Pukul (Contoh: 18:30)" class="bg-transparent text-xs font-semibold text-slate-700 outline-none w-28 placeholder:text-slate-400 placeholder:font-normal">
+                            <input type="text" id="filter-waktu" oninput="terapkanFilter()" placeholder="Pukul (Cth: 18:30)" class="bg-transparent text-xs font-semibold text-slate-700 outline-none w-28 placeholder:text-slate-400 placeholder:font-normal">
                         </div>
 
                         <div class="h-4 w-px bg-slate-300"></div> 
@@ -103,7 +103,11 @@
                     </div>
 
                     <button onclick="unduhCSV()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-blue-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 w-full sm:w-auto">
-                        <i class="fa-solid fa-download text-sm"></i> EXPORT TO CSV
+                        <i class="fa-solid fa-download text-sm"></i> EXPORT CSV
+                    </button>
+
+                    <button onclick="hapusSemuaDataLog()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 w-full sm:w-auto">
+                        <i class="fa-solid fa-trash-can text-sm"></i> CLEAR ALL
                     </button>
                 </div>
             </div>
@@ -117,7 +121,8 @@
                             <th class="pb-3 pt-2 pr-4 font-semibold">PH LEVEL</th>
                             <th class="pb-3 pt-2 pr-4 font-semibold">TURBIDITY</th>
                             <th class="pb-3 pt-2 pr-4 font-semibold">WATER LEVEL</th>
-                            <th class="pb-3 pt-2 font-semibold">ACTION</th> </tr>
+                            <th class="pb-3 pt-2 font-semibold text-center">ACTION</th>
+                        </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-slate-50 text-xs text-slate-600 font-medium">
                     </tbody>
@@ -145,9 +150,7 @@
                 }
             });
         }
-    </script>
 
-    <script>
         function logout() { 
             sessionStorage.removeItem("statusLogin"); 
             window.location.href = "login.html"; 
@@ -193,7 +196,6 @@
             
             const header = tabel.querySelectorAll("thead th");
             let dataHeader = [];
-            // Hindari mengambil judul kolom Action untuk CSV
             header.forEach((th, index) => {
                 if (index < 5) dataHeader.push(th.innerText);
             });
@@ -209,7 +211,6 @@
                 const kolom = tr.querySelectorAll("td");
                 let dataKolom = [];
                 kolom.forEach((td, index) => {
-                    // Hindari mengambil isi kolom Action (tombol delete) untuk CSV
                     if (index < 5) {
                         let teksBersih = td.innerText.replace(/\n/g, " ").trim();
                         dataKolom.push(`"${teksBersih}"`);
@@ -219,7 +220,7 @@
             });
 
             if(counterData === 0) {
-                alert("Tidak ada data yang cocok dengan tanggal & jam filter untuk diunduh!");
+                alert("Tidak ada data yang cocok dengan filter untuk diunduh!");
                 return;
             }
 
@@ -244,7 +245,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        // TAMBAHAN: Import remove
         import { getDatabase, ref, onValue, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ 
@@ -254,12 +254,24 @@
         const db = getDatabase(app);
         const tbody = document.getElementById('table-body');
 
-        // TAMBAHAN: Fungsi Global untuk Delete
+        // Fungsi Delete Satu Baris (Individu)
         window.hapusDataLog = function(keyData) {
             if(confirm("Yakin ingin menghapus baris data log ini?")) {
                 const nodeRef = ref(db, 'SistemAir_Log/' + keyData);
                 remove(nodeRef).catch(error => {
                     alert("Gagal menghapus data: " + error.message);
+                });
+            }
+        };
+
+        // TAMBAHAN: Fungsi Delete Seluruh Data (Clear All)
+        window.hapusSemuaDataLog = function() {
+            if(confirm("PERINGATAN BAHAYA!\n\nApakah Anda sangat yakin ingin MENGHAPUS SELURUH data riwayat log?\n\nTindakan ini tidak dapat dibatalkan!")) {
+                const nodeRef = ref(db, 'SistemAir_Log'); // Mengambil seluruh folder node SistemAir_Log
+                remove(nodeRef).then(() => {
+                    alert("Seluruh data log berhasil dikosongkan.");
+                }).catch(error => {
+                    alert("Gagal mengosongkan data: " + error.message);
                 });
             }
         };
@@ -273,7 +285,6 @@
                 let dataRiwayat = [];
                 
                 snapshot.forEach((childSnapshot) => {
-                    // TAMBAHAN: Mengambil Firebase Key unik setiap baris
                     let baris = childSnapshot.val();
                     baris.firebaseKey = childSnapshot.key;
                     dataRiwayat.push(baris);
@@ -311,7 +322,8 @@
                         <td class="py-4 pr-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
                         <td class="py-4 pr-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
                         <td class="py-4 pr-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
-                        <td class="py-4 font-medium"> <button onclick="hapusDataLog('${d.firebaseKey}')" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition active:scale-95" title="Hapus Data">
+                        <td class="py-4 font-medium text-center">
+                            <button onclick="hapusDataLog('${d.firebaseKey}')" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition active:scale-95" title="Hapus Baris Ini">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </td>
@@ -323,7 +335,7 @@
                 terapkanFilter();
 
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">Belum ada data riwayat yang terekam.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">Belum ada data riwayat yang terekam.</td></tr>`;
             }
         });
     </script>
