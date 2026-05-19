@@ -47,7 +47,7 @@
                     </div>
                     <div>
                         <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">LIVE RECORDS STORAGE</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Penyimpanan terenkripsi maksimal 50 baris data aktif.</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Penyimpanan terenkripsi riwayat data aktif (Max 100 Terbaru).</p>
                     </div>
                 </div>
                 
@@ -94,15 +94,14 @@
             window.location.href = "login.html"; 
         }
 
-        // FUNGSI UNTUK MEMFILTER BARIS TABEL BERDASARKAN HARI YANG DIPILIH
         function filterHari() {
-            const inputTanggal = document.getElementById("filter-tanggal").value; // Format: YYYY-MM-DD
+            const inputTanggal = document.getElementById("filter-tanggal").value; 
             const barisTabel = document.querySelectorAll("#table-body tr");
 
             if (!inputTanggal) return;
 
             barisTabel.forEach(tr => {
-                const tanggalData = tr.getAttribute("data-date"); // Format: YYYY-MM-DD
+                const tanggalData = tr.getAttribute("data-date"); 
                 if (tanggalData === inputTanggal) {
                     tr.classList.remove("hidden");
                 } else {
@@ -111,30 +110,25 @@
             });
         }
 
-        // FUNGSI UNTUK MERESET FILTER AGAR MENAMPILKAN SEMUA HARI KEMBALI
         function resetFilter() {
             document.getElementById("filter-tanggal").value = "";
             const barisTabel = document.querySelectorAll("#table-body tr");
             barisTabel.forEach(tr => tr.classList.remove("hidden"));
         }
 
-        // FUNGSI UNTUK MERUBAH ISI TABEL MENJADI FILE CSV (HANYA DATA YANG LOLOS FILTER)
         function unduhCSV() {
             const tabel = document.getElementById("tabel-log");
             let barisCsv = [];
             
-            // 1. Mengambil judul kolom header
             const header = tabel.querySelectorAll("thead th");
             let dataHeader = [];
             header.forEach(th => dataHeader.push(th.innerText));
             barisCsv.push(dataHeader.join(","));
 
-            // 2. Mengambil baris data dari body tabel yang TIDAK tersembunyi (Lolos Filter)
             const barisData = tabel.querySelectorAll("tbody tr");
             let counterData = 0;
 
             barisData.forEach(tr => {
-                // Lewati data jika baris sedang disembunyikan oleh filter hari
                 if (tr.classList.contains("hidden")) return;
 
                 counterData++;
@@ -152,11 +146,9 @@
                 return;
             }
 
-            // 3. Konversi data teks menjadi file Blob CSV
             const isiCsv = barisCsv.join("\n");
             const blob = new Blob([isiCsv], { type: "text/csv;charset=utf-8;" });
             
-            // 4. Trigger download instant pada browser
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             const inputTanggal = document.getElementById("filter-tanggal").value;
@@ -174,7 +166,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        // Tambahan query dan limitToLast di import
+        import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ 
             apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", 
@@ -183,49 +176,65 @@
         const db = getDatabase(app);
         const tbody = document.getElementById('table-body');
 
-        onValue(ref(db, 'SistemAir'), (snapshot) => {
+        // PENTING: Targetkan ke SistemAir_Log, ambil maksimal 100 data terakhir (agar web tidak berat)
+        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(100));
+
+        onValue(logRef, (snapshot) => {
+            // Kosongkan tabel sebelum merender ulang agar data tidak menumpuk saat refresh
+            tbody.innerHTML = ''; 
+
             if (snapshot.exists()) {
-                const d = snapshot.val();
+                let dataRiwayat = [];
                 
-                const waktuSekarang = new Date();
-                const jam = waktuSekarang.toLocaleTimeString('id-ID', { hour12: false });
-                
-                // Format tampilan tabel (DD/MM/YYYY)
-                const tanggalTampilan = waktuSekarang.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                
-                // Format ID Filter Tanggal HTML (YYYY-MM-DD)
-                const tahun = waktuSekarang.getFullYear();
-                const bulan = String(waktuSekarang.getMonth() + 1).padStart(2, '0');
-                const hari = String(waktuSekarang.getDate()).padStart(2, '0');
-                const tanggalAtribut = `${tahun}-${bulan}-${hari}`;
+                // Masukkan semua data ke dalam array sementara
+                snapshot.forEach((childSnapshot) => {
+                    dataRiwayat.push(childSnapshot.val());
+                });
 
-                let ph = d.pH || 0;
-                let phBadge = (ph >= 6.5 && ph <= 8.5)
-                    ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-100 ml-2">Optimal</span>`
-                    : `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold border border-rose-100 ml-2">Bad</span>`;
+                // Render array secara terbalik (reverse) agar data terbaru ada di paling atas
+                dataRiwayat.reverse().forEach((d) => {
+                    
+                    // PENTING: Gunakan timestamp dari database Firebase (ESP32)
+                    // Jika tidak ada timestamp dari DB, gunakan fallback waktu sekarang
+                    const waktuAsli = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
+                    
+                    const jam = waktuAsli.toLocaleTimeString('id-ID', { hour12: false });
+                    const tanggalTampilan = waktuAsli.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    
+                    // Format khusus untuk Atribut Filter HTML (YYYY-MM-DD)
+                    const tahun = waktuAsli.getFullYear();
+                    const bulan = String(waktuAsli.getMonth() + 1).padStart(2, '0');
+                    const hari = String(waktuAsli.getDate()).padStart(2, '0');
+                    const tanggalAtribut = `${tahun}-${bulan}-${hari}`;
 
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/50 transition-colors py-3";
-                
-                // Menyematkan atribut data-date tersembunyi untuk dibaca filter JS nanti
-                tr.setAttribute("data-date", tanggalAtribut);
-                
-                tr.innerHTML = `
-                    <td class="py-4 text-slate-400 font-mono">${jam}</td>
-                    <td class="py-4 text-slate-600 font-medium">${tanggalTampilan}</td>
-                    <td class="py-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
-                    <td class="py-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
-                    <td class="py-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
-                `;
+                    let ph = d.pH || 0;
+                    let phBadge = (ph >= 6.5 && ph <= 8.5)
+                        ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-100 ml-2">Optimal</span>`
+                        : `<span class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-[10px] font-bold border border-rose-100 ml-2">Bad</span>`;
 
-                tbody.insertBefore(tr, tbody.firstChild);
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50/50 transition-colors py-3";
+                    
+                    // Tanamkan atribut tanggal untuk filter (berdasarkan waktu asli alat)
+                    tr.setAttribute("data-date", tanggalAtribut);
+                    
+                    tr.innerHTML = `
+                        <td class="py-4 text-slate-400 font-mono">${jam}</td>
+                        <td class="py-4 text-slate-600 font-medium">${tanggalTampilan}</td>
+                        <td class="py-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
+                        <td class="py-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
+                        <td class="py-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
+                    `;
 
-                // Jalankan fungsi filter otomatis saat ada data real-time baru masuk
+                    // Tambahkan baris ke akhir tabel (karena urutan array sudah di reverse)
+                    tbody.appendChild(tr);
+                });
+
+                // Jalankan ulang fungsi filter setelah data dimuat untuk mempertahankan pilihan filter sebelumnya
                 filterHari();
 
-                if (tbody.children.length > 50) {
-                    tbody.removeChild(tbody.lastChild);
-                }
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Belum ada data riwayat yang terekam.</td></tr>`;
             }
         });
     </script>
