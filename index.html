@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -54,9 +55,12 @@
                     <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Potensial Hidrogen (pH)</span>
                     <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600 text-xs"><i class="fa-solid fa-flask"></i></div>
                 </div>
-                <div>
-                    <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-ph">0.00</div>
-                    <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-ph">Menunggu data...</div>
+                <div class="flex items-end justify-between gap-2">
+                    <div>
+                        <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-ph">0.00</div>
+                        <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-ph">Menunggu data...</div>
+                    </div>
+                    <div class="w-24 h-12"><canvas id="chart-ph"></canvas></div>
                 </div>
                 <div class="text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-ph">
                     <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
@@ -68,9 +72,12 @@
                     <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kekeruhan Air</span>
                     <div class="p-2 bg-amber-50 rounded-lg text-amber-600 text-xs"><i class="fa-solid fa-virus"></i></div>
                 </div>
-                <div>
-                    <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-turbidity">0 <span class="text-lg font-medium text-slate-400">NTU</span></div>
-                    <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-turbidity">Menunggu data...</div>
+                <div class="flex items-end justify-between gap-2">
+                    <div>
+                        <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-turbidity">0 <span class="text-lg font-medium text-slate-400">NTU</span></div>
+                        <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-turbidity">Menunggu data...</div>
+                    </div>
+                    <div class="w-24 h-12"><canvas id="chart-turbidity"></canvas></div>
                 </div>
                 <div class="text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-tb">
                     <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
@@ -82,9 +89,12 @@
                     <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Volume / Ketinggian Air</span>
                     <div class="p-2 bg-blue-50 rounded-lg text-blue-600 text-xs"><i class="fa-solid fa-water"></i></div>
                 </div>
-                <div>
-                    <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-level">0 <span class="text-lg font-medium text-slate-400">cm</span></div>
-                    <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-level">Menunggu data...</div>
+                <div class="flex items-end justify-between gap-2">
+                    <div>
+                        <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-level">0 <span class="text-lg font-medium text-slate-400">cm</span></div>
+                        <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-level">Menunggu data...</div>
+                    </div>
+                    <div class="w-24 h-12"><canvas id="chart-level"></canvas></div>
                 </div>
                 <div class="text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-lv">
                     <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
@@ -153,6 +163,25 @@
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
+        // Fungsi inisialisasi grafik mini (sparkline)
+        function createMiniChart(canvasId, color) {
+            return new Chart(document.getElementById(canvasId), {
+                type: 'line',
+                data: { labels: Array(10).fill(''), datasets: [{ data: Array(10).fill(0), borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            });
+        }
+
+        const chartPh = createMiniChart('chart-ph', '#10b981');
+        const chartTb = createMiniChart('chart-turbidity', '#f59e0b');
+        const chartLv = createMiniChart('chart-level', '#3b82f6');
+
+        function updateChartData(chart, newValue) {
+            chart.data.datasets[0].data.push(newValue);
+            if (chart.data.datasets[0].data.length > 10) chart.data.datasets[0].data.shift();
+            chart.update();
+        }
+
         window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
         window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
 
@@ -181,8 +210,9 @@
                 document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
                 document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
 
-                // Logic pH Card UI
+                // Logic pH Card UI & Chart
                 let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph.toFixed(2);
+                updateChartData(chartPh, ph);
                 let sph = document.getElementById('status-ph');
                 if(ph < 6.5 || ph > 8.5) {
                     sph.innerText = "CRITICAL LIMIT";
@@ -192,8 +222,9 @@
                     sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
                 }
 
-                // Logic Turbidity Card UI
+                // Logic Turbidity Card UI & Chart
                 let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-lg font-medium text-slate-400">NTU</span>`;
+                updateChartData(chartTb, tb);
                 let stb = document.getElementById('status-turbidity');
                 if(tb < 25) {
                     stb.innerText = "CLEAR WATER";
@@ -206,8 +237,9 @@
                     stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
                 }
 
-                // Logic Level Card UI
+                // Logic Level Card UI & Chart
                 let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-lg font-medium text-slate-400">cm</span>`;
+                updateChartData(chartLv, lv);
                 let slv = document.getElementById('status-level');
                 if(lv < 20) {
                     slv.innerText = "LOW RESERVOIR";
@@ -226,41 +258,47 @@
                 if (modeSistem === "AUTO") {
                     bAuto.className = "py-2 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm";
                     bManual.className = "py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600";
-                    pButtons.forEach(b => { b.disabled = true; b.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-300 cursor-not-allowed"; });
+                    pButtons.forEach(b => { 
+                        b.disabled = true; 
+                        b.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-300 cursor-not-allowed"; 
+                    });
                 } else {
                     bAuto.className = "py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600";
                     bManual.className = "py-2 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm";
-                    pButtons.forEach(b => { b.disabled = false; });
                 }
 
-                // Pump Indicators Switch State logic
-                if (modeSistem === "MANUAL") {
-                    let statusPompa = d.pompaStatus || "OFF";
-                    let p1on = document.getElementById('btn-p1-on'), p1off = document.getElementById('btn-p1-off');
-                    let p2on = document.getElementById('btn-p2-on'), p2off = document.getElementById('btn-p2-off');
-                    let ic1 = document.getElementById('icon-p1'), ic2 = document.getElementById('icon-p2');
+                // GLOBAL PUMP INDICATOR LOGIC (Berjalan di mode AUTO maupun MANUAL)
+                let statusPompa = d.pompaStatus || "OFF";
+                let p1on = document.getElementById('btn-p1-on'), p1off = document.getElementById('btn-p1-off');
+                let p2on = document.getElementById('btn-p2-on'), p2off = document.getElementById('btn-p2-off');
+                let ic1 = document.getElementById('icon-p1'), ic2 = document.getElementById('icon-p2');
 
-                    if (statusPompa === "KURAS" || statusPompa === "KRS") {
+                if (statusPompa === "KURAS" || statusPompa === "KRS") {
+                    ic1.className = "fa-solid fa-circle-nodes text-rose-500 animate-spin";
+                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
+                    if (modeSistem === "MANUAL") {
                         p1on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-rose-600 text-white shadow-sm";
                         p1off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
                         p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
                         p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                        ic1.className = "fa-solid fa-circle-nodes text-rose-500 animate-spin";
-                        ic2.className = "fa-solid fa-circle-nodes text-slate-300";
-                    } else if (statusPompa === "ISI") {
+                    }
+                } else if (statusPompa === "ISI") {
+                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
+                    ic2.className = "fa-solid fa-circle-nodes text-blue-500 animate-spin";
+                    if (modeSistem === "MANUAL") {
                         p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
                         p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
                         p2on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-blue-600 text-white shadow-sm";
                         p2off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        ic1.className = "fa-solid fa-circle-nodes text-slate-300";
-                        ic2.className = "fa-solid fa-circle-nodes text-blue-500 animate-spin";
-                    } else {
+                    }
+                } else {
+                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
+                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
+                    if (modeSistem === "MANUAL") {
                         p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
                         p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
                         p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
                         p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                        ic1.className = "fa-solid fa-circle-nodes text-slate-300";
-                        ic2.className = "fa-solid fa-circle-nodes text-slate-300";
                     }
                 }
             }
