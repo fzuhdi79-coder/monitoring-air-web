@@ -40,7 +40,7 @@
 
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-6">
             
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-100 mb-4">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b border-slate-100 mb-4">
                 <div class="flex items-start space-x-3">
                     <div class="bg-blue-50 p-2.5 rounded-xl text-blue-600 mt-0.5 shadow-inner">
                         <i class="fa-solid fa-database text-sm"></i>
@@ -51,9 +51,19 @@
                     </div>
                 </div>
                 
-                <button onclick="unduhCSV()" class="inline-flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-blue-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 self-start sm:self-auto">
-                    <i class="fa-solid fa-download text-sm"></i> EXPORT TO CSV
-                </button>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+                        <label for="filter-tanggal" class="text-[11px] font-bold text-slate-400 uppercase">Filter Hari:</label>
+                        <input type="date" id="filter-tanggal" onchange="filterHari()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
+                        <button onclick="resetFilter()" class="text-slate-400 hover:text-rose-500 transition text-xs pl-1" title="Reset Filter">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+
+                    <button onclick="unduhCSV()" class="inline-flex items-center gap-2 px-4 py-2 border border-slate-200 hover:bg-slate-50 text-blue-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95">
+                        <i class="fa-solid fa-download text-sm"></i> EXPORT TO CSV
+                    </button>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -84,7 +94,31 @@
             window.location.href = "login.html"; 
         }
 
-        // FUNGSI UNTUK MERUBAH ISI TABEL MENJADI FILE CSV & DIUNDUH AUTOMATIS
+        // FUNGSI UNTUK MEMFILTER BARIS TABEL BERDASARKAN HARI YANG DIPILIH
+        function filterHari() {
+            const inputTanggal = document.getElementById("filter-tanggal").value; // Format: YYYY-MM-DD
+            const barisTabel = document.querySelectorAll("#table-body tr");
+
+            if (!inputTanggal) return;
+
+            barisTabel.forEach(tr => {
+                const tanggalData = tr.getAttribute("data-date"); // Format: YYYY-MM-DD
+                if (tanggalData === inputTanggal) {
+                    tr.classList.remove("hidden");
+                } else {
+                    tr.classList.add("hidden");
+                }
+            });
+        }
+
+        // FUNGSI UNTUK MERESET FILTER AGAR MENAMPILKAN SEMUA HARI KEMBALI
+        function resetFilter() {
+            document.getElementById("filter-tanggal").value = "";
+            const barisTabel = document.querySelectorAll("#table-body tr");
+            barisTabel.forEach(tr => tr.classList.remove("hidden"));
+        }
+
+        // FUNGSI UNTUK MERUBAH ISI TABEL MENJADI FILE CSV (HANYA DATA YANG LOLOS FILTER)
         function unduhCSV() {
             const tabel = document.getElementById("tabel-log");
             let barisCsv = [];
@@ -95,23 +129,28 @@
             header.forEach(th => dataHeader.push(th.innerText));
             barisCsv.push(dataHeader.join(","));
 
-            // 2. Mengambil seluruh baris data dari body tabel
+            // 2. Mengambil baris data dari body tabel yang TIDAK tersembunyi (Lolos Filter)
             const barisData = tabel.querySelectorAll("tbody tr");
-            if(barisData.length === 0) {
-                alert("Belum ada data log real-time yang terekam untuk diunduh!");
-                return;
-            }
+            let counterData = 0;
 
             barisData.forEach(tr => {
+                // Lewati data jika baris sedang disembunyikan oleh filter hari
+                if (tr.classList.contains("hidden")) return;
+
+                counterData++;
                 const kolom = tr.querySelectorAll("td");
                 let dataKolom = [];
                 kolom.forEach(td => {
-                    // Membersihkan baris baru atau spasi berlebih akibat teks badge status
                     let teksBersih = td.innerText.replace(/\n/g, " ").trim();
                     dataKolom.push(`"${teksBersih}"`);
                 });
                 barisCsv.push(dataKolom.join(","));
             });
+
+            if(counterData === 0) {
+                alert("Tidak ada data yang cocok dengan tanggal filter untuk diunduh!");
+                return;
+            }
 
             // 3. Konversi data teks menjadi file Blob CSV
             const isiCsv = barisCsv.join("\n");
@@ -120,10 +159,11 @@
             // 4. Trigger download instant pada browser
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
-            const tglSekarang = new Date().toISOString().slice(0,10);
+            const inputTanggal = document.getElementById("filter-tanggal").value;
+            const tglFile = inputTanggal ? inputTanggal : new Date().toISOString().slice(0,10);
             
             link.setAttribute("href", url);
-            link.setAttribute("download", `WQ_System_Database_Log_${tglSekarang}.csv`);
+            link.setAttribute("download", `WQ_System_Log_${tglFile}.csv`);
             link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
@@ -136,7 +176,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
-        // Firebase Konfigurasi Asli Anda
         const app = initializeApp({ 
             apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", 
             databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" 
@@ -148,12 +187,18 @@
             if (snapshot.exists()) {
                 const d = snapshot.val();
                 
-                // Membuat penanggalan & waktu real-time komputer klien saat data masuk
                 const waktuSekarang = new Date();
                 const jam = waktuSekarang.toLocaleTimeString('id-ID', { hour12: false });
-                const tanggal = waktuSekarang.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                
+                // Format tampilan tabel (DD/MM/YYYY)
+                const tanggalTampilan = waktuSekarang.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                
+                // Format ID Filter Tanggal HTML (YYYY-MM-DD)
+                const tahun = waktuSekarang.getFullYear();
+                const bulan = String(waktuSekarang.getMonth() + 1).padStart(2, '0');
+                const hari = String(waktuSekarang.getDate()).padStart(2, '0');
+                const tanggalAtribut = `${tahun}-${bulan}-${hari}`;
 
-                // Penentuan badge dinamis berdasarkan nilai pH seperti contoh gambar Anda
                 let ph = d.pH || 0;
                 let phBadge = (ph >= 6.5 && ph <= 8.5)
                     ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-100 ml-2">Optimal</span>`
@@ -161,18 +206,23 @@
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/50 transition-colors py-3";
+                
+                // Menyematkan atribut data-date tersembunyi untuk dibaca filter JS nanti
+                tr.setAttribute("data-date", tanggalAtribut);
+                
                 tr.innerHTML = `
                     <td class="py-4 text-slate-400 font-mono">${jam}</td>
-                    <td class="py-4 text-slate-600 font-medium">${tanggal}</td>
+                    <td class="py-4 text-slate-600 font-medium">${tanggalTampilan}</td>
                     <td class="py-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
                     <td class="py-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
                     <td class="py-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
                 `;
 
-                // Menyisipkan baris terbaru di posisi paling atas tabel log (Kornologis terbalik)
                 tbody.insertBefore(tr, tbody.firstChild);
 
-                // Batasi baris data maksimum hingga 50 baris sesuai sub-header teks halaman Anda
+                // Jalankan fungsi filter otomatis saat ada data real-time baru masuk
+                filterHari();
+
                 if (tbody.children.length > 50) {
                     tbody.removeChild(tbody.lastChild);
                 }
