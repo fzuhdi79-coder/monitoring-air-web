@@ -166,7 +166,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        // Tambahan query dan limitToLast di import
         import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ 
@@ -176,32 +175,25 @@
         const db = getDatabase(app);
         const tbody = document.getElementById('table-body');
 
-        // PENTING: Targetkan ke SistemAir_Log, ambil maksimal 100 data terakhir (agar web tidak berat)
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(100));
 
         onValue(logRef, (snapshot) => {
-            // Kosongkan tabel sebelum merender ulang agar data tidak menumpuk saat refresh
             tbody.innerHTML = ''; 
 
             if (snapshot.exists()) {
                 let dataRiwayat = [];
                 
-                // Masukkan semua data ke dalam array sementara
                 snapshot.forEach((childSnapshot) => {
                     dataRiwayat.push(childSnapshot.val());
                 });
 
-                // Render array secara terbalik (reverse) agar data terbaru ada di paling atas
                 dataRiwayat.reverse().forEach((d) => {
                     
-                    // PENTING: Gunakan timestamp dari database Firebase (ESP32)
-                    // Jika tidak ada timestamp dari DB, gunakan fallback waktu sekarang
                     const waktuAsli = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
                     
                     const jam = waktuAsli.toLocaleTimeString('id-ID', { hour12: false });
                     const tanggalTampilan = waktuAsli.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
                     
-                    // Format khusus untuk Atribut Filter HTML (YYYY-MM-DD)
                     const tahun = waktuAsli.getFullYear();
                     const bulan = String(waktuAsli.getMonth() + 1).padStart(2, '0');
                     const hari = String(waktuAsli.getDate()).padStart(2, '0');
@@ -215,7 +207,6 @@
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50/50 transition-colors py-3";
                     
-                    // Tanamkan atribut tanggal untuk filter (berdasarkan waktu asli alat)
                     tr.setAttribute("data-date", tanggalAtribut);
                     
                     tr.innerHTML = `
@@ -226,11 +217,9 @@
                         <td class="py-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
                     `;
 
-                    // Tambahkan baris ke akhir tabel (karena urutan array sudah di reverse)
                     tbody.appendChild(tr);
                 });
 
-                // Jalankan ulang fungsi filter setelah data dimuat untuk mempertahankan pilihan filter sebelumnya
                 filterHari();
 
             } else {
