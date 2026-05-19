@@ -5,50 +5,87 @@
     <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gauges - WQ System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.6.1/justgage.min.js"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <nav class="navbar">
-        <div class="nav-brand"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> WQ-SYSTEM</div>
-        <div class="nav-links">
-            <a href="index.html">Overview</a>
-            <a href="speedometer.html" class="active">Gauges</a>
-            <a href="grafik.html">Analytics</a>
-            <a href="history.html">Data Log</a>
-            <a href="#" class="btn-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i></a>
+    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-blue-600/10 p-2 rounded-lg text-blue-400 border border-blue-500/20">
+                        <i class="fa-solid fa-droplet text-base"></i>
+                    </div>
+                    <span class="text-md font-extrabold tracking-wider text-white">WQ-SYSTEM</span>
+                </div>
+                <div class="flex space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700/30">
+                    <a href="index.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Overview</a>
+                    <a href="speedometer.html" class="bg-blue-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition">Gauges</a>
+                    <a href="grafik.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Analytics</a>
+                    <a href="history.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Data Log</a>
+                </div>
+                <div>
+                    <button onclick="logout()" class="h-9 w-9 bg-slate-800 hover:bg-rose-900/40 border border-slate-700/50 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 rounded-xl flex items-center justify-center transition active:scale-95">
+                        <i class="fa-solid fa-power-off text-sm"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="page-header">
-            <div class="page-title">
-                <h1>Instrument Gauges</h1>
-                <p>Visualisasi radial parameter operasional tangki air</p>
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div class="border-b border-slate-200 pb-5">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">Instrument Gauges</h1>
+            <p class="text-xs text-slate-500 mt-1">Visualisasi sirkular parameter operasional tangki air.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm text-center">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-4">pH Metrics Node</span>
+                <div id="gauge-ph" class="w-full h-48 mx-auto"></div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm text-center">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-4">Turbidity Spectro</span>
+                <div id="gauge-turbidity" class="w-full h-48 mx-auto"></div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm text-center">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-4">Volumetric Level</span>
+                <div id="gauge-level" class="w-full h-48 mx-auto"></div>
             </div>
         </div>
+    </main>
 
-        <div class="grid-layout">
-            <div class="card"><div class="card-title" style="text-align: center; margin-bottom: 10px;">pH Sensor</div><div id="gauge-ph" style="width:100%; height:200px;"></div></div>
-            <div class="card"><div class="card-title" style="text-align: center; margin-bottom: 10px;">Turbidity Sensor</div><div id="gauge-turbidity" style="width:100%; height:200px;"></div></div>
-            <div class="card"><div class="card-title" style="text-align: center; margin-bottom: 10px;">Level Sensor</div><div id="gauge-level" style="width:100%; height:200px;"></div></div>
-        </div>
-    </div>
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[11px] text-slate-400 font-medium">
+        &copy; 2026 WQ-SYSTEM Team. Instrument Cluster Node Service.
+    </footer>
 
     <script>function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }</script>
-    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         
-        let pColor = "#475569";
-        const gPh = new JustGage({ id: "gauge-ph", value: 0, min: 0, max: 14, label: "pH", levelColors: ["#ef4444","#10b981","#ef4444"], pointer: true, pointerOptions: {color: pColor}, valueFontColor: "#0f172a", valueFontFamily: "Nunito" });
-        const gTb = new JustGage({ id: "gauge-turbidity", value: 0, min: 0, max: 200, label: "NTU", levelColors: ["#10b981","#f59e0b","#ef4444"], pointer: true, pointerOptions: {color: pColor}, valueFontColor: "#0f172a", valueFontFamily: "Nunito" });
-        const gLv = new JustGage({ id: "gauge-level", value: 0, min: 0, max: 100, label: "cm", levelColors: ["#ef4444","#3b82f6","#10b981"], pointer: true, pointerOptions: {color: pColor}, valueFontColor: "#0f172a", valueFontFamily: "Nunito" });
+        // Premium minimal styling parameter untuk Gauge Circle
+        const gConfig = {
+            gaugeWidthScale: 0.25,
+            pointer: true,
+            pointerOptions: { color: "#0f172a", strokeWidth: 2, topLength: 80, bottomLength: 10 },
+            valueFontColor: "#0f172a",
+            valueFontFamily: "Inter",
+            valueFontWeight: "800",
+            hideInnerShadow: true,
+            shadowOpacity: 0,
+            gaugeColor: "#f1f5f9"
+        };
+
+        const gPh = new JustGage({ id: "gauge-ph", value: 0, min: 0, max: 14, label: "pH Level", levelColors: ["#f43f5e","#10b981","#f43f5e"], ...gConfig });
+        const gTb = new JustGage({ id: "gauge-turbidity", value: 0, min: 0, max: 200, label: "Turbidity (NTU)", levelColors: ["#10b981","#f59e0b","#f43f5e"], ...gConfig });
+        const gLv = new JustGage({ id: "gauge-level", value: 0, min: 0, max: 100, label: "Water Level (cm)", levelColors: ["#f43f5e","#3b82f6","#10b981"], ...gConfig });
 
         onValue(ref(getDatabase(), 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
