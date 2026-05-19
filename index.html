@@ -132,17 +132,29 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
-                <div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+                <div class="border-b border-slate-100 pb-3">
                     <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-blue-500"></i> Grafik Status Pompa Real-Time
+                        <i class="fa-solid fa-chart-line text-rose-500"></i> Grafik Status Pompa Kuras (Drainage)
                     </h3>
-                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa.</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa pengurasan real-time.</p>
+                </div>
+                <div class="relative w-full h-40 sm:h-48 md:h-52">
+                    <canvas id="chart-pompa-kuras"></canvas>
                 </div>
             </div>
-            <div class="relative w-full h-40 sm:h-48 md:h-52">
-                <canvas id="chart-pompa-otomatis"></canvas>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-blue-500"></i> Grafik Status Pompa Isi (Inflow)
+                    </h3>
+                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa pengisian real-time.</p>
+                </div>
+                <div class="relative w-full h-40 sm:h-48 md:h-52">
+                    <canvas id="chart-pompa-isi"></canvas>
+                </div>
             </div>
         </div>
 
@@ -152,63 +164,386 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Smart Automation Mode</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">AUTOMATED</button>
+                        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">MANUAL OVERRIDE</button>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
-                    <div><h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3></div>
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol pompa air (Hanya aktif pada mode manual override).</p>
+                    </div>
                     <div class="space-y-3">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)</span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg"><button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="px-3 py-1 text-[10px] font-bold rounded-md transition">ON</button><button id="btn-p1-off" onclick="ubahPompa('OFF')" class="px-3 py-1 text-[10px] font-bold rounded-md transition">OFF</button></div>
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)
+                            </span>
+                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
+                                <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
+                                <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
+                            </div>
                         </div>
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)</span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg"><button id="btn-p2-on" onclick="ubahPompa('ISI')" class="px-3 py-1 text-[10px] font-bold rounded-md transition">ON</button><button id="btn-p2-off" onclick="ubahPompa('OFF')" class="px-3 py-1 text-[10px] font-bold rounded-md transition">OFF</button></div>
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)
+                            </span>
+                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
+                                <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
+                                <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm p-5 sm:p-6 lg:col-span-2">
-                    <h3 class="text-sm font-bold text-amber-400 flex items-center gap-2 mb-4"><i class="fa-solid fa-hourglass-half"></i> Info Harian Alat</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div class="bg-slate-800 p-3 rounded-lg"><p class="text-[10px] text-slate-400">Durasi Pompa 1</p><p class="text-xs font-bold text-blue-400" id="durasiPompa1">00:00:00</p></div>
-                        <div class="bg-slate-800 p-3 rounded-lg"><p class="text-[10px] text-slate-400">Durasi Pompa 2</p><p class="text-xs font-bold text-blue-400" id="durasiPompa2">00:00:00</p></div>
-                        <div class="bg-slate-800 p-3 rounded-lg"><p class="text-[10px] text-slate-400">Waktu Terbuka</p><p class="text-xs font-bold text-emerald-400" id="waktuTerbuka">00:00:00</p></div>
-                        <div class="bg-slate-800 p-3 rounded-lg"><p class="text-[10px] text-slate-400">Saluran Buka</p><p class="text-xs font-bold text-amber-400" id="saluranBuka">0 Kali</p></div>
-                        <div class="bg-slate-800 p-3 rounded-lg"><p class="text-[10px] text-slate-400">Saluran Tutup</p><p class="text-xs font-bold text-rose-400" id="saluranTutup">0 Kali</p></div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-hourglass-half text-amber-500"></i> Info Harian Alat
+                        </h3>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">*Waktu & saluran otomatis direset jam 00:00</p>
+                    </div>
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-stopwatch text-slate-400"></i> Durasi Pompa 1
+                            </span>
+                            <span id="durasiPompa1" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-blue-600 shadow-sm">00:00:00</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-stopwatch text-slate-400"></i> Durasi Pompa 2
+                            </span>
+                            <span id="durasiPompa2" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-blue-600 shadow-sm">00:00:00</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-faucet text-slate-400"></i> Waktu Terbuka (Slr)
+                            </span>
+                            <span id="waktuTerbuka" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-emerald-600 shadow-sm">00:00:00</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i> Saluran Buka
+                            </span>
+                            <span id="saluranBuka" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-amber-600 shadow-sm">0 Kali</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-arrow-down-left-and-arrow-up-right-to-center text-slate-400"></i> Saluran Tutup
+                            </span>
+                            <span id="saluranTutup" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-rose-600 shadow-sm">0 Kali</span>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </main>
 
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
+        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
+    </footer>
+
+    <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerIcon.className = "fa-solid fa-bars text-xl";
+            } else {
+                hamburgerIcon.className = "fa-solid fa-xmark text-xl";
+            }
+        });
+    </script>
+
+    <script>function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }</script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
+        const statusBadge = document.getElementById('koneksi-status');
+        let timerSensor;
+
+        function createMiniChart(canvasId, color) {
+            return new Chart(document.getElementById(canvasId), {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            });
+        }
+
+        const chartPh = createMiniChart('chart-ph', '#10b981');
+        const chartTb = createMiniChart('chart-turbidity', '#f59e0b');
+        const chartLv = createMiniChart('chart-level', '#3b82f6');
+
+        // PERBAIKAN: Inisialisasi Chart Pompa Kuras Secara Terpisah
+        const ctxKuras = document.getElementById('chart-pompa-kuras').getContext('2d');
+        const chartPompaKuras = new Chart(ctxKuras, {
+            type: 'line',
+            data: {
+                labels: Array(20).fill('--:--:--'), 
+                datasets: [{
+                    label: 'Pompa Kuras',
+                    data: Array(20).fill(0),
+                    borderColor: '#f43f5e', 
+                    backgroundColor: 'rgba(244, 63, 94, 0.05)',
+                    fill: true, stepped: true, pointRadius: 0, borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    y: {
+                        min: -0.1, max: 1.1,
+                        ticks: {
+                            stepSize: 1, font: { size: 10, weight: 'bold' }, color: '#64748b',
+                            callback: function(value) {
+                                if (value === 1) return 'ON';
+                                if (value === 0) return 'OFF';
+                                return '';
+                            }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+
+        // PERBAIKAN: Inisialisasi Chart Pompa Isi Secara Terpisah
+        const ctxIsi = document.getElementById('chart-pompa-isi').getContext('2d');
+        const chartPompaIsi = new Chart(ctxIsi, {
+            type: 'line',
+            data: {
+                labels: Array(20).fill('--:--:--'), 
+                datasets: [{
+                    label: 'Pompa Isi',
+                    data: Array(20).fill(0),
+                    borderColor: '#3b82f6', 
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    fill: true, stepped: true, pointRadius: 0, borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    y: {
+                        min: -0.1, max: 1.1,
+                        ticks: {
+                            stepSize: 1, font: { size: 10, weight: 'bold' }, color: '#64748b',
+                            callback: function(value) {
+                                if (value === 1) return 'ON';
+                                if (value === 0) return 'OFF';
+                                return '';
+                            }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+
+        // Tarik Riwayat ke Grafik Sensor (Grafik Pompa tidak ditarik karena tidak ada di DB)
+        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
+        get(logRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const dataLog = childSnapshot.val();
+                    
+                    chartPh.data.labels.push('');
+                    chartPh.data.datasets[0].data.push(dataLog.pH || 0);
+
+                    chartTb.data.labels.push('');
+                    chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
+
+                    chartLv.data.labels.push('');
+                    chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
+                });
+                chartPh.update();
+                chartTb.update();
+                chartLv.update();
+            }
+        });
+
+        function updateChartData(chart, newValue) {
+            chart.data.labels.push('');
+            chart.data.datasets[0].data.push(newValue);
+            if (chart.data.datasets[0].data.length > 20) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+            chart.update();
+        }
+
+        // PERBAIKAN: Fungsi Update untuk Masing-Masing Grafik Pompa Baru
+        function updatePompaChart(waktu, valKuras, valIsi) {
+            // Update Pompa Kuras
+            chartPompaKuras.data.labels.push(waktu);
+            chartPompaKuras.data.datasets[0].data.push(valKuras);
+            if (chartPompaKuras.data.labels.length > 20) {
+                chartPompaKuras.data.labels.shift();
+                chartPompaKuras.data.datasets[0].data.shift();
+            }
+            chartPompaKuras.update();
+
+            // Update Pompa Isi
+            chartPompaIsi.data.labels.push(waktu);
+            chartPompaIsi.data.datasets[0].data.push(valIsi);
+            if (chartPompaIsi.data.labels.length > 20) {
+                chartPompaIsi.data.labels.shift();
+                chartPompaIsi.data.datasets[0].data.shift();
+            }
+            chartPompaIsi.update();
+        }
+
+        window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
+        window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
+
+        function setOfflineUI(pesan) {
+            statusBadge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span> ${pesan}`;
+            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 border-rose-200 text-rose-600 shadow-sm";
+        }
+
+        function setOnlineUI() {
+            statusBadge.innerHTML = `<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span> LIVE DATASTREAM`;
+            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm";
+        }
+
+        onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("NETWORK DISCONNECTED"); });
 
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
+                const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
                 
-                // MENGAMBIL DATA DARI ESP32 KE HTML
-                document.getElementById('durasiPompa1').innerText = d.durasiP1 || "00:00:00";
-                document.getElementById('durasiPompa2').innerText = d.durasiP2 || "00:00:00";
-                document.getElementById('waktuTerbuka').innerText = d.waktuSlr || "00:00:00";
-                document.getElementById('saluranBuka').innerText = (d.bukaSlr || 0) + " Kali";
-                document.getElementById('saluranTutup').innerText = (d.tutupSlr || 0) + " Kali";
+                setOnlineUI(); 
+                clearTimeout(timerSensor); 
+                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 35000); 
+                
+                document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
+                document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
+                document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
 
-                // ... (Update data sensor lainnya)
-                document.getElementById('val-ph').innerText = (d.pH || 0).toFixed(2);
-                document.getElementById('val-turbidity').innerText = Math.round(d.turbidity || 0) + " NTU";
-                document.getElementById('val-level').innerText = Math.round(d.tinggiAir || 0) + " cm";
-                document.getElementById('koneksi-status').innerText = "LIVE DATASTREAM";
-                document.getElementById('koneksi-status').className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm";
+                let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph.toFixed(2);
+                updateChartData(chartPh, ph);
+                let sph = document.getElementById('status-ph');
+                if(ph < 6.5 || ph > 8.5) {
+                    sph.innerText = "CRITICAL LIMIT";
+                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
+                } else {
+                    sph.innerText = "OPTIMAL STABLE";
+                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
+                }
+
+                let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span>`;
+                updateChartData(chartTb, tb);
+                let stb = document.getElementById('status-turbidity');
+                if(tb < 25) {
+                    stb.innerText = "CLEAR WATER";
+                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
+                } else if(tb < 100) {
+                    stb.innerText = "WARNING HIGH";
+                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700";
+                } else {
+                    stb.innerText = "HAZARD CRITICAL";
+                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
+                }
+
+                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
+                updateChartData(chartLv, lv);
+                let slv = document.getElementById('status-level');
+                if(lv < 20) {
+                    slv.innerText = "LOW RESERVOIR";
+                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
+                } else {
+                    slv.innerText = "SAFE STORAGE";
+                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-600";
+                }
+
+                let modeSistem = d.modeSistem || "AUTO";
+                const bAuto = document.getElementById('btn-mode-auto');
+                const bManual = document.getElementById('btn-mode-manual');
+                const pButtons = document.querySelectorAll('.btn-pump');
+
+                if (modeSistem === "AUTO") {
+                    bAuto.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
+                    bManual.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
+                    pButtons.forEach(b => { 
+                        b.disabled = true; 
+                        b.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-300 cursor-not-allowed"; 
+                    });
+                } else {
+                    bAuto.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
+                    bManual.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
+                    pButtons.forEach(b => { b.disabled = false; });
+                }
+
+                let statusPompa = d.pompaStatus || "OFF";
+                let p1on = document.getElementById('btn-p1-on'), p1off = document.getElementById('btn-p1-off');
+                let p2on = document.getElementById('btn-p2-on'), p2off = document.getElementById('btn-p2-off');
+                let ic1 = document.getElementById('icon-p1'), ic2 = document.getElementById('icon-p2');
+
+                let binaryKuras = 0;
+                let binaryIsi = 0;
+
+                if (statusPompa === "KURAS" || statusPompa === "KRS") {
+                    binaryKuras = 1;
+                    ic1.className = "fa-solid fa-circle-nodes text-rose-500 animate-spin";
+                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
+                    if (modeSistem === "MANUAL") {
+                        p1on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-rose-600 text-white shadow-sm";
+                        p1off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
+                        p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
+                        p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
+                    }
+                } else if (statusPompa === "ISI") {
+                    binaryIsi = 1;
+                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
+                    ic2.className = "fa-solid fa-circle-nodes text-blue-500 animate-spin";
+                    if (modeSistem === "MANUAL") {
+                        p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
+                        p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
+                        p2on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-blue-600 text-white shadow-sm";
+                        p2off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
+                    }
+                } else {
+                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
+                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
+                    if (modeSistem === "MANUAL") {
+                        p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
+                        p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
+                        p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
+                        p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
+                    }
+                }
+
+                // DILENGKAPI: Pemetaan data Info Harian dari Firebase Realtime Database
+                document.getElementById('durasiPompa1').innerText = d.durasiPompa1 || d.durasi_pompa1 || "00:00:00";
+                document.getElementById('durasiPompa2').innerText = d.durasiPompa2 || d.durasi_pompa2 || "00:00:00";
+                document.getElementById('waktuTerbuka').innerText = d.waktuTerbuka || d.waktu_terbuka || "00:00:00";
+                
+                const sb = d.saluranBuka !== undefined ? d.saluranBuka : (d.saluran_buka !== undefined ? d.saluran_buka : 0);
+                const st = d.saluranTutup !== undefined ? d.saluranTutup : (d.saluran_tutup !== undefined ? d.saluran_tutup : 0);
+                document.getElementById('saluranBuka').innerText = sb + " Kali";
+                document.getElementById('saluranTutup').innerText = st + " Kali";
+
+                updatePompaChart(waktu, binaryKuras, binaryIsi);
             }
         });
-
-        window.ubahMode = (mode) => set(ref(db, 'SistemAir/modeSistem'), mode);
-        window.ubahPompa = (perintah) => set(ref(db, 'SistemAir/pompaStatus'), perintah);
     </script>
 </body>
 </html>
