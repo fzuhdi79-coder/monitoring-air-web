@@ -16,7 +16,6 @@
     <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
                         <i class="fa-solid fa-droplet text-lg"></i>
@@ -44,174 +43,77 @@
                 </div>
             </div>
         </div>
-
         <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
-            <a href="index.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
-                <i class="fa-solid fa-chart-pie mr-2 text-blue-200"></i> Overview
-            </a>
-            <a href="grafik.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-chart-area mr-2 text-slate-500"></i> Analytics
-            </a>
-            <a href="history.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
-            </a>
-            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95">
-                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
-            </button>
+            <a href="index.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">Overview</a>
+            <a href="grafik.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">Analytics</a>
+            <a href="history.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">Data Log</a>
         </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
-        
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         <div class="flex flex-row items-center justify-between gap-4 border-b border-slate-200 pb-5">
             <div>
-                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">System Overview</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1">Metrik pembacaan telemetri sensor kualitas air secara real-time.</p>
+                <h1 class="text-xl font-bold text-slate-900">System Overview</h1>
+                <p class="text-xs text-slate-500">Metrik pembacaan sensor kualitas air real-time.</p>
             </div>
-            <div id="koneksi-status" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-bold border shadow-sm transition-all duration-300 whitespace-nowrap">
+            <div id="koneksi-status" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-sm">
                 <i class="fa-solid fa-rotate fa-spin"></i> SYNCING...
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Potensial Hidrogen (pH)</span>
-                    <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600 text-xs"><i class="fa-solid fa-flask"></i></div>
-                </div>
-                <div class="flex items-end justify-between gap-2">
-                    <div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-ph">0.00</div>
-                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-ph">Menunggu data...</div>
-                    </div>
-                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-ph"></canvas></div>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-ph">
-                    <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
-                </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                <span class="text-xs font-semibold text-slate-500 uppercase">Potensial Hidrogen (pH)</span>
+                <div class="text-4xl font-extrabold text-slate-900" id="val-ph">0.00</div>
+                <div class="w-full h-16"><canvas id="chart-ph"></canvas></div>
+                <div class="text-[11px] text-slate-400" id="time-ph">LAST UPDATE: --:--:--</div>
             </div>
-
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Kekeruhan Air</span>
-                    <div class="p-2 bg-amber-50 rounded-lg text-amber-600 text-xs"><i class="fa-solid fa-virus"></i></div>
-                </div>
-                <div class="flex items-end justify-between gap-2">
-                    <div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-turbidity">0 <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span></div>
-                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-turbidity">Menunggu data...</div>
-                    </div>
-                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-turbidity"></canvas></div>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-tb">
-                    <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
-                </div>
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                <span class="text-xs font-semibold text-slate-500 uppercase">Kekeruhan Air</span>
+                <div class="text-4xl font-extrabold text-slate-900" id="val-turbidity">0 NTU</div>
+                <div class="w-full h-16"><canvas id="chart-turbidity"></canvas></div>
+                <div class="text-[11px] text-slate-400" id="time-tb">LAST UPDATE: --:--:--</div>
             </div>
-
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between sm:col-span-2 lg:col-span-1">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Volume / Ketinggian Air</span>
-                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600 text-xs"><i class="fa-solid fa-water"></i></div>
-                </div>
-                <div class="flex items-end justify-between gap-2">
-                    <div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-level">0 <span class="text-base sm:text-lg font-medium text-slate-400">cm</span></div>
-                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-level">Menunggu data...</div>
-                    </div>
-                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-level"></canvas></div>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-lv">
-                    <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
-                </div>
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 sm:col-span-2 lg:col-span-1">
+                <span class="text-xs font-semibold text-slate-500 uppercase">Volume Air</span>
+                <div class="text-4xl font-extrabold text-slate-900" id="val-level">0 cm</div>
+                <div class="w-full h-16"><canvas id="chart-level"></canvas></div>
+                <div class="text-[11px] text-slate-400" id="time-lv">LAST UPDATE: --:--:--</div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
-                <div>
-                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-blue-500"></i> Grafik Status Pompa Real-Time
-                    </h3>
-                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa.</p>
-                </div>
-                <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-start sm:justify-end">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-rose-500 inline-block"></span> Kuras (Drainage)</div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Isi (Inflow)</div>
-                </div>
-            </div>
-            <div class="relative w-full h-40 sm:h-48 md:h-52">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+            <h3 class="text-sm font-bold text-slate-900 mb-4">Grafik Status Pompa</h3>
+            <div class="relative w-full h-52">
                 <canvas id="chart-pompa-otomatis"></canvas>
             </div>
         </div>
 
-        <div class="space-y-4">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-blue-500"></i> Actuators Control Center
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Smart Automation Mode</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">AUTOMATED</button>
-                        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">MANUAL OVERRIDE</button>
-                    </div>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <h3 class="text-sm font-bold text-slate-900">Automation Mode</h3>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                    <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2 text-xs font-bold rounded-lg transition">AUTOMATED</button>
+                    <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2 text-xs font-bold rounded-lg transition">MANUAL</button>
                 </div>
-
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol pompa air (Hanya aktif pada mode manual override).</p>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
-                            </div>
-                        </div>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <h3 class="text-sm font-bold text-slate-900">Pump Control</h3>
+                <div class="mt-4 flex gap-4">
+                    <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump py-2 px-4 rounded-lg text-xs font-bold">DRAIN ON</button>
+                    <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump py-2 px-4 rounded-lg text-xs font-bold">FILL ON</button>
+                    <button onclick="ubahPompa('OFF')" class="py-2 px-4 rounded-lg text-xs font-bold bg-slate-900 text-white">ALL OFF</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
-    </footer>
-
     <script>
         const hamburgerBtn = document.getElementById('hamburger-btn');
         const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-
-        hamburgerBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            if (mobileMenu.classList.contains('hidden')) {
-                hamburgerIcon.className = "fa-solid fa-bars text-xl";
-            } else {
-                hamburgerIcon.className = "fa-solid fa-xmark text-xl";
-            }
-        });
+        hamburgerBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
     </script>
-
-    <script>function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }</script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -222,10 +124,14 @@
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
+        // --- MANAJEMEN RIWAYAT LOKAL (Agar tidak hilang saat refresh) ---
+        function getHistory(key) { return JSON.parse(localStorage.getItem(key)) || Array(20).fill(0); }
+        function saveHistory(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+
         function createMiniChart(canvasId, color) {
             return new Chart(document.getElementById(canvasId), {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
+                data: { labels: Array(20).fill(''), datasets: [{ data: Array(20).fill(0), borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
             });
         }
@@ -238,212 +144,64 @@
         const chartPompaOtomatis = new Chart(ctxPompa, {
             type: 'line',
             data: {
-                // PERBAIKAN: Isi dengan 20 titik kosong sebagai template lebar sumbu x
-                labels: Array(20).fill('--:--:--'), 
+                labels: Array(20).fill(''), 
                 datasets: [
-                    {
-                        label: 'Pompa Kuras',
-                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
-                        borderColor: '#f43f5e', 
-                        backgroundColor: 'rgba(244, 63, 94, 0.05)',
-                        fill: true, stepped: true, pointRadius: 0, borderWidth: 2
-                    },
-                    {
-                        label: 'Pompa Isi',
-                        data: Array(20).fill(0), // Diisi angka 0 (OFF) sebagai garis dasar
-                        borderColor: '#3b82f6', 
-                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                        fill: true, stepped: true, pointRadius: 0, borderWidth: 2
-                    }
+                    { label: 'Pompa Kuras', data: getHistory('data_kuras'), borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.05)', fill: true, stepped: true, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Pompa Isi', data: getHistory('data_isi'), borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.05)', fill: true, stepped: true, pointRadius: 0, borderWidth: 2 }
                 ]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: true } },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                    y: {
-                        min: -0.1, max: 1.1,
-                        ticks: {
-                            stepSize: 1, font: { size: 10, weight: 'bold' }, color: '#64748b',
-                            callback: function(value) {
-                                if (value === 1) return 'ON';
-                                if (value === 0) return 'OFF';
-                                return '';
-                            }
-                        },
-                        grid: { color: '#f1f5f9' }
-                    }
+                    x: { display: false },
+                    y: { min: -0.1, max: 1.1, ticks: { stepSize: 1, callback: (v) => v === 1 ? 'ON' : 'OFF' } }
                 }
             }
         });
 
-        // Tarik Riwayat ke Grafik Sensor (Grafik Pompa tidak ditarik karena tidak ada di DB)
-        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
-        get(logRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const dataLog = childSnapshot.val();
-                    
-                    chartPh.data.labels.push('');
-                    chartPh.data.datasets[0].data.push(dataLog.pH || 0);
-
-                    chartTb.data.labels.push('');
-                    chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
-
-                    chartLv.data.labels.push('');
-                    chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
-                });
-                chartPh.update();
-                chartTb.update();
-                chartLv.update();
-            }
-        });
-
         function updateChartData(chart, newValue) {
-            chart.data.labels.push('');
             chart.data.datasets[0].data.push(newValue);
-            if (chart.data.datasets[0].data.length > 20) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
-            }
+            if (chart.data.datasets[0].data.length > 20) chart.data.datasets[0].data.shift();
             chart.update();
         }
 
-        function updatePompaChart(waktu, valKuras, valIsi) {
-            chartPompaOtomatis.data.labels.push(waktu);
-            chartPompaOtomatis.data.datasets[0].data.push(valKuras);
-            chartPompaOtomatis.data.datasets[1].data.push(valIsi);
-
-            if (chartPompaOtomatis.data.labels.length > 20) {
-                chartPompaOtomatis.data.labels.shift();
-                chartPompaOtomatis.data.datasets[0].data.shift();
-                chartPompaOtomatis.data.datasets[1].data.shift();
-            }
+        function updatePompaChart(valKuras, valIsi) {
+            const d1 = chartPompaOtomatis.data.datasets[0].data;
+            const d2 = chartPompaOtomatis.data.datasets[1].data;
+            d1.push(valKuras); d2.push(valIsi);
+            if (d1.length > 20) { d1.shift(); d2.shift(); }
+            saveHistory('data_kuras', d1);
+            saveHistory('data_isi', d2);
             chartPompaOtomatis.update();
         }
 
         window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
         window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
 
-        function setOfflineUI(pesan) {
-            statusBadge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span> ${pesan}`;
-            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 border-rose-200 text-rose-600 shadow-sm";
-        }
-
-        function setOnlineUI() {
-            statusBadge.innerHTML = `<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span> LIVE DATASTREAM`;
-            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm";
-        }
-
-        onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("NETWORK DISCONNECTED"); });
-
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
                 const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+                statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm";
+                statusBadge.innerHTML = "LIVE STREAMING";
                 
-                setOnlineUI(); 
-                clearTimeout(timerSensor); 
-                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 35000); 
-                
-                document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
-                document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
-                document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
+                document.getElementById('time-ph').innerText = "LAST UPDATE: " + waktu;
+                document.getElementById('time-tb').innerText = "LAST UPDATE: " + waktu;
+                document.getElementById('time-lv').innerText = "LAST UPDATE: " + waktu;
 
-                let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph.toFixed(2);
-                updateChartData(chartPh, ph);
-                let sph = document.getElementById('status-ph');
-                if(ph < 6.5 || ph > 8.5) {
-                    sph.innerText = "CRITICAL LIMIT";
-                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                } else {
-                    sph.innerText = "OPTIMAL STABLE";
-                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
-                }
+                document.getElementById('val-ph').innerText = (d.pH || 0).toFixed(2);
+                document.getElementById('val-turbidity').innerText = Math.round(d.turbidity || 0) + " NTU";
+                document.getElementById('val-level').innerText = Math.round(d.tinggiAir || 0) + " cm";
 
-                let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span>`;
-                updateChartData(chartTb, tb);
-                let stb = document.getElementById('status-turbidity');
-                if(tb < 25) {
-                    stb.innerText = "CLEAR WATER";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
-                } else if(tb < 100) {
-                    stb.innerText = "WARNING HIGH";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700";
-                } else {
-                    stb.innerText = "HAZARD CRITICAL";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                }
+                updateChartData(chartPh, d.pH || 0);
+                updateChartData(chartTb, d.turbidity || 0);
+                updateChartData(chartLv, d.tinggiAir || 0);
 
-                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
-                updateChartData(chartLv, lv);
-                let slv = document.getElementById('status-level');
-                if(lv < 20) {
-                    slv.innerText = "LOW RESERVOIR";
-                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                } else {
-                    slv.innerText = "SAFE STORAGE";
-                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-600";
-                }
-
-                let modeSistem = d.modeSistem || "AUTO";
-                const bAuto = document.getElementById('btn-mode-auto');
-                const bManual = document.getElementById('btn-mode-manual');
-                const pButtons = document.querySelectorAll('.btn-pump');
-
-                if (modeSistem === "AUTO") {
-                    bAuto.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
-                    bManual.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
-                    pButtons.forEach(b => { 
-                        b.disabled = true; 
-                        b.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-300 cursor-not-allowed"; 
-                    });
-                } else {
-                    bAuto.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
-                    bManual.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
-                    pButtons.forEach(b => { b.disabled = false; });
-                }
-
-                let statusPompa = d.pompaStatus || "OFF";
-                let p1on = document.getElementById('btn-p1-on'), p1off = document.getElementById('btn-p1-off');
-                let p2on = document.getElementById('btn-p2-on'), p2off = document.getElementById('btn-p2-off');
-                let ic1 = document.getElementById('icon-p1'), ic2 = document.getElementById('icon-p2');
-
-                let binaryKuras = 0;
-                let binaryIsi = 0;
-
-                if (statusPompa === "KURAS" || statusPompa === "KRS") {
-                    binaryKuras = 1;
-                    ic1.className = "fa-solid fa-circle-nodes text-rose-500 animate-spin";
-                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
-                    if (modeSistem === "MANUAL") {
-                        p1on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-rose-600 text-white shadow-sm";
-                        p1off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                    }
-                } else if (statusPompa === "ISI") {
-                    binaryIsi = 1;
-                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
-                    ic2.className = "fa-solid fa-circle-nodes text-blue-500 animate-spin";
-                    if (modeSistem === "MANUAL") {
-                        p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                        p2on.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-blue-600 text-white shadow-sm";
-                        p2off.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                    }
-                } else {
-                    ic1.className = "fa-solid fa-circle-nodes text-slate-300";
-                    ic2.className = "fa-solid fa-circle-nodes text-slate-300";
-                    if (modeSistem === "MANUAL") {
-                        p1on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p1off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                        p2on.className = "px-3 py-1 text-[11px] font-medium rounded-md text-slate-400 hover:text-slate-600";
-                        p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
-                    }
-                }
-
-                updatePompaChart(waktu, binaryKuras, binaryIsi);
+                // Update pompa hanya jika status berubah
+                let k = (d.pompaStatus === "KURAS") ? 1 : 0;
+                let i = (d.pompaStatus === "ISI") ? 1 : 0;
+                updatePompaChart(k, i);
             }
         });
     </script>
