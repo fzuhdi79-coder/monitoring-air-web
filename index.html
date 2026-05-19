@@ -346,8 +346,7 @@
                 const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
                 
                 setOnlineUI(); 
-                clearTimeout(timerSensor); 
-                // Diubah menjadi 10 detik agar web tidak mudah memunculkan status "Offline"
+                clearTimeout(timerSensor);
                 timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 30000); 
                 
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
@@ -453,3 +452,330 @@
     </script>
 </body>
 </html>
+
+/* ========================================================
+ * SISTEM MONITORING & OTOMASI AKUARIUM IOT (COMBINED - SIMULATION MODE)
+ * FITUR: Dual-Path Firebase (Anti-Crash) + Full Simulation Random + Data Log
+ * INTERVAl: Pengiriman & Serial Monitor di-set 30 Detik Sekali
+ * ========================================================
+ */
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <Adafruit_ADS1X15.h>
+#include <WiFi.h>
+#include <FirebaseESP32.h>
+#include "time.h" 
+
+// ==========================================
+// KREDENSIAL WIFI & FIREBASE
+// ==========================================
+#define WIFI_SSID "zudistecu"
+#define WIFI_PASSWORD "nicacantikk" 
+#define API_KEY "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A"
+#define DATABASE_URL "realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
+
+// ==========================================
+// KONFIGURASI PIN HARDWARE
+// ==========================================
+#define LCD_SDA 21         
+#define LCD_SCL 22         
+#define PIN_RELAY_KURAS 26 
+#define PIN_RELAY_ISI 27   
+#define pinTrig 32
+#define pinEcho 33
+
+// Konfigurasi Relay (Sesuaikan LOW/HIGH dengan jenis relay Anda)
+#define RELAY_NYALA LOW   // Active Low (Ubah ke HIGH jika relay Anda Active High)
+#define RELAY_MATI HIGH
+
+// ==========================================
+// OBJEK GLOBAL (JALUR GANDA)
+// ==========================================
+Adafruit_ADS1115 ads;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+FirebaseData fbdoRead;  // Jalur baca perintah web
+FirebaseData fbdoWrite; // Jalur kirim data sensor
+FirebaseAuth auth;
+FirebaseConfig config;
+
+// ==========================================
+// VARIABEL SENSOR & LOGIKA ORI
+// ==========================================
+float V_pH686 = 1.233;  
+float V_pH401 = 0.470;  
+const int totalSamples = 30;   
+float ph_buffer[20];            
+int ph_index = 0;
+float finalPH = 7.0;
+
+const int jumlahSampel = 31;    
+float voltJernih = 2.572;      
+float faktorNTU = 1500;        
+float ntu = 0;
+float voltFinal_Turb = 0.0; // Untuk simulasi serial monitor
+
+const float tinggiMaksimal = 60.0; 
+const float BATAS_PENUH = 55.0;        
+const float TARGET_KURAS_TURB = BATAS_PENUH - 30.0; 
+const float TARGET_KURAS_PH   = BATAS_PENUH - 15.0; 
+float tinggiAir = 50.0; 
+
+// State Machine mendukung Otomatis & Manual Web
+enum StatusSistem { NORMAL, KURAS_KOTOR, KURAS_KIMIA, PENGISIAN, MANUAL_KURAS, MANUAL_ISI };
+StatusSistem statusSekarang = NORMAL;
+String modeSistem = "AUTO"; 
+
+// Timer IoT
+unsigned long timerKirim = 0;
+unsigned long timerBaca = 0;
+unsigned long timerSimulasiSensor = 0; 
+unsigned long timerLog = 0; 
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println("\n--- [SISTEM GABUNGAN: MODE SIMULASI AKTIF] ---");
+  
+  // 1. SETUP PIN & RELAY
+  pinMode(pinTrig, OUTPUT);
+  pinMode(pinEcho, INPUT);
+  pinMode(PIN_RELAY_KURAS, OUTPUT);
+  pinMode(PIN_RELAY_ISI, OUTPUT);
+  digitalWrite(PIN_RELAY_KURAS, RELAY_MATI);
+  digitalWrite(PIN_RELAY_ISI, RELAY_MATI);
+  
+  // 2. SETUP LCD
+  Wire.begin(LCD_SDA, LCD_SCL);
+  lcd.begin(); 
+  lcd.backlight();
+  
+  for (int i = 0; i < 20; i++) ph_buffer[i] = 7.0;
+
+  // 3. SETUP ADS1115 (Bypass lock jika alat tidak terpasang saat simulasi)
+  if (!ads.begin()) {
+    Serial.println("[WARN] ADS1115 tidak terdeteksi. Berjalan tanpa hardware fisik.");
+  }
+
+  // 4. SETUP WIFI & FIREBASE DENGAN TIMEOUT
+  lcd.setCursor(0, 0); lcd.print("Koneksi WiFi...");
+  Serial.print("[WIFI] Menghubungkan ke ");
+  Serial.println(WIFI_SSID);
+  
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  int timeoutCounter = 0;
+  
+  while (WiFi.status() != WL_CONNECTED && timeoutCounter < 40) {
+    delay(500); 
+    Serial.print(".");
+    timeoutCounter++;
+  }
+  
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\n[WIFI] Sukses Terhubung!");
+    lcd.clear(); lcd.print("WiFi Connected!");
+    
+    configTime(7 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+    
+    config.api_key = API_KEY;
+    config.database_url = DATABASE_URL;
+    config.signer.test_mode = true; 
+    Firebase.begin(&config, &auth);
+    Firebase.reconnectWiFi(true);
+    
+    fbdoRead.setResponseSize(1024); 
+    fbdoWrite.setResponseSize(1024); 
+    Serial.println("[FIREBASE] Protokol Ganda Siap.");
+  } else {
+    Serial.println("\n[WIFI GAGAL] Masuk ke Mode Offline.");
+    lcd.clear(); lcd.print("WiFi Gagal!");
+  }
+
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  String pmpStatus = "OFF";
+  
+  if (statusSekarang == KURAS_KOTOR || statusSekarang == KURAS_KIMIA) pmpStatus = "KURAS";
+  else if (statusSekarang == PENGISIAN) pmpStatus = "ISI";
+  else if (statusSekarang == MANUAL_KURAS) pmpStatus = "Manual-KURAS";
+  else if (statusSekarang == MANUAL_ISI) pmpStatus = "Manual-ISI";
+  else pmpStatus = "OFF";
+
+  // ====================================================
+  // LOGIKA SIMULASI SENSOR DINAMIS (FULL RANDOM AKTIF)
+  // ====================================================
+  if (millis() - timerSimulasiSensor > 2000) {
+    timerSimulasiSensor = millis();
+    
+    finalPH = (float)random(500, 1000) / 100.0;    // Simulasikan pH 5.0 - 10.0
+    ntu = random(0, 150);                          // Simulasikan NTU 0 - 150
+    tinggiAir = (float)random(50, 650) / 10.0;     // Simulasikan Air 5.0 - 65.0 cm
+    voltFinal_Turb = (float)random(100, 400) / 100.0; // Voltase dummy
+  }
+
+  // ====================================================
+  // BACA PERINTAH DARI FIREBASE (Menggunakan fbdoRead)
+  // ====================================================
+  if (WiFi.status() == WL_CONNECTED && Firebase.ready() && (millis() - timerBaca > 1500)) {
+    timerBaca = millis();
+    
+    if (Firebase.getString(fbdoRead, "/SistemAir/modeSistem")) {
+      modeSistem = fbdoRead.stringData();
+    }
+    
+    if (modeSistem == "MANUAL") {
+      if (Firebase.getString(fbdoRead, "/SistemAir/pompaStatus")) {
+        String perintahWeb = fbdoRead.stringData();
+        
+        if (perintahWeb == "KURAS") statusSekarang = MANUAL_KURAS;
+        else if (perintahWeb == "ISI") statusSekarang = MANUAL_ISI;
+        else statusSekarang = NORMAL; 
+      }
+    }
+  }
+
+  // ====================================================
+  // OTAK OTOMASI (Hanya Bekerja Saat Mode AUTO)
+  // ====================================================
+  if (modeSistem == "AUTO") {
+    if (statusSekarang == MANUAL_KURAS || statusSekarang == MANUAL_ISI) {
+      statusSekarang = NORMAL; 
+    }
+
+    if (statusSekarang == NORMAL) {
+      if (ntu > 50) statusSekarang = KURAS_KOTOR;
+      else if (finalPH < 6.5 || finalPH > 8.5) statusSekarang = KURAS_KIMIA;
+    }
+  }
+
+  // ====================================================
+  // EKSEKUSI RELAY BERDASARKAN STATUS
+  // ====================================================
+  switch (statusSekarang) {
+    case KURAS_KOTOR:
+      digitalWrite(PIN_RELAY_KURAS, RELAY_NYALA);
+      digitalWrite(PIN_RELAY_ISI, RELAY_MATI);
+      if (tinggiAir <= TARGET_KURAS_TURB) statusSekarang = PENGISIAN;      
+      break;
+
+    case KURAS_KIMIA:
+      digitalWrite(PIN_RELAY_KURAS, RELAY_NYALA);
+      digitalWrite(PIN_RELAY_ISI, RELAY_MATI);
+      if (tinggiAir <= TARGET_KURAS_PH) statusSekarang = PENGISIAN;      
+      break;
+
+    case PENGISIAN:
+      digitalWrite(PIN_RELAY_KURAS, RELAY_MATI);
+      digitalWrite(PIN_RELAY_ISI, RELAY_NYALA);
+      if (tinggiAir >= BATAS_PENUH) {
+        ntu = 15;
+        finalPH = 7.2;
+        statusSekarang = NORMAL;      
+      }
+      break;
+
+    case MANUAL_KURAS:
+      digitalWrite(PIN_RELAY_KURAS, RELAY_NYALA);
+      digitalWrite(PIN_RELAY_ISI, RELAY_MATI);
+      break;
+
+    case MANUAL_ISI:
+      digitalWrite(PIN_RELAY_KURAS, RELAY_MATI);
+      digitalWrite(PIN_RELAY_ISI, RELAY_NYALA);
+      break;
+
+    case NORMAL:
+    default:
+      digitalWrite(PIN_RELAY_KURAS, RELAY_MATI);
+      digitalWrite(PIN_RELAY_ISI, RELAY_MATI);
+      break;
+  }
+
+  // ====================================================
+  // OUTPUT KE SERIAL MONITOR (SUDAH DIUBAH KE 30 DETIK)
+  // ====================================================
+  static unsigned long lastLog = 0;
+  if (millis() - lastLog > 30000) { // <--- SEKARANG SUDAH PAS 30 DETIK SEKALI
+    lastLog = millis();
+    Serial.print("pH: "); Serial.print(finalPH, 2);
+    Serial.print(" | Volt Turb: "); Serial.print(voltFinal_Turb, 3); 
+    Serial.print(" V | NTU: "); Serial.print(ntu, 0);
+    Serial.print(" | Air: "); Serial.print(tinggiAir, 1);
+    Serial.print(" cm | Mode: "); Serial.print(modeSistem);
+    Serial.print(" | Status Pompa: "); Serial.println(pmpStatus);
+  }
+
+  // ====================================================
+  // TAMPILAN DASHBOARD LCD 16x2
+  // ====================================================
+  lcd.setCursor(0, 0);
+  lcd.print("pH:"); lcd.print(finalPH, 2);
+  lcd.print(" T:"); lcd.print((int)ntu);
+  lcd.print("    ");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Air:"); lcd.print((int)tinggiAir);
+  lcd.print("cm Pmp:"); lcd.print(pmpStatus); 
+  lcd.print("    ");
+
+  // ====================================================
+  // 1. KIRIM DATA KE FIREBASE (SistemAir - Setiap 30 Detik untuk Speedometer)
+  // ====================================================
+  if (millis() - timerKirim > 30000) { 
+    timerKirim = millis();
+    
+    if (WiFi.status() == WL_CONNECTED && Firebase.ready()) {
+      time_t now;
+      time(&now); 
+
+      FirebaseJson payload;
+      payload.set("pH", finalPH);
+      payload.set("turbidity", ntu);
+      payload.set("tinggiAir", tinggiAir);
+      payload.set("timestamp", (double)now); 
+      payload.set("statusSistem", pmpStatus); 
+      
+      if (modeSistem == "AUTO") {
+        String fbPompa = "OFF";
+        if (statusSekarang == KURAS_KOTOR || statusSekarang == KURAS_KIMIA) fbPompa = "KURAS";
+        else if (statusSekarang == PENGISIAN) fbPompa = "ISI";
+        payload.set("pompaStatus", fbPompa);
+      }
+
+      if (Firebase.updateNode(fbdoWrite, "/SistemAir", payload)) {
+        Serial.println(" -> [Firebase: DATA SPEEDOMETER TERKIRIM]");
+      } else {
+        Serial.printf(" -> [Firebase ERR: %s]\n", fbdoWrite.errorReason().c_str());
+      }
+    }
+  }
+
+  // ====================================================
+  // 2. KIRIM DATA LOG RIWAYAT KE FIREBASE (SistemAir_Log)
+  // ====================================================
+  if (millis() - timerLog > 30000) { 
+    timerLog = millis();
+    
+    if (WiFi.status() == WL_CONNECTED && Firebase.ready()) {
+      time_t now;
+      time(&now); 
+
+      if (now > 1600000000) { 
+        FirebaseJson payloadLog;
+        payloadLog.set("pH", finalPH);
+        payloadLog.set("turbidity", ntu);
+        payloadLog.set("tinggiAir", tinggiAir);
+        payloadLog.set("timestamp", (double)now); 
+
+        if (Firebase.pushJSON(fbdoWrite, "/SistemAir_Log", payloadLog)) {
+          Serial.println(" ===> [Firebase: LOG DATABASE TEREKAM (BARIS BARU)]");
+        } else {
+          Serial.printf(" ===> [Firebase LOG ERR: %s]\n", fbdoWrite.errorReason().c_str());
+        }
+      }
+    }
+  }
+}
