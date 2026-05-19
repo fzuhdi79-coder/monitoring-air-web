@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics - WQ System</title>
+    <title>Realtime Telemetry Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -74,12 +74,12 @@
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Datastream Waveform Multi-Sensor
+                    <i class="fa-solid fa-chart-line text-blue-500"></i> Multi-Sensor Datastream
                 </span>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Kualitas / pH</div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Kekeruhan / Turbidity</div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Volume / Level</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH) </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Water Turbidity </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level </div>
                 </div>
             </div>
             
