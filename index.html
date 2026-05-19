@@ -13,27 +13,56 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-sm">
+    <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col sm:flex-row items-center justify-between py-3 sm:h-16 gap-3 sm:gap-0">
-                <div class="flex items-center space-x-2.5">
-                    <div class="bg-blue-600/10 p-2 rounded-lg text-blue-400 border border-blue-500/20">
-                        <i class="fa-solid fa-droplet text-base"></i>
+            <div class="flex items-center justify-between h-16">
+                
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
+                        <i class="fa-solid fa-droplet text-lg"></i>
                     </div>
-                    <span class="text-md font-extrabold tracking-wider text-white">WQ-SYSTEM</span>
+                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r flow-root from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
                 </div>
-                <div class="flex w-full sm:w-auto overflow-x-auto no-scrollbar justify-center space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700/30">
-                    <a href="index.html" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold shadow-sm transition whitespace-nowrap">Overview</a>
-                    <a href="speedometer.html" class="text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition whitespace-nowrap">Gauges</a>
-                    <a href="grafik.html" class="text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition whitespace-nowrap">Analytics</a>
-                    <a href="history.html" class="text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition whitespace-nowrap">Data Log</a>
+
+                <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
+                    <a href="index.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Overview</a>
+                    <a href="speedometer.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Gauges</a>
+                    <a href="grafik.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Analytics</a>
+                    <a href="history.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Data Log</a>
                 </div>
-                <div class="hidden sm:block">
-                    <button onclick="logout()" class="h-9 w-9 bg-slate-800 hover:bg-rose-900/40 border border-slate-700/50 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 rounded-xl flex items-center justify-center transition active:scale-95">
-                        <i class="fa-solid fa-power-off text-sm"></i>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
+                        <i class="fa-solid fa-power-off"></i> Sign Out
+                    </button>
+                </div>
+
+                <div class="flex md:hidden">
+                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
+                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
+            <a href="index.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                <i class="fa-solid fa-chart-pie mr-2 text-blue-200"></i> Overview
+            </a>
+            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
+            </a>
+            <a href="grafik.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-chart-area mr-2 text-slate-500"></i> Analytics
+            </a>
+            <a href="history.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
+            </a>
+            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
+            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95">
+                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
+            </button>
         </div>
     </nav>
 
@@ -171,6 +200,22 @@
         &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
     </footer>
 
+    <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            // Ganti icon fa-bars (garis tiga) menjadi fa-xmark (silang) saat menu dibuka
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerIcon.className = "fa-solid fa-bars text-xl";
+            } else {
+                hamburgerIcon.className = "fa-solid fa-xmark text-xl";
+            }
+        });
+    </script>
+
     <script>function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }</script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -181,7 +226,6 @@
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
-        // Fungsi inisialisasi grafik mini (sparkline)
         function createMiniChart(canvasId, color) {
             return new Chart(document.getElementById(canvasId), {
                 type: 'line',
@@ -194,7 +238,6 @@
         const chartTb = createMiniChart('chart-turbidity', '#f59e0b');
         const chartLv = createMiniChart('chart-level', '#3b82f6');
 
-        // Inisialisasi Grafik Stepped Line untuk Parameter Pompa Otomatis
         const ctxPompa = document.getElementById('chart-pompa-otomatis').getContext('2d');
         const chartPompaOtomatis = new Chart(ctxPompa, {
             type: 'line',
@@ -298,7 +341,6 @@
                 document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
                 document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
 
-                // Logic pH Card UI & Chart
                 let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph.toFixed(2);
                 updateChartData(chartPh, ph);
                 let sph = document.getElementById('status-ph');
@@ -310,7 +352,6 @@
                     sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
                 }
 
-                // Logic Turbidity Card UI & Chart
                 let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-lg font-medium text-slate-400">NTU</span>`;
                 updateChartData(chartTb, tb);
                 let stb = document.getElementById('status-turbidity');
@@ -325,7 +366,6 @@
                     stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
                 }
 
-                // Logic Level Card UI & Chart
                 let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-lg font-medium text-slate-400">cm</span>`;
                 updateChartData(chartLv, lv);
                 let slv = document.getElementById('status-level');
@@ -337,7 +377,6 @@
                     slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-600";
                 }
 
-                // System Mode UI Toggle
                 let modeSistem = d.modeSistem || "AUTO";
                 const bAuto = document.getElementById('btn-mode-auto');
                 const bManual = document.getElementById('btn-mode-manual');
@@ -356,7 +395,6 @@
                     pButtons.forEach(b => { b.disabled = false; });
                 }
 
-                // GLOBAL PUMP LOGIC & RE-CONVERSION TO BINARY CHART (0 / 1)
                 let statusPompa = d.pompaStatus || "OFF";
                 let p1on = document.getElementById('btn-p1-on'), p1off = document.getElementById('btn-p1-off');
                 let p2on = document.getElementById('btn-p2-on'), p2off = document.getElementById('btn-p2-off');
