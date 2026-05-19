@@ -69,7 +69,7 @@
 
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden p-4 sm:p-6">
             
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b border-slate-100 mb-4">
+            <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 pb-6 border-b border-slate-100 mb-4">
                 <div class="flex items-start space-x-3">
                     <div class="bg-blue-50 p-2.5 rounded-xl text-blue-600 mt-0.5 shadow-inner">
                         <i class="fa-solid fa-database text-sm"></i>
@@ -117,7 +117,7 @@
                             <th class="pb-3 pt-2 pr-4 font-semibold">PH LEVEL</th>
                             <th class="pb-3 pt-2 pr-4 font-semibold">TURBIDITY</th>
                             <th class="pb-3 pt-2 pr-4 font-semibold">WATER LEVEL</th>
-                        </tr>
+                            <th class="pb-3 pt-2 font-semibold">ACTION</th> </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-slate-50 text-xs text-slate-600 font-medium">
                     </tbody>
@@ -193,7 +193,10 @@
             
             const header = tabel.querySelectorAll("thead th");
             let dataHeader = [];
-            header.forEach(th => dataHeader.push(th.innerText));
+            // Hindari mengambil judul kolom Action untuk CSV
+            header.forEach((th, index) => {
+                if (index < 5) dataHeader.push(th.innerText);
+            });
             barisCsv.push(dataHeader.join(","));
 
             const barisData = tabel.querySelectorAll("tbody tr");
@@ -205,9 +208,12 @@
                 counterData++;
                 const kolom = tr.querySelectorAll("td");
                 let dataKolom = [];
-                kolom.forEach(td => {
-                    let teksBersih = td.innerText.replace(/\n/g, " ").trim();
-                    dataKolom.push(`"${teksBersih}"`);
+                kolom.forEach((td, index) => {
+                    // Hindari mengambil isi kolom Action (tombol delete) untuk CSV
+                    if (index < 5) {
+                        let teksBersih = td.innerText.replace(/\n/g, " ").trim();
+                        dataKolom.push(`"${teksBersih}"`);
+                    }
                 });
                 barisCsv.push(dataKolom.join(","));
             });
@@ -238,7 +244,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        // TAMBAHAN: Import remove
+        import { getDatabase, ref, onValue, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ 
             apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", 
@@ -246,6 +253,16 @@
         });
         const db = getDatabase(app);
         const tbody = document.getElementById('table-body');
+
+        // TAMBAHAN: Fungsi Global untuk Delete
+        window.hapusDataLog = function(keyData) {
+            if(confirm("Yakin ingin menghapus baris data log ini?")) {
+                const nodeRef = ref(db, 'SistemAir_Log/' + keyData);
+                remove(nodeRef).catch(error => {
+                    alert("Gagal menghapus data: " + error.message);
+                });
+            }
+        };
 
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(100));
 
@@ -256,7 +273,10 @@
                 let dataRiwayat = [];
                 
                 snapshot.forEach((childSnapshot) => {
-                    dataRiwayat.push(childSnapshot.val());
+                    // TAMBAHAN: Mengambil Firebase Key unik setiap baris
+                    let baris = childSnapshot.val();
+                    baris.firebaseKey = childSnapshot.key;
+                    dataRiwayat.push(baris);
                 });
 
                 dataRiwayat.reverse().forEach((d) => {
@@ -291,6 +311,10 @@
                         <td class="py-4 pr-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
                         <td class="py-4 pr-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
                         <td class="py-4 pr-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
+                        <td class="py-4 font-medium"> <button onclick="hapusDataLog('${d.firebaseKey}')" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition active:scale-95" title="Hapus Data">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
                     `;
 
                     tbody.appendChild(tr);
@@ -299,7 +323,7 @@
                 terapkanFilter();
 
             } else {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Belum ada data riwayat yang terekam.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">Belum ada data riwayat yang terekam.</td></tr>`;
             }
         });
     </script>
