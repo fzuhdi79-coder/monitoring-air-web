@@ -15,20 +15,20 @@
 
     <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex flex-col sm:flex-row items-center justify-between py-3 sm:h-16 gap-3 sm:gap-0">
                 <div class="flex items-center space-x-2.5">
                     <div class="bg-blue-600/10 p-2 rounded-lg text-blue-400 border border-blue-500/20">
                         <i class="fa-solid fa-droplet text-base"></i>
                     </div>
                     <span class="text-md font-extrabold tracking-wider text-white">WQ-SYSTEM</span>
                 </div>
-                <div class="flex space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700/30">
-                    <a href="index.html" class="bg-blue-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition">Overview</a>
-                    <a href="speedometer.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Gauges</a>
-                    <a href="grafik.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Analytics</a>
-                    <a href="history.html" class="text-slate-400 hover:text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition">Data Log</a>
+                <div class="flex w-full sm:w-auto overflow-x-auto no-scrollbar justify-center space-x-1 bg-slate-800/50 p-1 rounded-xl border border-slate-700/30">
+                    <a href="index.html" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold shadow-sm transition whitespace-nowrap">Overview</a>
+                    <a href="speedometer.html" class="text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition whitespace-nowrap">Gauges</a>
+                    <a href="grafik.html" class="text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition whitespace-nowrap">Analytics</a>
+                    <a href="history.html" class="text-slate-400 hover:text-white px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition whitespace-nowrap">Data Log</a>
                 </div>
-                <div>
+                <div class="hidden sm:block">
                     <button onclick="logout()" class="h-9 w-9 bg-slate-800 hover:bg-rose-900/40 border border-slate-700/50 hover:border-rose-500/30 text-slate-400 hover:text-rose-400 rounded-xl flex items-center justify-center transition active:scale-95">
                         <i class="fa-solid fa-power-off text-sm"></i>
                     </button>
@@ -37,85 +37,85 @@
         </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
         
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+        <div class="flex flex-row items-center justify-between gap-4 border-b border-slate-200 pb-5">
             <div>
-                <h1 class="text-xl font-bold text-slate-900 tracking-tight">System Overview</h1>
-                <p class="text-xs text-slate-500 mt-1">Metrik pembacaan telemetri sensor kualitas air secara real-time.</p>
+                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">System Overview</h1>
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1">Metrik pembacaan telemetri sensor kualitas air secara real-time.</p>
             </div>
-            <div id="koneksi-status" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border shadow-sm transition-all duration-300">
+            <div id="koneksi-status" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-bold border shadow-sm transition-all duration-300 whitespace-nowrap">
                 <i class="fa-solid fa-rotate fa-spin"></i> SYNCING...
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 flex flex-col justify-between">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Potensial Hidrogen (pH)</span>
+                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Potensial Hidrogen (pH)</span>
                     <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600 text-xs"><i class="fa-solid fa-flask"></i></div>
                 </div>
                 <div class="flex items-end justify-between gap-2">
                     <div>
-                        <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-ph">0.00</div>
-                        <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-ph">Menunggu data...</div>
+                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-ph">0.00</div>
+                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-ph">Menunggu data...</div>
                     </div>
-                    <div class="w-24 h-12"><canvas id="chart-ph"></canvas></div>
+                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-ph"></canvas></div>
                 </div>
-                <div class="text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-ph">
+                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-ph">
                     <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 flex flex-col justify-between">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Kekeruhan Air</span>
+                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Kekeruhan Air</span>
                     <div class="p-2 bg-amber-50 rounded-lg text-amber-600 text-xs"><i class="fa-solid fa-virus"></i></div>
                 </div>
                 <div class="flex items-end justify-between gap-2">
                     <div>
-                        <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-turbidity">0 <span class="text-lg font-medium text-slate-400">NTU</span></div>
-                        <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-turbidity">Menunggu data...</div>
+                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-turbidity">0 <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span></div>
+                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-turbidity">Menunggu data...</div>
                     </div>
-                    <div class="w-24 h-12"><canvas id="chart-turbidity"></canvas></div>
+                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-turbidity"></canvas></div>
                 </div>
-                <div class="text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-tb">
+                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-tb">
                     <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4 flex flex-col justify-between">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Volume / Ketinggian Air</span>
+                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Volume / Ketinggian Air</span>
                     <div class="p-2 bg-blue-50 rounded-lg text-blue-600 text-xs"><i class="fa-solid fa-water"></i></div>
                 </div>
                 <div class="flex items-end justify-between gap-2">
                     <div>
-                        <div class="text-4xl font-extrabold text-slate-900 tracking-tight" id="val-level">0 <span class="text-lg font-medium text-slate-400">cm</span></div>
-                        <div class="mt-2 inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-level">Menunggu data...</div>
+                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-level">0 <span class="text-base sm:text-lg font-medium text-slate-400">cm</span></div>
+                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-level">Menunggu data...</div>
                     </div>
-                    <div class="w-24 h-12"><canvas id="chart-level"></canvas></div>
+                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-level"></canvas></div>
                 </div>
-                <div class="text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-lv">
+                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-lv">
                     <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
                 </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-3">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-chart-line text-blue-500"></i> Grafik Status Pompa Real-Time
                     </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Memantau visualisasi grafik kondisi ON/OFF pompa otomatis.</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Memantau visualisasi grafik kondisi ON/OFF pompa otomatis.</p>
                 </div>
-                <div class="flex gap-4 text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded bg-rose-500 inline-block"></span> Kuras (Drainage)</div>
-                    <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded bg-blue-500 inline-block"></span> Isi (Inflow)</div>
+                <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-xl justify-start sm:justify-end">
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-rose-500 inline-block"></span> Kuras (Drainage)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Isi (Inflow)</div>
                 </div>
             </div>
-            <div class="relative w-full h-48">
+            <div class="relative w-full h-40 sm:h-48 md:h-52">
                 <canvas id="chart-pompa-otomatis"></canvas>
             </div>
         </div>
@@ -125,40 +125,40 @@
                 <i class="fa-solid fa-sliders text-blue-500"></i> Actuators Control Center
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
                     <div>
-                        <h3 class="text-sm font-bold text-slate-900">Automation Intelligence Mode</h3>
-                        <p class="text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Automation Intelligence Mode</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 bg-slate-100 p-1 rounded-xl">
-                        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-xs font-bold rounded-lg transition-all duration-200">AUTOMATED</button>
-                        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-xs font-bold rounded-lg transition-all duration-200">MANUAL OVERRIDE</button>
+                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
+                        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">AUTOMATED</button>
+                        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">MANUAL OVERRIDE</button>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
                     <div>
-                        <h3 class="text-sm font-bold text-slate-900">Relay Actuator Switch</h3>
-                        <p class="text-xs text-slate-400 mt-1">Tombol interaktif sakelar daya pompa air (Hanya aktif pada mode manual override).</p>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Relay Actuator Switch</h3>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol interaktif sakelar daya pompa air (Hanya aktif pada mode manual override).</p>
                     </div>
                     <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
                                 <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa Submersible 1 (Drainage)
                             </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200">
-                                <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[11px] font-bold rounded-md transition">OFF</button>
+                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
+                                <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
+                                <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
+                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
                                 <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa Submersible 2 (Inflow)
                             </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200">
-                                <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[11px] font-bold rounded-md transition">OFF</button>
+                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
+                                <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
+                                <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
                             </div>
                         </div>
                     </div>
@@ -167,7 +167,7 @@
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[11px] text-slate-400 font-medium">
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
         &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
     </footer>
 
@@ -194,27 +194,27 @@
         const chartTb = createMiniChart('chart-turbidity', '#f59e0b');
         const chartLv = createMiniChart('chart-level', '#3b82f6');
 
-        // BUKAN LAGI MINI CHART: Inisialisasi Grafik Stepped Line untuk Parameter Pompa Otomatis
+        // Inisialisasi Grafik Stepped Line untuk Parameter Pompa Otomatis
         const ctxPompa = document.getElementById('chart-pompa-otomatis').getContext('2d');
         const chartPompaOtomatis = new Chart(ctxPompa, {
             type: 'line',
             data: {
-                labels: Array(15).fill('--:--:--'), // Menampung 15 data waktu terupdate
+                labels: Array(15).fill('--:--:--'), 
                 datasets: [
                     {
                         label: 'Pompa Kuras',
                         data: Array(15).fill(0),
-                        borderColor: '#f43f5e', // Rose 500
+                        borderColor: '#f43f5e', 
                         backgroundColor: 'rgba(244, 63, 94, 0.05)',
                         fill: true,
-                        stepped: true, // Membuat garis berbentuk siku-siku (sakelar digital)
+                        stepped: true, 
                         pointRadius: 0,
                         borderWidth: 2
                     },
                     {
                         label: 'Pompa Isi',
                         data: Array(15).fill(0),
-                        borderColor: '#3b82f6', // Blue 500
+                        borderColor: '#3b82f6', 
                         backgroundColor: 'rgba(59, 130, 246, 0.05)',
                         fill: true,
                         stepped: true,
@@ -257,7 +257,6 @@
             chart.update();
         }
 
-        // Fungsi khusus update chart pompa biner (0 / 1)
         function updatePompaChart(waktu, valKuras, valIsi) {
             chartPompaOtomatis.data.labels.push(waktu);
             chartPompaOtomatis.data.datasets[0].data.push(valKuras);
@@ -397,7 +396,6 @@
                     }
                 }
 
-                // Kirim data kondisi aktual (baik dipicu otomatis atau manual) ke grafik panel utama
                 updatePompaChart(waktu, binaryKuras, binaryIsi);
             }
         });
