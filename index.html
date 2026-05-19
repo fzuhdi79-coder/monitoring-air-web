@@ -102,6 +102,24 @@
             </div>
         </div>
 
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-blue-500"></i> Grafik Status Aktivitas Pompa Real-Time
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Memantau visualisasi grafik logika berundak (Stepped Line) kondisi ON/OFF pompa otomatis.</p>
+                </div>
+                <div class="flex gap-4 text-[11px] font-bold">
+                    <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded bg-rose-500 inline-block"></span> Kuras (Drainage)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded bg-blue-500 inline-block"></span> Isi (Inflow)</div>
+                </div>
+            </div>
+            <div class="relative w-full h-48">
+                <canvas id="chart-pompa-otomatis"></canvas>
+            </div>
+        </div>
+
         <div class="space-y-4">
             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
                 <i class="fa-solid fa-sliders text-blue-500"></i> Actuators Control Center
@@ -176,10 +194,81 @@
         const chartTb = createMiniChart('chart-turbidity', '#f59e0b');
         const chartLv = createMiniChart('chart-level', '#3b82f6');
 
+        // BUKAN LAGI MINI CHART: Inisialisasi Grafik Stepped Line untuk Parameter Pompa Otomatis
+        const ctxPompa = document.getElementById('chart-pompa-otomatis').getContext('2d');
+        const chartPompaOtomatis = new Chart(ctxPompa, {
+            type: 'line',
+            data: {
+                labels: Array(15).fill('--:--:--'), // Menampung 15 data waktu terupdate
+                datasets: [
+                    {
+                        label: 'Pompa Kuras',
+                        data: Array(15).fill(0),
+                        borderColor: '#f43f5e', // Rose 500
+                        backgroundColor: 'rgba(244, 63, 94, 0.05)',
+                        fill: true,
+                        stepped: true, // Membuat garis berbentuk siku-siku (sakelar digital)
+                        pointRadius: 0,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Pompa Isi',
+                        data: Array(15).fill(0),
+                        borderColor: '#3b82f6', // Blue 500
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        fill: true,
+                        stepped: true,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 9 }, color: '#94a3b8' }
+                    },
+                    y: {
+                        min: -0.1,
+                        max: 1.1,
+                        ticks: {
+                            stepSize: 1,
+                            font: { size: 10, weight: 'bold' },
+                            color: '#64748b',
+                            callback: function(value) {
+                                if (value === 1) return 'ON (1)';
+                                if (value === 0) return 'OFF (0)';
+                                return '';
+                            }
+                        },
+                        grid: { color: '#f1f5f9' }
+                    }
+                }
+            }
+        });
+
         function updateChartData(chart, newValue) {
             chart.data.datasets[0].data.push(newValue);
             if (chart.data.datasets[0].data.length > 10) chart.data.datasets[0].data.shift();
             chart.update();
+        }
+
+        // Fungsi khusus update chart pompa biner (0 / 1)
+        function updatePompaChart(waktu, valKuras, valIsi) {
+            chartPompaOtomatis.data.labels.push(waktu);
+            chartPompaOtomatis.data.datasets[0].data.push(valKuras);
+            chartPompaOtomatis.data.datasets[1].data.push(valIsi);
+
+            if (chartPompaOtomatis.data.labels.length > 15) {
+                chartPompaOtomatis.data.labels.shift();
+                chartPompaOtomatis.data.datasets[0].data.shift();
+                chartPompaOtomatis.data.datasets[1].data.shift();
+            }
+            chartPompaOtomatis.update();
         }
 
         window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
@@ -256,24 +345,29 @@
                 const pButtons = document.querySelectorAll('.btn-pump');
 
                 if (modeSistem === "AUTO") {
-                    bAuto.className = "py-2 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm";
-                    bManual.className = "py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600";
+                    bAuto.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
+                    bManual.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
                     pButtons.forEach(b => { 
                         b.disabled = true; 
                         b.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-100 text-slate-300 cursor-not-allowed"; 
                     });
                 } else {
-                    bAuto.className = "py-2 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600";
-                    bManual.className = "py-2 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm";
+                    bAuto.className = "py-2.5 text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
+                    bManual.className = "py-2.5 text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
+                    pButtons.forEach(b => { b.disabled = false; });
                 }
 
-                // GLOBAL PUMP INDICATOR LOGIC (Berjalan di mode AUTO maupun MANUAL)
+                // GLOBAL PUMP LOGIC & RE-CONVERSION TO BINARY CHART (0 / 1)
                 let statusPompa = d.pompaStatus || "OFF";
                 let p1on = document.getElementById('btn-p1-on'), p1off = document.getElementById('btn-p1-off');
                 let p2on = document.getElementById('btn-p2-on'), p2off = document.getElementById('btn-p2-off');
                 let ic1 = document.getElementById('icon-p1'), ic2 = document.getElementById('icon-p2');
 
+                let binaryKuras = 0;
+                let binaryIsi = 0;
+
                 if (statusPompa === "KURAS" || statusPompa === "KRS") {
+                    binaryKuras = 1;
                     ic1.className = "fa-solid fa-circle-nodes text-rose-500 animate-spin";
                     ic2.className = "fa-solid fa-circle-nodes text-slate-300";
                     if (modeSistem === "MANUAL") {
@@ -283,6 +377,7 @@
                         p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
                     }
                 } else if (statusPompa === "ISI") {
+                    binaryIsi = 1;
                     ic1.className = "fa-solid fa-circle-nodes text-slate-300";
                     ic2.className = "fa-solid fa-circle-nodes text-blue-500 animate-spin";
                     if (modeSistem === "MANUAL") {
@@ -301,6 +396,9 @@
                         p2off.className = "px-3 py-1 text-[11px] font-bold rounded-md bg-slate-900 text-white shadow-sm";
                     }
                 }
+
+                // Kirim data kondisi aktual (baik dipicu otomatis atau manual) ke grafik panel utama
+                updatePompaChart(waktu, binaryKuras, binaryIsi);
             }
         });
     </script>
