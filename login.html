@@ -5,39 +5,50 @@
     <script>if (sessionStorage.getItem("statusLogin") === "sukses") { window.location.href = "index.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Login - Water Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-center items-center px-4">
 
-    <nav class="navbar">
-        <div class="nav-brand"><i class="fa-solid fa-droplet" style="color: #3b82f6;"></i> WQ-SYSTEM</div>
-    </nav>
-
-    <div class="container login-wrapper">
-        <div class="login-box">
-            <h2>Authentication</h2>
-            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Masuk ke sistem monitoring utama</p>
-            
-            <div id="pesan-error" class="error-msg"><i class="fa-solid fa-circle-exclamation"></i> Kredensial tidak valid.</div>
-
-            <input type="text" id="username" class="form-control" placeholder="ID Pengguna" onkeypress="cekEnter(event)">
-            <input type="password" id="password" class="form-control" placeholder="Kata Sandi" onkeypress="cekEnter(event)">
-            
-            <button class="btn-submit" onclick="prosesLogin()">Akses Sistem</button>
+    <div class="w-full max-w-sm bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
+        <div class="text-center space-y-2">
+            <div class="inline-flex bg-blue-50 text-blue-600 p-3 rounded-2xl border border-blue-100 text-lg mb-2">
+                <i class="fa-solid fa-droplet"></i>
+            </div>
+            <h2 class="text-lg font-extrabold tracking-tight text-slate-900">Platform Authentication</h2>
+            <p class="text-xs text-slate-400">Masuk menuju gerbang monitoring IoT WQ-System</p>
         </div>
+
+        <div id="pesan-error" class="hidden p-3 bg-rose-50 border border-rose-150 rounded-xl text-xs font-semibold text-rose-600 flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-sm"></i> ID atau Kata Sandi salah!
+        </div>
+
+        <div class="space-y-3.5">
+            <div>
+                <input type="text" id="username" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition" placeholder="ID Node Operator" onkeypress="cekEnter(event)">
+            </div>
+            <div>
+                <input type="password" id="password" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition" placeholder="Kata Sandi Enkripsi" onkeypress="cekEnter(event)">
+            </div>
+        </div>
+
+        <button onclick="prosesLogin()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition active:scale-[0.98] shadow-md">
+            AKSES PANEL UTAMA
+        </button>
     </div>
 
     <script>
         function prosesLogin() {
             let u = document.getElementById('username').value;
             let p = document.getElementById('password').value;
-            
             if (u === "roy" && p === "1986") {
                 sessionStorage.setItem("statusLogin", "sukses");
                 window.location.href = "index.html";
             } else {
-                document.getElementById('pesan-error').style.display = "block";
+                const errBox = document.getElementById('pesan-error');
+                errBox.classList.remove('hidden');
             }
         }
         function cekEnter(e) { if(e.key === "Enter") prosesLogin(); }
