@@ -207,7 +207,6 @@
 
         hamburgerBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
-            // Ganti icon fa-bars (garis tiga) menjadi fa-xmark (silang) saat menu dibuka
             if (mobileMenu.classList.contains('hidden')) {
                 hamburgerIcon.className = "fa-solid fa-bars text-xl";
             } else {
@@ -217,19 +216,22 @@
     </script>
 
     <script>function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }</script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        // Penambahan fungsi get, query, dan limitToLast untuk menarik riwayat ke grafik mini
+        import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
+        // Inisialisasi Chart Dikosongkan (Tidak lagi menggunakan Array.fill 0)
         function createMiniChart(canvasId, color) {
             return new Chart(document.getElementById(canvasId), {
                 type: 'line',
-                data: { labels: Array(10).fill(''), datasets: [{ data: Array(10).fill(0), borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
+                data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
             });
         }
@@ -242,46 +244,32 @@
         const chartPompaOtomatis = new Chart(ctxPompa, {
             type: 'line',
             data: {
-                labels: Array(15).fill('--:--:--'), 
+                labels: [], 
                 datasets: [
                     {
                         label: 'Pompa Kuras',
-                        data: Array(15).fill(0),
+                        data: [],
                         borderColor: '#f43f5e', 
                         backgroundColor: 'rgba(244, 63, 94, 0.05)',
-                        fill: true,
-                        stepped: true, 
-                        pointRadius: 0,
-                        borderWidth: 2
+                        fill: true, stepped: true, pointRadius: 0, borderWidth: 2
                     },
                     {
                         label: 'Pompa Isi',
-                        data: Array(15).fill(0),
+                        data: [],
                         borderColor: '#3b82f6', 
                         backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                        fill: true,
-                        stepped: true,
-                        pointRadius: 0,
-                        borderWidth: 2
+                        fill: true, stepped: true, pointRadius: 0, borderWidth: 2
                     }
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
                 scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 9 }, color: '#94a3b8' }
-                    },
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
                     y: {
-                        min: -0.1,
-                        max: 1.1,
+                        min: -0.1, max: 1.1,
                         ticks: {
-                            stepSize: 1,
-                            font: { size: 10, weight: 'bold' },
-                            color: '#64748b',
+                            stepSize: 1, font: { size: 10, weight: 'bold' }, color: '#64748b',
                             callback: function(value) {
                                 if (value === 1) return 'ON';
                                 if (value === 0) return 'OFF';
@@ -294,9 +282,36 @@
             }
         });
 
+        // 1. [FITUR BARU] Tarik Riwayat ke Grafik Saat Pertama Kali Dibuka
+        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
+        get(logRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const dataLog = childSnapshot.val();
+                    
+                    chartPh.data.labels.push('');
+                    chartPh.data.datasets[0].data.push(dataLog.pH || 0);
+
+                    chartTb.data.labels.push('');
+                    chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
+
+                    chartLv.data.labels.push('');
+                    chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
+                });
+                chartPh.update();
+                chartTb.update();
+                chartLv.update();
+            }
+        });
+
+        // Fungsi Update Grafik
         function updateChartData(chart, newValue) {
+            chart.data.labels.push('');
             chart.data.datasets[0].data.push(newValue);
-            if (chart.data.datasets[0].data.length > 10) chart.data.datasets[0].data.shift();
+            if (chart.data.datasets[0].data.length > 20) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
             chart.update();
         }
 
@@ -305,7 +320,7 @@
             chartPompaOtomatis.data.datasets[0].data.push(valKuras);
             chartPompaOtomatis.data.datasets[1].data.push(valIsi);
 
-            if (chartPompaOtomatis.data.labels.length > 15) {
+            if (chartPompaOtomatis.data.labels.length > 20) {
                 chartPompaOtomatis.data.labels.shift();
                 chartPompaOtomatis.data.datasets[0].data.shift();
                 chartPompaOtomatis.data.datasets[1].data.shift();
@@ -328,6 +343,7 @@
 
         onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("NETWORK DISCONNECTED"); });
 
+        // 2. Baca Data Real-Time
         onValue(ref(db, 'SistemAir'), (snapshot) => {
             if (snapshot.exists()) {
                 const d = snapshot.val();
@@ -335,7 +351,8 @@
                 
                 setOnlineUI(); 
                 clearTimeout(timerSensor); 
-                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 4000); 
+                // Diubah menjadi 10 detik agar web tidak mudah memunculkan status "Offline"
+                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 10000); 
                 
                 document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
                 document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
@@ -352,7 +369,7 @@
                     sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
                 }
 
-                let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-lg font-medium text-slate-400">NTU</span>`;
+                let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span>`;
                 updateChartData(chartTb, tb);
                 let stb = document.getElementById('status-turbidity');
                 if(tb < 25) {
@@ -366,7 +383,7 @@
                     stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
                 }
 
-                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-lg font-medium text-slate-400">cm</span>`;
+                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
                 updateChartData(chartLv, lv);
                 let slv = document.getElementById('status-level');
                 if(lv < 20) {
