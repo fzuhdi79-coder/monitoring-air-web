@@ -12,25 +12,54 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <nav class="bg-[#0f172a] text-white sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-droplet text-blue-500 text-lg"></i>
-                <span class="font-bold tracking-wider text-base">WQ-SYSTEM</span>
-            </div>
+    <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
+                        <i class="fa-solid fa-droplet text-lg"></i>
+                    </div>
+                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r flow-root from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
+                </div>
 
-            <div class="flex items-center space-x-6 text-sm font-medium text-slate-300">
-                <a href="index.html" class="hover:text-white transition">Overview</a>
-                <a href="grafik.html" class="hover:text-white transition">Analytics</a>
-                <a href="history.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-md font-semibold shadow shadow-blue-500/20">Data Log</a>
-            </div>
+                <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
+                    <a href="index.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Overview</a>
+                    <a href="grafik.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Analytics</a>
+                    <a href="history.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Data Log</a>
+                </div>
 
-            <button onclick="logout()" class="text-slate-400 hover:text-rose-400 transition text-lg">
-                <i class="fa-solid fa-power-off"></i>
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
+                        <i class="fa-solid fa-power-off"></i> Sign Out
+                    </button>
+                </div>
+
+                <div class="flex md:hidden">
+                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
+                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
+            <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
+            </a>
+            <a href="grafik.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-chart-area mr-2 text-slate-500"></i> Analytics
+            </a>
+            <a href="history.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                <i class="fa-solid fa-database mr-2 text-blue-200"></i> Data Log
+            </a>
+            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
+            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95">
+                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
             </button>
         </div>
     </nav>
-
     <main class="flex-grow max-w-7xl w-full mx-auto px-6 py-8 space-y-6">
         <div>
             <h1 class="text-2xl font-bold text-slate-900">Database Entry Log</h1>
@@ -96,6 +125,23 @@
     <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400 font-medium mt-auto">
         &copy; 2026 WQ-SYSTEM Team. System Live Logs Cloud Service.
     </footer>
+
+    <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+
+        if(hamburgerBtn) {
+            hamburgerBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                if (mobileMenu.classList.contains('hidden')) {
+                    hamburgerIcon.className = "fa-solid fa-bars text-xl";
+                } else {
+                    hamburgerIcon.className = "fa-solid fa-xmark text-xl";
+                }
+            });
+        }
+    </script>
 
     <script>
         function logout() { 
