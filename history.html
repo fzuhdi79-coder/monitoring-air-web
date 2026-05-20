@@ -159,7 +159,6 @@
             window.location.href = "login.html"; 
         }
 
-        // Fungsi terapkanFilter diperbarui agar ikut menghitung jumlah baris yang tampil
         function terapkanFilter() {
             const inputTanggal = document.getElementById("filter-tanggal").value; 
             const inputWaktu = document.getElementById("filter-waktu").value.trim(); 
@@ -198,7 +197,6 @@
                 }
             });
 
-            // Update Badge Total Data secara Real-Time berdasarkan filter aktif
             const totalDataBadge = document.getElementById('total-data-badge');
             if (totalDataBadge) {
                 if (inputTanggal !== "" || inputWaktu !== "") {
@@ -208,7 +206,6 @@
                 }
             }
 
-            // UI Feedback jika pencarian filter tidak menemukan data
             const pesanKosong = document.getElementById("pesan-kosong-filter");
             if (adaDataAsli && !adaDataTampil) {
                 if (!pesanKosong) {
@@ -302,11 +299,19 @@
             }
         };
 
+        // KODE YANG DIPERBARUI AGAR SINKRON DENGAN OVERVIEW (INDEX.HTML)
         window.hapusSemuaDataLog = function() {
-            if(confirm("PERINGATAN BAHAYA!\n\nApakah Anda sangat yakin ingin MENGHAPUS SELURUH data riwayat log?\n\nTindakan ini tidak dapat dibatalkan!")) {
-                const nodeRef = ref(db, 'SistemAir_Log'); 
-                remove(nodeRef).then(() => {
-                    alert("Seluruh data log berhasil dikosongkan.");
+            if(confirm("PERINGATAN BAHAYA!\n\nApakah Anda sangat yakin ingin MENGHAPUS SELURUH data riwayat log dan rekap harian?\n\nTindakan ini tidak dapat dibatalkan!")) {
+                
+                const logRef = ref(db, 'SistemAir_Log'); 
+                const harianRef = ref(db, 'SistemAir_Harian'); 
+
+                // 1. Hapus data log mentah
+                remove(logRef).then(() => {
+                    // 2. Jika sukses, hapus juga data rekap harian agar Overview ikut kosong (0)
+                    return remove(harianRef);
+                }).then(() => {
+                    alert("Seluruh data log dan rekap harian berhasil dikosongkan.");
                 }).catch(error => {
                     alert("Gagal mengosongkan data: " + error.message);
                 });
@@ -373,7 +378,6 @@
 
             } else {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">Belum ada data riwayat yang terekam.</td></tr>`;
-                // Reset badge ke 0 jika database kosong
                 const totalDataBadge = document.getElementById('total-data-badge');
                 if (totalDataBadge) totalDataBadge.innerText = "0 Data";
             }
