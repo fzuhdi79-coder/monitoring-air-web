@@ -76,10 +76,10 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">LIVE RECORDS STORAGE</h2>
+                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">LIVE DAILY LOGS</h2>
                             <span id="total-data-badge" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block">0 Data</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Penyimpanan terenkripsi riwayat data aktif (Max 100 Terbaru).</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Menampilkan seluruh data log hari ini (Direset setiap jam 00:00).</p>
                     </div>
                 </div>
                 
@@ -115,22 +115,30 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto h-[600px] border border-slate-100 rounded-xl relative shadow-inner custom-scrollbar">
                 <table id="tabel-log" class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 whitespace-nowrap">
-                            <th class="pb-3 pt-2 pr-4 font-semibold">TIMESTAMP</th>
-                            <th class="pb-3 pt-2 pr-4 font-semibold">DATE</th>
-                            <th class="pb-3 pt-2 pr-4 font-semibold">PH LEVEL</th>
-                            <th class="pb-3 pt-2 pr-4 font-semibold">TURBIDITY</th>
-                            <th class="pb-3 pt-2 pr-4 font-semibold">WATER LEVEL</th>
-                            <th class="pb-3 pt-2 font-semibold text-center">ACTION</th>
+                    <thead class="sticky top-0 bg-slate-50 z-10 shadow-sm">
+                        <tr class="text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 whitespace-nowrap">
+                            <th class="pb-3 pt-3 pl-4 pr-4 font-semibold">TIMESTAMP</th>
+                            <th class="pb-3 pt-3 pr-4 font-semibold">DATE</th>
+                            <th class="pb-3 pt-3 pr-4 font-semibold">PH LEVEL</th>
+                            <th class="pb-3 pt-3 pr-4 font-semibold">TURBIDITY</th>
+                            <th class="pb-3 pt-3 pr-4 font-semibold">WATER LEVEL</th>
+                            <th class="pb-3 pt-3 font-semibold text-center pr-4">ACTION</th>
                         </tr>
                     </thead>
                     <tbody id="table-body" class="divide-y divide-slate-50 text-xs text-slate-600 font-medium">
                     </tbody>
                 </table>
             </div>
+            
+            <style>
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: #f8fafc; border-radius: 8px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+            </style>
+
         </div>
     </main>
 
@@ -281,7 +289,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        // IMPORT DIPERBARUI: Menambahkan orderByChild dan startAt untuk fitur filtering 24 Jam
+        import { getDatabase, ref, onValue, query, remove, orderByChild, startAt } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ 
             apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", 
@@ -299,16 +308,13 @@
             }
         };
 
-        // KODE YANG DIPERBARUI AGAR SINKRON DENGAN OVERVIEW (INDEX.HTML)
         window.hapusSemuaDataLog = function() {
             if(confirm("PERINGATAN BAHAYA!\n\nApakah Anda sangat yakin ingin MENGHAPUS SELURUH data riwayat log dan rekap harian?\n\nTindakan ini tidak dapat dibatalkan!")) {
                 
                 const logRef = ref(db, 'SistemAir_Log'); 
                 const harianRef = ref(db, 'SistemAir_Harian'); 
 
-                // 1. Hapus data log mentah
                 remove(logRef).then(() => {
-                    // 2. Jika sukses, hapus juga data rekap harian agar Overview ikut kosong (0)
                     return remove(harianRef);
                 }).then(() => {
                     alert("Seluruh data log dan rekap harian berhasil dikosongkan.");
@@ -318,7 +324,21 @@
             }
         };
 
-        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(100));
+        // =========================================================================
+        // LOGIKA PENARIKAN DATA 24 JAM (DIRESET OTOMATIS SETIAP JAM 00:00 MALAM)
+        // =========================================================================
+        
+        // 1. Dapatkan Timestamp (Detik) tepat pada pukul 00:00:00 hari ini
+        const waktuMulaiHariIni = new Date();
+        waktuMulaiHariIni.setHours(0, 0, 0, 0); 
+        const timestampMulai = Math.floor(waktuMulaiHariIni.getTime() / 1000);
+
+        // 2. Minta Firebase hanya mengirimkan data yang terjadi SETELAH jam 00:00 hari ini
+        const logRef = query(
+            ref(db, 'SistemAir_Log'), 
+            orderByChild('timestamp'), 
+            startAt(timestampMulai)
+        );
 
         onValue(logRef, (snapshot) => {
             tbody.innerHTML = ''; 
@@ -359,12 +379,12 @@
                     tr.setAttribute("data-time", jamFormat);
                     
                     tr.innerHTML = `
-                        <td class="py-4 pr-4 text-slate-400 font-mono">${jamFormat}</td>
+                        <td class="py-4 pl-4 pr-4 text-slate-400 font-mono">${jamFormat}</td>
                         <td class="py-4 pr-4 text-slate-600 font-medium">${tanggalTampilan}</td>
                         <td class="py-4 pr-4 font-bold text-slate-800">${ph.toFixed(2)} ${phBadge}</td>
                         <td class="py-4 pr-4 font-bold text-slate-800">${Math.round(d.turbidity || 0)} <span class="text-slate-400 font-normal ml-0.5">NTU</span></td>
                         <td class="py-4 pr-4 font-bold text-slate-800">${Math.round(d.tinggiAir || 0)} <span class="text-slate-400 font-normal ml-0.5">cm</span></td>
-                        <td class="py-4 font-medium text-center">
+                        <td class="py-4 font-medium text-center pr-4">
                             <button onclick="hapusDataLog('${d.firebaseKey}')" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition active:scale-95" title="Hapus Baris Ini">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
@@ -377,7 +397,7 @@
                 terapkanFilter();
 
             } else {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">Belum ada data riwayat yang terekam.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">Belum ada data riwayat hari ini yang terekam.</td></tr>`;
                 const totalDataBadge = document.getElementById('total-data-badge');
                 if (totalDataBadge) totalDataBadge.innerText = "0 Data";
             }
