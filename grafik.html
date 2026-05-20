@@ -28,90 +28,23 @@
                     <a href="grafik.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Analytics</a>
                     <a href="history.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Data Log</a>
                 </div>
-
-                <div class="hidden md:flex items-center space-x-4">
-                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
-                        <i class="fa-solid fa-power-off"></i> Sign Out
-                    </button>
-                </div>
-
-                <div class="flex md:hidden">
-                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
-                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
             </div>
-        </div>
-
-        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
-            <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
-            </a>
-            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
-            </a>
-            <a href="grafik.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
-                <i class="fa-solid fa-chart-area mr-2 text-blue-200"></i> Analytics
-            </a>
-            <a href="history.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
-            </a>
-            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
-                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
-            </button>
         </div>
     </nav>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         <div class="border-b border-slate-200 pb-5">
             <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Real-time Advanced Charts</h1>
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan ketiga parameter utama sensor.</p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Multi-Sensor Datastream
-                </span>
-                <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH) </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Water Turbidity </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level </div>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6">
+            <div class="w-full overflow-x-auto pb-4">
+                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 2500px;">
+                    <canvas id="chart-multi-parameter"></canvas>
                 </div>
-            </div>
-            
-            <div class="flex w-full pb-4">
-                
-                <div class="h-64 sm:h-80 md:h-96 flex-shrink-0 border-r border-slate-100" style="width: 32px;">
-                    <canvas id="chart-y-axis"></canvas>
-                </div>
-                
-                <div class="w-full overflow-x-auto">
-                    <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
-                        <canvas id="chart-multi-parameter"></canvas>
-                    </div>
-                </div>
-
             </div>
         </div>
     </main>
-
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
-    </footer>
-
-    <script>
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        hamburgerBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            hamburgerIcon.className = mobileMenu.classList.contains('hidden') ? "fa-solid fa-bars text-xl" : "fa-solid fa-xmark text-xl";
-        });
-        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
-    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -120,84 +53,64 @@
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
-        // PERBAIKAN: Konfigurasi Sumbu Y Sticky
-        const ctxY = document.getElementById('chart-y-axis').getContext('2d');
-        new Chart(ctxY, {
-            type: 'line',
-            data: { labels: [''], datasets: [] },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: 'transparent', font: { size: 9 } }, border: { display: false } },
-                    y: { min: 0, max: 160, grid: { display: false }, ticks: { font: { size: 10 }, color: '#64748b', padding: 2 }, border: { display: false } }
-                }
-            }
-        });
-
-        // Konfigurasi Grafik Data Asli
         const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
         const chartMulti = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    // PERBAIKAN: Menambahkan pointRadius: 2 dan backgroundColor agar Titik Muncul
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }
-                ]
-            },
+            data: { labels: [], datasets: [
+                { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.2, pointRadius: 2, borderWidth: 2 },
+                { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.2, pointRadius: 2, borderWidth: 2 },
+                { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.2, pointRadius: 2, borderWidth: 2 }
+            ]},
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top' } },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                    // Menyamakan skala Y dengan Sumbu Y Sticky agar sinkron
-                    y: { min: 0, max: 160, grid: { color: '#f1f5f9' }, ticks: { display: false }, border: { display: false } }
+                    x: { ticks: { font: { size: 10 } } },
+                    y: { 
+                        beginAtZero: true, 
+                        suggestedMax: 100, // Menghindari grafik gepeng
+                        ticks: { font: { size: 10 } } 
+                    }
                 }
             }
         });
 
-        // Menarik 2.880 data riwayat harian
+        // Tarik 2880 data riwayat
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(2880));
+        
         get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
-                    const dataLog = childSnapshot.val();
-                    let waktuAsli = '--:--:--';
+                    const d = childSnapshot.val();
+                    const waktu = d.timestamp ? new Date(d.timestamp * 1000).toLocaleTimeString('id-ID', { hour12: false }) : '--:--';
                     
-                    if (dataLog.timestamp) {
-                        const dateObj = new Date(dataLog.timestamp * 1000);
-                        waktuAsli = dateObj.toLocaleTimeString('id-ID', { hour12: false });
-                    }
-
-                    chartMulti.data.labels.push(waktuAsli);
-                    chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
-                    chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
-                    chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
+                    chartMulti.data.labels.push(waktu);
+                    chartMulti.data.datasets[0].data.push(d.pH || 0);
+                    chartMulti.data.datasets[1].data.push(d.turbidity || 0);
+                    chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
                 });
                 chartMulti.update();
             }
 
+            // Real-time listener
             onValue(ref(db, 'SistemAir'), (snapshot) => {
                 if (snapshot.exists()) {
                     const d = snapshot.val();
                     const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
 
-                    chartMulti.data.labels.push(waktu);
-                    chartMulti.data.datasets[0].data.push(d.pH || 0);
-                    chartMulti.data.datasets[1].data.push(d.turbidity || 0);
-                    chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
+                    // Hanya tambah jika data benar-benar ada
+                    if (d.pH !== undefined) {
+                        chartMulti.data.labels.push(waktu);
+                        chartMulti.data.datasets[0].data.push(d.pH);
+                        chartMulti.data.datasets[1].data.push(d.turbidity || 0);
+                        chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
 
-                    if (chartMulti.data.labels.length > 2880) {
-                        chartMulti.data.labels.shift();
-                        chartMulti.data.datasets[0].data.shift();
-                        chartMulti.data.datasets[1].data.shift();
-                        chartMulti.data.datasets[2].data.shift();
+                        if (chartMulti.data.labels.length > 2880) {
+                            chartMulti.data.labels.shift();
+                            chartMulti.data.datasets.forEach(ds => ds.data.shift());
+                        }
+                        chartMulti.update();
                     }
-                    chartMulti.update();
                 }
             });
         });
