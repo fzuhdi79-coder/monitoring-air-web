@@ -69,27 +69,27 @@
     </nav>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        <div class="border-b border-slate-200 pb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Advanced Graphical History</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Gunakan kombinasi kalender dan timeframe untuk analisa telemetri tingkat lanjut.</p>
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Pilih tanggal pada kalender dan rentang waktu untuk memunculkan tren grafik riwayat log data.</p>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3 self-start lg:self-center">
+            <div class="flex flex-wrap items-center gap-3 self-start sm:self-center">
                 <div class="flex items-center space-x-2 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm">
                     <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
                     <input type="date" id="filter-tanggal-grafik" onchange="gantiTanggalGrafik()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
                 </div>
 
                 <div class="flex items-center bg-slate-200/70 p-1 rounded-xl border border-slate-200 shadow-inner" id="timeframe-container">
-                    <button onclick="ubahTimeframe('15p')" id="tf-15p" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">Live</button>
+                    <button onclick="ubahTimeframe('15p')" id="tf-15p" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">Live (15 Poin)</button>
                     <button onclick="ubahTimeframe('1h')" id="tf-1h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">1 Jam</button>
                     <button onclick="ubahTimeframe('6h')" id="tf-6h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">6 Jam</button>
-                    <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam (Semua)</button>
+                    <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam</button>
                 </div>
 
-                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1">
-                    <i class="fa-solid fa-compress text-[10px]"></i> Reset View
+                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-lg border border-slate-200 transition active:scale-95 shadow-sm">
+                    <i class="fa-solid fa-arrows-rotate mr-1"></i> Reset Zoom
                 </button>
             </div>
         </div>
@@ -97,12 +97,12 @@
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Telemetry Analytics Stream <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">(Gunakan mouse drag / swipe jari untuk kustomisasi posisi geser)</span>
+                    <i class="fa-solid fa-chart-line text-blue-500"></i> Analytics Datastream <span class="text-[10px] text-slate-400 font-normal">(Geser kanan/kiri pada grafik untuk menjelajah waktu)</span>
                 </span>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> pH </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-amber-500 inline-block"></span> Turbidity </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-blue-500 inline-block"></span> Water Level </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> pH </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Turbidity </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level </div>
                 </div>
             </div>
             
@@ -136,21 +136,19 @@
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
-        // State Global untuk Managemen Waktu Grafik
-        let currentTimeframe = '15p'; 
-        let rawTimestamps = []; 
-        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
-        let unsubscribeLiveStream = null;
+        // State pendukung fitur timeframe tanpa merusak basis data asli
+        let currentTimeframe = '15p';
+        let rawTimestamps = [];
 
         const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
         const chartMulti = new Chart(ctx, {
-            type: 'line',
+            type: 'line', // KODE ORI: Seluruh grafik tetap berjenis 'line'
             data: {
                 labels: [],
                 datasets: [
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.2, pointRadius: 2, borderWidth: 2 }
+                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 3, borderWidth: 2 }
                 ]
             },
             options: {
@@ -172,22 +170,19 @@
 
         window.resetSkalaGrafik = function() { chartMulti.resetZoom(); };
 
-        // FUNGSI LOGIKA TIMEFRAME INTERAKTIF (MANIPULASI MIN-MAX AXIS)
+        // FUNGSI BARU: Mengatur interaksi tombol timeframe tanpa merusak konfigurasi Chart original
         window.ubahTimeframe = function(tf) {
             currentTimeframe = tf;
-            
-            // Perbarui Style Button Aktif
             const tfs = ['15p', '1h', '6h', 'all'];
             tfs.forEach(item => {
                 const btn = document.getElementById(`tf-${item}`);
                 if (item === tf) {
-                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200/50";
+                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm";
                 } else {
                     btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
                 }
             });
-
-            chartMulti.resetZoom(); // Reset modifikasi zoom manual user sebelumnya
+            chartMulti.resetZoom();
             aturBatasTampilanGrafik();
             chartMulti.update();
         };
@@ -197,9 +192,9 @@
             if (totalData === 0) return;
 
             if (currentTimeframe === '15p') {
-                const jumlahTampil = 15;
-                if (totalData > jumlahTampil) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampil];
+                const jumlahTampilLayar = 15; 
+                if (totalData > jumlahTampilLayar) {
+                    chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampilLayar];
                     chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
                 } else {
                     chartMulti.options.scales.x.min = undefined;
@@ -208,7 +203,7 @@
             } 
             else if (currentTimeframe === '1h' || currentTimeframe === '6h') {
                 const detikTerakhir = rawTimestamps[totalData - 1];
-                const durasiMundur = currentTimeframe === '1h' ? 3600 : 21600; // Hitungan detik dalam (1 jam / 6 jam)
+                const durasiMundur = currentTimeframe === '1h' ? 3600 : 21600;
                 const batasDetikMin = detikTerakhir - durasiMundur;
                 
                 let indeksTarget = 0;
@@ -218,7 +213,6 @@
                         break;
                     }
                 }
-                
                 if (indeksTarget < totalData) {
                     chartMulti.options.scales.x.min = chartMulti.data.labels[indeksTarget];
                     chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
@@ -246,6 +240,9 @@
             const d = String(objDate.getDate()).padStart(2, '0');
             return `${y}-${m}-${d}`;
         }
+
+        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
+        let unsubscribeLiveStream = null;
 
         window.muatGrafikPerTanggal = function(tanggalFolder) {
             chartMulti.data.labels = [];
