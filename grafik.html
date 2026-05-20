@@ -67,57 +67,27 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         <div class="border-b border-slate-200 pb-5">
             <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Real-time Advanced Charts</h1>
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan ketiga parameter utama sensor secara individual.</p>
+            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan ketiga parameter utama sensor.</p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-flask text-emerald-500"></i> Analisis - Potensial Hidrogen (pH)
+                    <i class="fa-solid fa-chart-line text-blue-500"></i> Multi-Sensor Datastream
                 </span>
-                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
-                    <span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH)
+                <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH) </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Water Turbidity </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level </div>
                 </div>
             </div>
-            <div id="scroll-ph" class="w-full overflow-x-auto pb-4">
-                <div id="container-ph" class="relative h-64 sm:h-80 md:h-96" style="width: 100%;">
-                    <canvas id="chart-ph"></canvas>
+            
+            <div class="w-full overflow-x-auto pb-4">
+                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
+                    <canvas id="chart-multi-parameter"></canvas>
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-virus text-amber-500"></i> Analisis - Kekeruhan Air (Turbidity)
-                </span>
-                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
-                    <span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Water Turbidity (NTU)
-                </div>
-            </div>
-            <div id="scroll-tb" class="w-full overflow-x-auto pb-4">
-                <div id="container-tb" class="relative h-64 sm:h-80 md:h-96" style="width: 100%;">
-                    <canvas id="chart-tb"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-water text-blue-500"></i> Analisis - Ketinggian Air (Water Level)
-                </span>
-                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
-                    <span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level (cm)
-                </div>
-            </div>
-            <div id="scroll-lv" class="w-full overflow-x-auto pb-4">
-                <div id="container-lv" class="relative h-64 sm:h-80 md:h-96" style="width: 100%;">
-                    <canvas id="chart-lv"></canvas>
-                </div>
-            </div>
-        </div>
-
     </main>
 
     <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
@@ -142,30 +112,29 @@
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
-        // ==============================================
-        // PERBAIKAN: Fungsi pembuat chart kembali normal (Tanpa split canvas)
-        // ==============================================
-        function createMainChart(ctxId, color, minV, maxV) {
-            return new Chart(document.getElementById(ctxId).getContext('2d'), {
-                type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: color, backgroundColor: color, tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                        // Sumbu Y akan tampil normal seperti semula dan tidak 0 lagi
-                        y: { min: minV, max: maxV, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
-                    }
+        const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
+        const chartMulti = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 2, borderWidth: 2 },
+                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 2, borderWidth: 2 },
+                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 2, borderWidth: 2 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
                 }
-            });
-        }
+            }
+        });
 
-        // Kunci Skala agar tidak kebingungan
-        const chartPh = createMainChart('chart-ph', '#10b981', 0, 14);
-        const chartTb = createMainChart('chart-tb', '#f59e0b', 0, 150);
-        const chartLv = createMainChart('chart-lv', '#3b82f6', 0, 100);
-
+        // Helper fungsi format HH:mm.ss
         function formatWaktu(d) {
             const h = String(d.getHours()).padStart(2, '0');
             const m = String(d.getMinutes()).padStart(2, '0');
@@ -173,93 +142,42 @@
             return `${h}:${m}.${s}`;
         }
 
-        // ==============================================
-        // PERBAIKAN: Fungsi Pelebaran Grafik Dinamis
-        // ==============================================
-        function aturLebarDinamis(chart, containerId) {
-            const container = document.getElementById(containerId);
-            if(!container) return;
-            const jumlahData = chart.data.labels.length;
-            
-            // Jarak antar titik ditentukan 25px. 
-            // Jika data sedikit, akan otomatis menggunakan lebar layar 100% (tidak ompong)
-            const lebarBaru = Math.max(container.parentElement.clientWidth, jumlahData * 25);
-            container.style.width = lebarBaru + 'px';
-            chart.resize();
-        }
-
-        // Fungsi Auto Scroll ke data paling baru (kanan)
-        function geserKeKanan(scrollId) {
-            const scrollDiv = document.getElementById(scrollId);
-            if(scrollDiv) scrollDiv.scrollLeft = scrollDiv.scrollWidth;
-        }
-
-        // Menarik Riwayat 24 Jam Terakhir
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(1440));
         get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
                     const dataLog = childSnapshot.val();
                     let waktuLabel = '--:--.--';
+                    
                     if (dataLog.timestamp) {
                         waktuLabel = formatWaktu(new Date(dataLog.timestamp * 1000));
                     }
 
-                    chartPh.data.labels.push(waktuLabel);
-                    chartTb.data.labels.push(waktuLabel);
-                    chartLv.data.labels.push(waktuLabel);
-
-                    chartPh.data.datasets[0].data.push(dataLog.pH || 0);
-                    chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
-                    chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
+                    chartMulti.data.labels.push(waktuLabel);
+                    chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
+                    chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
+                    chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
                 });
-                
-                chartPh.update(); chartTb.update(); chartLv.update();
-
-                // Atur lebarnya sesuai jumlah data yang ditarik
-                aturLebarDinamis(chartPh, 'container-ph');
-                aturLebarDinamis(chartTb, 'container-tb');
-                aturLebarDinamis(chartLv, 'container-lv');
-
-                // Jeda sedikit agar layar dirender sebelum digeser paksa
-                setTimeout(() => {
-                    geserKeKanan('scroll-ph');
-                    geserKeKanan('scroll-tb');
-                    geserKeKanan('scroll-lv');
-                }, 100);
+                chartMulti.update();
             }
 
-            // Menerima Data Baru Real-time
             onValue(ref(db, 'SistemAir'), (snapshot) => {
                 if (snapshot.exists()) {
                     const d = snapshot.val();
-                    if(d.pH === undefined) return; // Cegah error jika format tidak cocok
-
                     const waktu = formatWaktu(new Date());
 
-                    chartPh.data.labels.push(waktu);
-                    chartTb.data.labels.push(waktu);
-                    chartLv.data.labels.push(waktu);
+                    chartMulti.data.labels.push(waktu);
+                    chartMulti.data.datasets[0].data.push(d.pH || 0);
+                    chartMulti.data.datasets[1].data.push(d.turbidity || 0);
+                    chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
 
-                    chartPh.data.datasets[0].data.push(d.pH || 0);
-                    chartTb.data.datasets[0].data.push(d.turbidity || 0);
-                    chartLv.data.datasets[0].data.push(d.tinggiAir || 0);
-
-                    if (chartPh.data.labels.length > 1440) {
-                        chartPh.data.labels.shift(); chartPh.data.datasets[0].data.shift();
-                        chartTb.data.labels.shift(); chartTb.data.datasets[0].data.shift();
-                        chartLv.data.labels.shift(); chartLv.data.datasets[0].data.shift();
+                    if (chartMulti.data.labels.length > 1440) {
+                        chartMulti.data.labels.shift();
+                        chartMulti.data.datasets[0].data.shift();
+                        chartMulti.data.datasets[1].data.shift();
+                        chartMulti.data.datasets[2].data.shift();
                     }
-                    
-                    chartPh.update(); chartTb.update(); chartLv.update();
-
-                    aturLebarDinamis(chartPh, 'container-ph');
-                    aturLebarDinamis(chartTb, 'container-tb');
-                    aturLebarDinamis(chartLv, 'container-lv');
-
-                    geserKeKanan('scroll-ph');
-                    geserKeKanan('scroll-tb');
-                    geserKeKanan('scroll-lv');
+                    chartMulti.update();
                 }
             });
         });
