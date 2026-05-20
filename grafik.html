@@ -69,24 +69,32 @@
     </nav>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        <div class="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div class="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Real-time Advanced Charts</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan parameter sensor untuk <span class="font-bold text-slate-800" id="info-tanggal">Hari Ini</span>.</p>
+                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Advanced Graphical History</h1>
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Pilih tanggal pada kalender untuk memunculkan tren grafik riwayat log data kemarin.</p>
             </div>
-            <button onclick="resetSkalaGrafik()" class="self-start sm:self-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-lg border border-slate-200 transition active:scale-95">
-                <i class="fa-solid fa-arrows-rotate mr-1"></i> Reset Geser/Zoom
-            </button>
+            
+            <div class="flex items-center gap-3 self-start sm:self-center">
+                <div class="flex items-center space-x-2 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm">
+                    <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
+                    <input type="date" id="filter-tanggal-grafik" onchange="gantiTanggalGrafik()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
+                </div>
+
+                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-lg border border-slate-200 transition active:scale-95 shadow-sm">
+                    <i class="fa-solid fa-arrows-rotate mr-1"></i> Reset Zoom
+                </button>
+            </div>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Multi-Sensor Datastream <span class="text-[10px] text-slate-400 font-normal">(Gunakan Mouse/Jari untuk menggeser grafik)</span>
+                    <i class="fa-solid fa-chart-line text-blue-500"></i> Analytics Datastream <span class="text-[10px] text-slate-400 font-normal">(Geser kanan/kiri pada grafik untuk menjelajah waktu)</span>
                 </span>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH) </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Water Turbidity </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> pH </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Turbidity </div>
                     <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level </div>
                 </div>
             </div>
@@ -137,37 +145,20 @@
                 maintainAspectRatio: false,
                 plugins: { 
                     legend: { display: false },
-                    // SUNTIKAN KONFIGURASI PLUGIN ZOOM & PAN
                     zoom: {
-                        pan: {
-                            enabled: true,
-                            mode: 'x', // Hanya ijinkan geser ke kanan-kiri (X-axis)
-                        },
-                        zoom: {
-                            wheel: { enabled: true }, // Bisa di-zoom in/out pakai scroll wheel mouse
-                            pinch: { enabled: true }, // Bisa di-zoom in/out pakai cubitan jari di HP
-                            mode: 'x',
-                        }
+                        pan: { enabled: true, mode: 'x' },
+                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
                     }
                 },
                 scales: {
-                    x: { 
-                        grid: { display: false }, 
-                        ticks: { font: { size: 9 }, color: '#94a3b8' },
-                        min: undefined, // Akan dihitung dinamis setelah data ditarik
-                        max: undefined
-                    },
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' }, min: undefined, max: undefined },
                     y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
                 }
             }
         });
 
-        // Ekspos fungsi reset grafik ke objek window agar bisa diklik tombolnya
-        window.resetSkalaGrafik = function() {
-            chartMulti.resetZoom();
-        };
+        window.resetSkalaGrafik = function() { chartMulti.resetZoom(); };
 
-        // Helper fungsi format HH:mm.ss
         function formatWaktu(d) {
             const h = String(d.getHours()).padStart(2, '0');
             const m = String(d.getMinutes()).padStart(2, '0');
@@ -182,60 +173,79 @@
             return `${y}-${m}-${d}`;
         }
 
-        let tanggalHariIni = dapatkanTanggalLokal(new Date());
-        document.getElementById("info-tanggal").innerText = tanggalHariIni;
+        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
+        let unsubscribeLiveStream = null;
 
-        const logRef = query(ref(db, 'SistemAir_Log/' + tanggalHariIni), limitToLast(2880));
-        
-        get(logRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                snapshot.forEach((childSnapshot) => {
-                    const dataLog = childSnapshot.val();
-                    let waktuLabel = '--:--.--';
-                    
-                    if (dataLog.timestamp) {
-                        waktuLabel = formatWaktu(new Date(dataLog.timestamp * 1000));
-                    }
+        // FUNGSI UTAMA: MEMUAT DATA GRAFIK BERDASARKAN FOLDER TANGGAL YANG DIPILIH
+        window.muatGrafikPerTanggal = function(tanggalFolder) {
+            // Bersihkan data lama di canvas grafik
+            chartMulti.data.labels = [];
+            chartMulti.data.datasets[0].data = [];
+            chartMulti.data.datasets[1].data = [];
+            chartMulti.data.datasets[2].data = [];
+            chartMulti.update();
 
-                    chartMulti.data.labels.push(waktuLabel);
-                    chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
-                    chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
-                    chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
-                });
-                
-                // Mengatur batas awal pandangan grafik (misal hanya menampilkan 10 data terakhir di layar awal)
-                // Sisa datanya otomatis tersembunyi dan baru terlihat jika digeser (pan)
+            const logRef = query(ref(db, 'SistemAir_Log/' + tanggalFolder), limitToLast(2880));
+            
+            get(logRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const dataLog = childSnapshot.val();
+                        let waktuLabel = '--:--.--';
+                        if (dataLog.timestamp) {
+                            waktuLabel = formatWaktu(new Date(dataLog.timestamp * 1000));
+                        }
+                        chartMulti.data.labels.push(waktuLabel);
+                        chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
+                        chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
+                        chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
+                    });
+                }
                 aturBatasTampilanGrafik();
                 chartMulti.update();
+                
+                // PENTING: Fitur Live Streaming Realtime hanya berjalan jika user memilih HARI INI
+                aktifkanAtauMatikanLiveStream(tanggalFolder);
+            });
+        };
+
+        function aktifkanAtauMatikanLiveStream(tanggalFolder) {
+            // Matikan stream sebelumnya jika ada
+            if (unsubscribeLiveStream) {
+                unsubscribeLiveStream();
+                unsubscribeLiveStream = null;
             }
 
-            onValue(ref(db, 'SistemAir'), (snapshot) => {
-                if (snapshot.exists()) {
-                    const d = snapshot.val();
-                    const waktu = formatWaktu(new Date());
+            const hariIniLokal = dapatkanTanggalLokal(new Date());
+            
+            // Jika user memilih melihat tanggal hari ini, sambungkan dengan data sensor realtime
+            if (tanggalFolder === hariIniLokal) {
+                unsubscribeLiveStream = onValue(ref(db, 'SistemAir'), (snapshot) => {
+                    if (snapshot.exists()) {
+                        const d = snapshot.val();
+                        const waktu = formatWaktu(new Date());
 
-                    chartMulti.data.labels.push(waktu);
-                    chartMulti.data.datasets[0].data.push(d.pH || 0);
-                    chartMulti.data.datasets[1].data.push(d.turbidity || 0);
-                    chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
+                        chartMulti.data.labels.push(waktu);
+                        chartMulti.data.datasets[0].data.push(d.pH || 0);
+                        chartMulti.data.datasets[1].data.push(d.turbidity || 0);
+                        chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
 
-                    if (chartMulti.data.labels.length > 2880) {
-                        chartMulti.data.labels.shift();
-                        chartMulti.data.datasets[0].data.shift();
-                        chartMulti.data.datasets[1].data.shift();
-                        chartMulti.data.datasets[2].data.shift();
+                        if (chartMulti.data.labels.length > 2880) {
+                            chartMulti.data.labels.shift();
+                            chartMulti.data.datasets[0].data.shift();
+                            chartMulti.data.datasets[1].data.shift();
+                            chartMulti.data.datasets[2].data.shift();
+                        }
+                        aturBatasTampilanGrafik();
+                        chartMulti.update();
                     }
+                });
+            }
+        }
 
-                    aturBatasTampilanGrafik();
-                    chartMulti.update();
-                }
-            });
-        });
-
-        // Fungsi pembatas pandangan agar grafik terpotong di layar dan memaksa user untuk menggesernya
         function aturBatasTampilanGrafik() {
             const totalData = chartMulti.data.labels.length;
-            const jumlahTampilLayar = 15; // Mengunci tampilan layar hanya memperlihatkan 15 titik data terupdate
+            const jumlahTampilLayar = 15; 
             
             if (totalData > jumlahTampilLayar) {
                 chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampilLayar];
@@ -246,10 +256,27 @@
             }
         }
 
+        // FUNGSI MEMPROSES PERUBAHAN KALENDER KETIKA USER MEMILIH TANGGAL LAIN
+        window.gantiTanggalGrafik = function() {
+            const tglDipilih = document.getElementById("filter-tanggal-grafik").value;
+            if (tglDipilih) {
+                tanggalAktifPilihan = tglDipilih;
+                window.muatGrafikPerTanggal(tglDipilih);
+            }
+        };
+
+        // INISIALISASI AWAL (Saat Pertama Kali Dibuka)
+        const inputKalender = document.getElementById("filter-tanggal-grafik");
+        inputKalender.value = tanggalAktifPilihan; // Isi kalender dengan hari ini
+        window.muatGrafikPerTanggal(tanggalAktifPilihan); // Muat grafik hari ini
+
+        // Auto-refresh jika ganti hari (hanya bekerja jika posisi kalender ada di hari ini)
         setInterval(() => {
-            const cekHariBaru = dapatkanTanggalLokal(new Date());
-            if(cekHariBaru !== tanggalHariIni) {
-                window.location.reload();
+            const hariIniLokal = dapatkanTanggalLokal(new Date());
+            if (inputKalender.value === tanggalAktifPilihan && hariIniLokal !== tanggalAktifPilihan) {
+                tanggalAktifPilihan = hariIniLokal;
+                inputKalender.value = hariIniLokal;
+                window.muatGrafikPerTanggal(hariIniLokal);
             }
         }, 5000);
     </script>
