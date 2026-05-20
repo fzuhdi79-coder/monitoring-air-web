@@ -161,10 +161,17 @@
             const inputWaktu = document.getElementById("filter-waktu").value.trim(); 
             const barisTabel = document.querySelectorAll("#table-body tr");
 
+            let adaDataAsli = false;
+            let adaDataTampil = false;
+
             barisTabel.forEach(tr => {
                 const tanggalData = tr.getAttribute("data-date"); 
                 const waktuData = tr.getAttribute("data-time"); 
                 
+                // Mencegah baris kosong (seperti pesan "Belum ada data") ikut ter-filter dan memicu error
+                if (!tanggalData || !waktuData) return;
+                
+                adaDataAsli = true;
                 let tampilTanggal = true;
                 let tampilWaktu = true;
 
@@ -178,10 +185,25 @@
 
                 if (tampilTanggal && tampilWaktu) {
                     tr.classList.remove("hidden");
+                    adaDataTampil = true;
                 } else {
                     tr.classList.add("hidden");
                 }
             });
+
+            // UI Feedback jika pencarian filter tidak menemukan data
+            const pesanKosong = document.getElementById("pesan-kosong-filter");
+            if (adaDataAsli && !adaDataTampil) {
+                if (!pesanKosong) {
+                    const tbody = document.getElementById("table-body");
+                    const tr = document.createElement("tr");
+                    tr.id = "pesan-kosong-filter";
+                    tr.innerHTML = `<td colspan="6" class="text-center py-8 text-slate-400 font-medium bg-slate-50/50"><i class="fa-solid fa-magnifying-glass mb-2 text-xl"></i><br>Tidak ada rekaman yang cocok dengan filter pencarian.</td>`;
+                    tbody.appendChild(tr);
+                }
+            } else if (pesanKosong && adaDataTampil) {
+                pesanKosong.remove();
+            }
         }
 
         function resetFilter() {
@@ -205,7 +227,8 @@
             let counterData = 0;
 
             barisData.forEach(tr => {
-                if (tr.classList.contains("hidden")) return;
+                // BUG FIX: Jangan eksport baris yang di-hidden atau baris pesan teks "Kosong"
+                if (tr.classList.contains("hidden") || !tr.hasAttribute("data-date")) return;
 
                 counterData++;
                 const kolom = tr.querySelectorAll("td");
@@ -220,7 +243,7 @@
             });
 
             if(counterData === 0) {
-                alert("Tidak ada data yang cocok dengan filter untuk diunduh!");
+                alert("Tidak ada data yang tersedia untuk diunduh!");
                 return;
             }
 
@@ -254,7 +277,6 @@
         const db = getDatabase(app);
         const tbody = document.getElementById('table-body');
 
-        // Fungsi Delete Satu Baris (Individu)
         window.hapusDataLog = function(keyData) {
             if(confirm("Yakin ingin menghapus baris data log ini?")) {
                 const nodeRef = ref(db, 'SistemAir_Log/' + keyData);
@@ -264,10 +286,9 @@
             }
         };
 
-        // TAMBAHAN: Fungsi Delete Seluruh Data (Clear All)
         window.hapusSemuaDataLog = function() {
             if(confirm("PERINGATAN BAHAYA!\n\nApakah Anda sangat yakin ingin MENGHAPUS SELURUH data riwayat log?\n\nTindakan ini tidak dapat dibatalkan!")) {
-                const nodeRef = ref(db, 'SistemAir_Log'); // Mengambil seluruh folder node SistemAir_Log
+                const nodeRef = ref(db, 'SistemAir_Log'); 
                 remove(nodeRef).then(() => {
                     alert("Seluruh data log berhasil dikosongkan.");
                 }).catch(error => {
