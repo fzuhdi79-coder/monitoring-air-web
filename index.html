@@ -204,10 +204,13 @@
 
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
                     <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                            <i class="fa-solid fa-chart-pie text-amber-500"></i> Rekap Sensor Harian
-                        </h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">*Data rata-rata sensor hari ini. Direset jam 00:00</p>
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-amber-500"></i> Rekap Sensor Harian
+                            </h3>
+                            <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)" class="text-[10px] sm:text-[11px] font-bold bg-slate-100 border border-slate-200 text-slate-600 rounded-md px-2 py-1 outline-none cursor-pointer" title="Pilih Tanggal Riwayat">
+                        </div>
+                        <p id="label-keterangan-rekap" class="text-[11px] sm:text-xs text-slate-400 mt-1">*Data rata-rata sensor hari ini. Direset jam 00:00</p>
                         
                         <button onclick="downloadHarianCSV()" class="mt-2 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95 shadow-sm border border-emerald-500/20">
                             <i class="fa-solid fa-file-csv text-sm"></i> Unduh Riwayat (CSV)
@@ -500,7 +503,6 @@
                         b.className = "btn-pump px-3 py-1 text-[11px] font-bold rounded-md bg-transparent text-slate-500 hover:bg-slate-300/50 transition cursor-pointer";
                     });
 
-                    // Penanda warna tombol pompa saat mode manual
                     if(pStat === "KURAS") {
                         btnP1On.className = "btn-pump px-3 py-1 text-[11px] font-bold rounded-md bg-white text-slate-900 shadow-sm transition";
                         btnP1Off.className = "btn-pump px-3 py-1 text-[11px] font-bold rounded-md bg-transparent text-slate-500 hover:bg-slate-300/50 transition cursor-pointer";
@@ -513,7 +515,6 @@
                     }
                 }
 
-                // Logika Grafik Pompa ON/OFF
                 let valKuras = (pStat === "KURAS") ? 1 : 0;
                 let valIsi = (pStat === "ISI") ? 1 : 0;
                 
@@ -524,38 +525,61 @@
             }
         });
 
-        // -------------------------------------------------------------
-        // LOGIKA PENARIKAN DATA REKAP SENSOR HARIAN (HARI INI)
-        // -------------------------------------------------------------
+        // PELENGKAPAN KODE: LOGIKA PENARIKAN DATA REKAP SENSOR HARIAN (DENGAN DATE PICKER)
         const hariIni = new Date().toISOString().split('T')[0];
+        const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
+        const labelKeteranganRekap = document.getElementById('label-keterangan-rekap');
         
-        onValue(ref(db, 'SistemAir_Harian/' + hariIni), (snapshot) => {
-            if (snapshot.exists()) {
-                const dataHarian = snapshot.val();
-                
-                document.getElementById('rata-ph').innerText = dataHarian.rata_pH ? dataHarian.rata_pH.toFixed(2) : "0.00";
-                document.getElementById('rata-tb').innerText = dataHarian.rata_turbidity ? dataHarian.rata_turbidity.toFixed(0) + " NTU" : "0 NTU";
-                document.getElementById('rata-lv').innerText = dataHarian.rata_tinggiAir ? dataHarian.rata_tinggiAir.toFixed(0) + " cm" : "0 cm";
-                
-                const pHMax = dataHarian.pH_maksimum ? dataHarian.pH_maksimum.toFixed(1) : "0.0";
-                const pHMin = dataHarian.pH_minimum ? dataHarian.pH_minimum.toFixed(1) : "0.0";
-                document.getElementById('maxmin-ph').innerText = pHMax + " / " + pHMin;
-                
-                document.getElementById('total-sampel').innerText = (dataHarian.total_sampel_hari_ini || 0) + " Data";
-            } else {
-                // Jika belum ada data untuk hari ini
-                document.getElementById('rata-ph').innerText = "0.00";
-                document.getElementById('rata-tb').innerText = "0 NTU";
-                document.getElementById('rata-lv').innerText = "0 cm";
-                document.getElementById('maxmin-ph').innerText = "0.0 / 0.0";
-                document.getElementById('total-sampel').innerText = "0 Data";
-            }
-        });
+        if (inputTanggalRekap) {
+            inputTanggalRekap.max = hariIni;
+            inputTanggalRekap.value = hariIni;
+        }
 
-        // Placeholder untuk fungsi unduh CSV
+        let rekapListener = null;
+
+        window.muatDataHarian = function(tanggalPilihan) {
+            if (labelKeteranganRekap) {
+                labelKeteranganRekap.innerText = (tanggalPilihan === hariIni) 
+                    ? "*Data rata-rata sensor hari ini. Direset jam 00:00" 
+                    : `*Data rata-rata sensor tanggal: ${tanggalPilihan}`;
+            }
+
+            // Hentikan listener lama jika ada agar tidak bentrok
+            if (rekapListener) {
+                rekapListener(); 
+            }
+
+            // Buat listener baru untuk membaca tanggal yang dipilih pada Date Picker
+            rekapListener = onValue(ref(db, 'SistemAir_Harian/' + tanggalPilihan), (snapshot) => {
+                if (snapshot.exists()) {
+                    const dataHarian = snapshot.val();
+                    
+                    document.getElementById('rata-ph').innerText = dataHarian.rata_pH ? dataHarian.rata_pH.toFixed(2) : "0.00";
+                    document.getElementById('rata-tb').innerText = dataHarian.rata_turbidity ? dataHarian.rata_turbidity.toFixed(0) + " NTU" : "0 NTU";
+                    document.getElementById('rata-lv').innerText = dataHarian.rata_tinggiAir ? dataHarian.rata_tinggiAir.toFixed(0) + " cm" : "0 cm";
+                    
+                    const pHMax = dataHarian.pH_maksimum ? dataHarian.pH_maksimum.toFixed(1) : "0.0";
+                    const pHMin = dataHarian.pH_minimum ? dataHarian.pH_minimum.toFixed(1) : "0.0";
+                    document.getElementById('maxmin-ph').innerText = pHMax + " / " + pHMin;
+                    
+                    document.getElementById('total-sampel').innerText = (dataHarian.total_sampel_hari_ini || 0) + " Data";
+                } else {
+                    // Jika belum ada data untuk hari tersebut
+                    document.getElementById('rata-ph').innerText = "0.00";
+                    document.getElementById('rata-tb').innerText = "0 NTU";
+                    document.getElementById('rata-lv').innerText = "0 cm";
+                    document.getElementById('maxmin-ph').innerText = "0.0 / 0.0";
+                    document.getElementById('total-sampel').innerText = "0 Data";
+                }
+            });
+        };
+
+        // Panggil fungsi saat web pertama kali direfresh agar memuat data hari ini
+        window.muatDataHarian(hariIni);
+
         window.downloadHarianCSV = function() {
-            alert("Fitur unduh riwayat CSV untuk tanggal: " + hariIni + " sedang diproses.");
-            // Di sini Anda bisa menambahkan logika penarikan data log berdasarkan tanggal (mirip page history)
+            const tglPilihan = document.getElementById('input-tanggal-rekap').value || hariIni;
+            alert("Fitur unduh riwayat CSV untuk tanggal: " + tglPilihan + " sedang diproses.");
         }
     </script>
 </body>
