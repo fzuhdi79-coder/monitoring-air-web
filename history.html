@@ -79,13 +79,13 @@
                             <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">LIVE RECORDS STORAGE</h2>
                             <span id="total-data-badge" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block">0 Data</span>
                         </div>
-                        <p class="text-xs text-slate-400 mt-0.5">Penyimpanan terenkripsi riwayat data aktif (Max 100 Terbaru).</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Penyimpanan terenkripsi riwayat data aktif.</p>
                     </div>
                 </div>
                 
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full lg:w-auto overflow-x-auto">
                     
-                    <div class="flex items-center justify-between sm:justify-start space-x-2 sm:space-x-3 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl w-full sm:w-auto">
+                    <div class="flex items-center justify-start space-x-2 sm:space-x-3 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl w-full md:w-auto shrink-0">
                         
                         <div class="flex items-center space-x-2" title="Filter Berdasarkan Hari">
                             <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
@@ -94,9 +94,11 @@
 
                         <div class="h-4 w-px bg-slate-300"></div> 
                         
-                        <div class="flex items-center space-x-2" title="Filter Berdasarkan Jam/Menit/Detik">
+                        <div class="flex items-center space-x-1 sm:space-x-2" title="Dari Jam Berapa Sampai Jam Berapa">
                             <i class="fa-regular fa-clock text-slate-400 text-xs"></i>
-                            <input type="text" id="filter-waktu" oninput="terapkanFilter()" placeholder="Pukul (Cth: 18:30)" class="bg-transparent text-xs font-semibold text-slate-700 outline-none w-28 placeholder:text-slate-400 placeholder:font-normal">
+                            <input type="time" id="filter-waktu-mulai" onchange="terapkanFilter()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
+                            <span class="text-slate-400 font-bold text-xs">-</span>
+                            <input type="time" id="filter-waktu-selesai" onchange="terapkanFilter()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
                         </div>
 
                         <div class="h-4 w-px bg-slate-300"></div> 
@@ -105,11 +107,11 @@
                         </button>
                     </div>
 
-                    <button onclick="unduhCSV()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-blue-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 w-full sm:w-auto">
+                    <button onclick="unduhCSV()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-blue-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 w-full sm:w-auto shrink-0">
                         <i class="fa-solid fa-download text-sm"></i> EXPORT CSV
                     </button>
 
-                    <button onclick="hapusSemuaDataLog()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 w-full sm:w-auto">
+                    <button onclick="hapusSemuaDataLog()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl text-xs font-bold transition shadow-sm active:scale-95 w-full sm:w-auto shrink-0">
                         <i class="fa-solid fa-trash-can text-sm"></i> CLEAR ALL
                     </button>
                 </div>
@@ -161,7 +163,8 @@
 
         function terapkanFilter() {
             const inputTanggal = document.getElementById("filter-tanggal").value; 
-            const inputWaktu = document.getElementById("filter-waktu").value.trim(); 
+            const waktuMulai = document.getElementById("filter-waktu-mulai").value; 
+            const waktuSelesai = document.getElementById("filter-waktu-selesai").value; 
             const barisTabel = document.querySelectorAll("#table-body tr");
 
             let adaDataAsli = false;
@@ -180,12 +183,18 @@
                 let tampilTanggal = true;
                 let tampilWaktu = true;
 
+                // 1. Cek Tanggal
                 if (inputTanggal !== "") {
                     tampilTanggal = (tanggalData === inputTanggal);
                 }
                 
-                if (inputWaktu !== "") {
-                    tampilWaktu = waktuData.includes(inputWaktu);
+                // 2. Cek Rentang Waktu
+                if (waktuMulai !== "" || waktuSelesai !== "") {
+                    const jamData = waktuData; // format tabel: "HH:mm:ss"
+                    const jamMulai = waktuMulai !== "" ? waktuMulai + ":00" : "00:00:00"; // tambah detik agar valid
+                    const jamSelesai = waktuSelesai !== "" ? waktuSelesai + ":59" : "23:59:59";
+                    
+                    tampilWaktu = (jamData >= jamMulai && jamData <= jamSelesai);
                 }
 
                 if (tampilTanggal && tampilWaktu) {
@@ -199,7 +208,7 @@
 
             const totalDataBadge = document.getElementById('total-data-badge');
             if (totalDataBadge) {
-                if (inputTanggal !== "" || inputWaktu !== "") {
+                if (inputTanggal !== "" || waktuMulai !== "" || waktuSelesai !== "") {
                     totalDataBadge.innerText = `${totalTampil} dari ${totalAsli} Data`;
                 } else {
                     totalDataBadge.innerText = `${totalAsli} Data`;
@@ -222,7 +231,8 @@
 
         function resetFilter() {
             document.getElementById("filter-tanggal").value = "";
-            document.getElementById("filter-waktu").value = "";
+            document.getElementById("filter-waktu-mulai").value = "";
+            document.getElementById("filter-waktu-selesai").value = "";
             terapkanFilter(); 
         }
 
@@ -290,7 +300,6 @@
         const db = getDatabase(app);
         const tbody = document.getElementById('table-body');
 
-        // BUG FIX HAPUS DATA: Menggunakan struktur folder/key 
         window.hapusDataLog = function(keyData) {
             if(confirm("Yakin ingin menghapus baris data log ini?")) {
                 const nodeRef = ref(db, 'SistemAir_Log/' + keyData);
@@ -318,7 +327,6 @@
 
         const logRef = ref(db, 'SistemAir_Log');
 
-        // BUG FIX PEMBACAAN DATA: Masuk ke dalam folder tanggal terlebih dahulu
         onValue(logRef, (snapshot) => {
             tbody.innerHTML = ''; 
 
@@ -328,24 +336,19 @@
                 snapshot.forEach((folderTanggal) => {
                     let isiFolder = folderTanggal.val();
                     
-                    // Cek apakah ini folder tanggal (isinya object-object dan bukan data langsung)
                     if (isiFolder && typeof isiFolder === 'object' && !isiFolder.hasOwnProperty('timestamp')) {
-                        // Loop isi dari dalam folder tanggal
                         Object.keys(isiFolder).forEach(pushId => {
                             let baris = isiFolder[pushId];
-                            // Gabungkan nama folder tanggal dan pushId untuk fungsi hapus
                             baris.firebaseKey = folderTanggal.key + '/' + pushId; 
                             dataRiwayat.push(baris);
                         });
                     } else {
-                        // Jika ada data lama yang tidak masuk folder, tetap terbaca
                         let baris = isiFolder;
                         baris.firebaseKey = folderTanggal.key;
                         dataRiwayat.push(baris);
                     }
                 });
 
-                // Urutkan data berdasarkan timestamp (yang terbaru di atas) agar rapi
                 dataRiwayat.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
                 dataRiwayat.forEach((d) => {
@@ -398,7 +401,7 @@
             }
         });
 
-        // TAMBAHAN FITUR: AUTOSAVE KE CSV SETIAP AKHIR HARI (JAM 23:59:55)
+        // AUTOSAVE KE CSV SETIAP AKHIR HARI (JAM 23:59:55)
         setInterval(() => {
             const skrg = new Date();
             if (skrg.getHours() === 23 && skrg.getMinutes() === 59 && skrg.getSeconds() === 55) {
