@@ -83,7 +83,7 @@
             </div>
             
             <div class="w-full overflow-x-auto pb-4">
-                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
+                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 1000px;">
                     <canvas id="chart-multi-parameter"></canvas>
                 </div>
             </div>
@@ -142,8 +142,6 @@
             return `${h}:${m}.${s}`;
         }
 
-        // --- UPDATE LOGIKA: FOKUS PADA TANGGAL HARI INI SAJA ---
-        
         function dapatkanTanggalLokal(objDate) {
             const y = objDate.getFullYear();
             const m = String(objDate.getMonth() + 1).padStart(2, '0');
@@ -154,8 +152,7 @@
         let tanggalHariIni = dapatkanTanggalLokal(new Date());
         document.getElementById("info-tanggal").innerText = tanggalHariIni;
 
-        // Tarik data riwayat khusus HARI INI
-        // Path disesuaikan: 'SistemAir_Log/YYYY-MM-DD'
+        // Ambil data log folder tanggal hari ini (Maksimal 2880 data sesuai kapasitas harian)
         const logRef = query(ref(db, 'SistemAir_Log/' + tanggalHariIni), limitToLast(2880));
         
         get(logRef).then((snapshot) => {
@@ -176,7 +173,7 @@
                 chartMulti.update();
             }
 
-            // Dengarkan pembaruan real-time dari 'SistemAir' (Current state)
+            // Realtime Update monitoring stream
             onValue(ref(db, 'SistemAir'), (snapshot) => {
                 if (snapshot.exists()) {
                     const d = snapshot.val();
@@ -198,14 +195,14 @@
             });
         });
 
-        // Auto-refresh halaman tepat saat berganti hari agar grafik ter-reset dan membuka folder besoknya
+        // Auto-refresh otomatis jika mendeteksi pergantian tanggal di sistem laptop/HP user
         setInterval(() => {
             const cekHariBaru = dapatkanTanggalLokal(new Date());
             if(cekHariBaru !== tanggalHariIni) {
                 console.log("Hari berganti, merefresh grafik...");
                 window.location.reload();
             }
-        }, 5000); // Cek setiap 5 detik
+        }, 5000);
     </script>
 </body>
 </html>
