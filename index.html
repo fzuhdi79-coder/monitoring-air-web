@@ -368,10 +368,14 @@
         const tanggal = String(now.getDate()).padStart(2, '0');
         const hariIni = `${tahun}-${bulan}-${tanggal}`;
 
-        // PERBAIKAN: Penarikan data diarahkan ke folder HARI INI
-        const logRefLast20 = query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20));
+        // =======================================================
+        // PERBAIKAN: Mengambil dari folder root agar saat log masuk
+        // bentuk "SistemAir_Log/12312..." terbaca dengan benar
+        // =======================================================
+        const logRefLast20 = query(ref(db, 'SistemAir_Log'), limitToLast(20));
         get(logRefLast20).then((snapshot) => {
             if (snapshot.exists()) {
+                
                 let labelsKuras = []; let dataKuras = [];
                 let labelsIsi = []; let dataIsi = [];
                 let labelsPh = []; let dataPh = [];
@@ -383,11 +387,13 @@
                     
                     labelsPh.push(''); dataPh.push(dataLog.pH || 0);
                     labelsTb.push(''); dataTb.push(dataLog.turbidity || 0);
-                    labelsLv.push(''); dataLv.push(dataLog.tinggiAir || 0);
+                    // Sesuaikan dengan foto: tinggi_air
+                    labelsLv.push(''); dataLv.push(dataLog.tinggi_air || 0);
 
-                    const dateObj = dataLog.timestamp ? new Date(dataLog.timestamp * 1000) : new Date();
-                    const waktuJam = dateObj.toLocaleTimeString('id-ID', { hour12: false });
+                    const ts = dataLog.timestamp ? dataLog.timestamp * 1000 : Date.now();
+                    const waktuJam = new Date(ts).toLocaleTimeString('id-ID', { hour12: false });
                     
+                    // Sesuaikan dengan foto: pompaStatus
                     let pStat = dataLog.pompaStatus || "OFF";
                     let valKuras = (pStat === "KURAS") ? 1 : 0;
                     let valIsi = (pStat === "ISI") ? 1 : 0;
@@ -396,6 +402,7 @@
                     labelsIsi.push(waktuJam); dataIsi.push(valIsi);
                 });
 
+                // Trik Jitu: Tambal (pad) kekosongan data dari depan (unshift) hingga pas 20 item
                 while(labelsPh.length < 20) {
                     labelsPh.unshift(''); dataPh.unshift(0);
                     labelsTb.unshift(''); dataTb.unshift(0);
@@ -488,7 +495,8 @@
                     stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
                 }
 
-                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
+                // SINKRONISASI: tinggi_air 
+                let lv = d.tinggi_air || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
                 updateChartData(chartLv, lv);
                 let slv = document.getElementById('status-level');
                 if(lv < 20) {
@@ -585,7 +593,7 @@
                             jumlahData++;
                             let ph = parseFloat(d.pH) || 0;
                             let tb = parseFloat(d.turbidity) || 0;
-                            let lv = parseFloat(d.tinggiAir) || 0;
+                            let lv = parseFloat(d.tinggi_air) || 0; // SINKRONISASI
 
                             totalPh += ph;
                             totalTb += tb;
@@ -639,7 +647,7 @@
                         
                         if(formatTglNode === tglPilihan) {
                             const waktuJam = dateObj.toLocaleTimeString('id-ID');
-                            csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggiAir}\n`;
+                            csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggi_air}\n`; // SINKRONISASI
                             rowCount++;
                         }
                     });
