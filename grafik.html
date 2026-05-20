@@ -82,10 +82,18 @@
                 </div>
             </div>
             
-            <div class="w-full overflow-x-auto pb-4">
-                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
-                    <canvas id="chart-multi-parameter"></canvas>
+            <div class="flex w-full pb-4">
+                
+                <div class="h-64 sm:h-80 md:h-96 flex-shrink-0 border-r border-slate-100" style="width: 32px;">
+                    <canvas id="chart-y-axis"></canvas>
                 </div>
+                
+                <div class="w-full overflow-x-auto">
+                    <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
+                        <canvas id="chart-multi-parameter"></canvas>
+                    </div>
+                </div>
+
             </div>
         </div>
     </main>
@@ -112,15 +120,32 @@
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
+        // PERBAIKAN: Konfigurasi Sumbu Y Sticky
+        const ctxY = document.getElementById('chart-y-axis').getContext('2d');
+        new Chart(ctxY, {
+            type: 'line',
+            data: { labels: [''], datasets: [] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: 'transparent', font: { size: 9 } }, border: { display: false } },
+                    y: { min: 0, max: 160, grid: { display: false }, ticks: { font: { size: 10 }, color: '#64748b', padding: 2 }, border: { display: false } }
+                }
+            }
+        });
+
+        // Konfigurasi Grafik Data Asli
         const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
         const chartMulti = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: [],
                 datasets: [
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 2, borderWidth: 2 }
+                    // PERBAIKAN: Menambahkan pointRadius: 2 dan backgroundColor agar Titik Muncul
+                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 },
+                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 },
+                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }
                 ]
             },
             options: {
@@ -129,31 +154,26 @@
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
+                    // Menyamakan skala Y dengan Sumbu Y Sticky agar sinkron
+                    y: { min: 0, max: 160, grid: { color: '#f1f5f9' }, ticks: { display: false }, border: { display: false } }
                 }
             }
         });
 
-        // Helper fungsi format HH:mm.ss
-        function formatWaktu(d) {
-            const h = String(d.getHours()).padStart(2, '0');
-            const m = String(d.getMinutes()).padStart(2, '0');
-            const s = String(d.getSeconds()).padStart(2, '0');
-            return `${h}:${m}.${s}`;
-        }
-
-        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(1440));
+        // Menarik 2.880 data riwayat harian
+        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(2880));
         get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
                     const dataLog = childSnapshot.val();
-                    let waktuLabel = '--:--.--';
+                    let waktuAsli = '--:--:--';
                     
                     if (dataLog.timestamp) {
-                        waktuLabel = formatWaktu(new Date(dataLog.timestamp * 1000));
+                        const dateObj = new Date(dataLog.timestamp * 1000);
+                        waktuAsli = dateObj.toLocaleTimeString('id-ID', { hour12: false });
                     }
 
-                    chartMulti.data.labels.push(waktuLabel);
+                    chartMulti.data.labels.push(waktuAsli);
                     chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
                     chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
                     chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
@@ -164,14 +184,14 @@
             onValue(ref(db, 'SistemAir'), (snapshot) => {
                 if (snapshot.exists()) {
                     const d = snapshot.val();
-                    const waktu = formatWaktu(new Date());
+                    const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
 
                     chartMulti.data.labels.push(waktu);
                     chartMulti.data.datasets[0].data.push(d.pH || 0);
                     chartMulti.data.datasets[1].data.push(d.turbidity || 0);
                     chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
 
-                    if (chartMulti.data.labels.length > 1440) {
+                    if (chartMulti.data.labels.length > 2880) {
                         chartMulti.data.labels.shift();
                         chartMulti.data.datasets[0].data.shift();
                         chartMulti.data.datasets[1].data.shift();
