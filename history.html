@@ -281,7 +281,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { getDatabase, ref, onValue, query, remove } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ 
             apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", 
@@ -290,6 +290,7 @@
         const db = getDatabase(app);
         const tbody = document.getElementById('table-body');
 
+        // BUG FIX HAPUS DATA: Menggunakan struktur folder/key 
         window.hapusDataLog = function(keyData) {
             if(confirm("Yakin ingin menghapus baris data log ini?")) {
                 const nodeRef = ref(db, 'SistemAir_Log/' + keyData);
@@ -299,16 +300,13 @@
             }
         };
 
-        // KODE YANG DIPERBARUI AGAR SINKRON DENGAN OVERVIEW (INDEX.HTML)
         window.hapusSemuaDataLog = function() {
             if(confirm("PERINGATAN BAHAYA!\n\nApakah Anda sangat yakin ingin MENGHAPUS SELURUH data riwayat log dan rekap harian?\n\nTindakan ini tidak dapat dibatalkan!")) {
                 
                 const logRef = ref(db, 'SistemAir_Log'); 
                 const harianRef = ref(db, 'SistemAir_Harian'); 
 
-                // 1. Hapus data log mentah
                 remove(logRef).then(() => {
-                    // 2. Jika sukses, hapus juga data rekap harian agar Overview ikut kosong (0)
                     return remove(harianRef);
                 }).then(() => {
                     alert("Seluruh data log dan rekap harian berhasil dikosongkan.");
@@ -318,22 +316,39 @@
             }
         };
 
-        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(100));
+        const logRef = ref(db, 'SistemAir_Log');
 
+        // BUG FIX PEMBACAAN DATA: Masuk ke dalam folder tanggal terlebih dahulu
         onValue(logRef, (snapshot) => {
             tbody.innerHTML = ''; 
 
             if (snapshot.exists()) {
                 let dataRiwayat = [];
                 
-                snapshot.forEach((childSnapshot) => {
-                    let baris = childSnapshot.val();
-                    baris.firebaseKey = childSnapshot.key;
-                    dataRiwayat.push(baris);
+                snapshot.forEach((folderTanggal) => {
+                    let isiFolder = folderTanggal.val();
+                    
+                    // Cek apakah ini folder tanggal (isinya object-object dan bukan data langsung)
+                    if (isiFolder && typeof isiFolder === 'object' && !isiFolder.hasOwnProperty('timestamp')) {
+                        // Loop isi dari dalam folder tanggal
+                        Object.keys(isiFolder).forEach(pushId => {
+                            let baris = isiFolder[pushId];
+                            // Gabungkan nama folder tanggal dan pushId untuk fungsi hapus
+                            baris.firebaseKey = folderTanggal.key + '/' + pushId; 
+                            dataRiwayat.push(baris);
+                        });
+                    } else {
+                        // Jika ada data lama yang tidak masuk folder, tetap terbaca
+                        let baris = isiFolder;
+                        baris.firebaseKey = folderTanggal.key;
+                        dataRiwayat.push(baris);
+                    }
                 });
 
-                dataRiwayat.reverse().forEach((d) => {
-                    
+                // Urutkan data berdasarkan timestamp (yang terbaru di atas) agar rapi
+                dataRiwayat.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                dataRiwayat.forEach((d) => {
                     const waktuAsli = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
                     const tanggalTampilan = waktuAsli.toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' });
                     
@@ -382,6 +397,17 @@
                 if (totalDataBadge) totalDataBadge.innerText = "0 Data";
             }
         });
+
+        // TAMBAHAN FITUR: AUTOSAVE KE CSV SETIAP AKHIR HARI (JAM 23:59:55)
+        setInterval(() => {
+            const skrg = new Date();
+            if (skrg.getHours() === 23 && skrg.getMinutes() === 59 && skrg.getSeconds() === 55) {
+                console.log("Memicu otomatis export CSV bawaan...");
+                if (typeof unduhCSV === "function") {
+                    unduhCSV();
+                }
+            }
+        }, 1000);
     </script>
 </body>
 </html>
