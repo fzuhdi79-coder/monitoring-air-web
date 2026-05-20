@@ -20,11 +20,12 @@
     <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
+                
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
                         <i class="fa-solid fa-droplet text-lg"></i>
                     </div>
-                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
+                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r flow-root from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
@@ -52,9 +53,6 @@
             <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
                 <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
             </a>
-            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
-            </a>
             <a href="grafik.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
                 <i class="fa-solid fa-chart-area mr-2 text-blue-200"></i> Analytics
             </a>
@@ -62,34 +60,34 @@
                 <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
             </a>
             <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
+            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95">
                 <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
             </button>
         </div>
     </nav>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        <div class="border-b border-slate-200 pb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Advanced Graphical History</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Gunakan kombinasi kalender dan timeframe untuk analisa telemetri tingkat lanjut.</p>
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Gunakan kombinasi kalender dan rentang waktu untuk analisa data sensor lebih interaktif.</p>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3 self-start lg:self-center">
+            <div class="flex flex-wrap items-center gap-3 self-start sm:self-center">
                 <div class="flex items-center space-x-2 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm">
                     <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
                     <input type="date" id="filter-tanggal-grafik" onchange="gantiTanggalGrafik()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
                 </div>
 
                 <div class="flex items-center bg-slate-200/70 p-1 rounded-xl border border-slate-200 shadow-inner" id="timeframe-container">
-                    <button onclick="ubahTimeframe('15p')" id="tf-15p" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">Live</button>
+                    <button onclick="ubahTimeframe('15p')" id="tf-15p" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">Live (15 Poin)</button>
                     <button onclick="ubahTimeframe('1h')" id="tf-1h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">1 Jam</button>
                     <button onclick="ubahTimeframe('6h')" id="tf-6h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">6 Jam</button>
-                    <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam (Semua)</button>
+                    <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam</button>
                 </div>
 
-                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1">
-                    <i class="fa-solid fa-compress text-[10px]"></i> Reset View
+                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-lg border border-slate-200 transition active:scale-95 shadow-sm">
+                    <i class="fa-solid fa-arrows-rotate mr-1"></i> Reset Zoom
                 </button>
             </div>
         </div>
@@ -97,12 +95,12 @@
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Telemetry Analytics Stream <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">(Gunakan mouse drag / swipe jari untuk kustomisasi posisi geser)</span>
+                    <i class="fa-solid fa-square-poll-vertical" style="color: rgb(0, 0, 0);"></i> Multi-Axis Sensor Dashboard <span class="text-[10px] text-slate-400 font-normal">Scroll / Seret grafik</span>
                 </span>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> pH </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-amber-500 inline-block"></span> Turbidity </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-blue-500 inline-block"></span> Water Level </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> pH [Line] (Kiri)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-amber-400 inline-block"></span> Turbidity [Bar] (Kanan)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500/30 border border-blue-500 inline-block"></span> Water Level [Area] (Kanan)</div>
                 </div>
             </div>
             
@@ -114,48 +112,77 @@
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
-    </footer>
-
     <script>
         const hamburgerBtn = document.getElementById('hamburger-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const hamburgerIcon = document.getElementById('hamburger-icon');
+
         hamburgerBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
-            hamburgerIcon.className = mobileMenu.classList.contains('hidden') ? "fa-solid fa-bars text-xl" : "fa-solid fa-xmark text-xl";
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerIcon.className = "fa-solid fa-bars text-xl";
+            } else {
+                hamburgerIcon.className = "fa-solid fa-xmark text-xl";
+            }
         });
+
         function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
     </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { getDatabase, ref, onValue, get, query } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
-        // State Global untuk Managemen Waktu Grafik
-        let currentTimeframe = '15p'; 
-        let rawTimestamps = []; 
-        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
-        let unsubscribeLiveStream = null;
+        let currentTimeframe = '15p';
+        let rawTimestamps = [];
 
         const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
         const chartMulti = new Chart(ctx, {
-            type: 'line',
             data: {
                 labels: [],
                 datasets: [
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.2, pointRadius: 2, borderWidth: 2 }
+                    { 
+                        label: 'pH', 
+                        type: 'line', 
+                        data: [], 
+                        borderColor: '#10b981', 
+                        backgroundColor: '#10b981', 
+                        tension: 0.4, 
+                        pointRadius: 2, 
+                        borderWidth: 2,
+                        yAxisID: 'y' // Sumbu Kiri
+                    },
+                    { 
+                        label: 'Turbidity', 
+                        type: 'bar', // VARIATIVE 1: Diubah jadi Grafik Batang (Bar)
+                        data: [], 
+                        borderColor: '#fbbf24', 
+                        backgroundColor: 'rgba(251, 191, 36, 0.4)', 
+                        borderWidth: 1,
+                        yAxisID: 'y1', // Sumbu Kanan
+                        barPercentage: 0.5
+                    },
+                    { 
+                        label: 'Water Level', 
+                        type: 'line', // VARIATIVE 2: Diubah jadi Grafik Area (Line + Fill Terbuka)
+                        data: [], 
+                        borderColor: '#3b82f6', 
+                        backgroundColor: 'rgba(59, 130, 246, 0.12)', 
+                        fill: true, 
+                        tension: 0.4, 
+                        pointRadius: 1, 
+                        borderWidth: 2,
+                        yAxisID: 'y1' // Sumbu Kanan
+                    }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
                 plugins: { 
                     legend: { display: false },
                     zoom: {
@@ -165,29 +192,34 @@
                 },
                 scales: {
                     x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' }, min: undefined, max: undefined },
-                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
+                    y: { 
+                        type: 'linear', display: true, position: 'left', min: 0, max: 14,
+                        title: { display: true, text: 'Skala pH', font: { size: 10, weight: 'bold' }, color: '#10b981' },
+                        grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#10b981' } 
+                    },
+                    y1: { 
+                        type: 'linear', display: true, position: 'right',
+                        title: { display: true, text: 'Kekeruhan (NTU) & Level (cm)', font: { size: 10, weight: 'bold' }, color: '#64748b' },
+                        grid: { drawOnChartArea: false }, ticks: { font: { size: 10 }, color: '#64748b' } 
+                    }
                 }
             }
         });
 
         window.resetSkalaGrafik = function() { chartMulti.resetZoom(); };
 
-        // FUNGSI LOGIKA TIMEFRAME INTERAKTIF (MANIPULASI MIN-MAX AXIS)
         window.ubahTimeframe = function(tf) {
             currentTimeframe = tf;
-            
-            // Perbarui Style Button Aktif
             const tfs = ['15p', '1h', '6h', 'all'];
             tfs.forEach(item => {
                 const btn = document.getElementById(`tf-${item}`);
                 if (item === tf) {
-                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200/50";
+                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm";
                 } else {
                     btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
                 }
             });
-
-            chartMulti.resetZoom(); // Reset modifikasi zoom manual user sebelumnya
+            chartMulti.resetZoom();
             aturBatasTampilanGrafik();
             chartMulti.update();
         };
@@ -197,9 +229,9 @@
             if (totalData === 0) return;
 
             if (currentTimeframe === '15p') {
-                const jumlahTampil = 15;
-                if (totalData > jumlahTampil) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampil];
+                const jumlahTampilLayar = 15; 
+                if (totalData > jumlahTampilLayar) {
+                    chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampilLayar];
                     chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
                 } else {
                     chartMulti.options.scales.x.min = undefined;
@@ -208,7 +240,7 @@
             } 
             else if (currentTimeframe === '1h' || currentTimeframe === '6h') {
                 const detikTerakhir = rawTimestamps[totalData - 1];
-                const durasiMundur = currentTimeframe === '1h' ? 3600 : 21600; // Hitungan detik dalam (1 jam / 6 jam)
+                const durasiMundur = currentTimeframe === '1h' ? 3600 : 21600;
                 const batasDetikMin = detikTerakhir - durasiMundur;
                 
                 let indeksTarget = 0;
@@ -218,7 +250,6 @@
                         break;
                     }
                 }
-                
                 if (indeksTarget < totalData) {
                     chartMulti.options.scales.x.min = chartMulti.data.labels[indeksTarget];
                     chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
@@ -247,6 +278,9 @@
             return `${y}-${m}-${d}`;
         }
 
+        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
+        let unsubscribeLiveStream = null;
+
         window.muatGrafikPerTanggal = function(tanggalFolder) {
             chartMulti.data.labels = [];
             chartMulti.data.datasets[0].data = [];
@@ -255,20 +289,32 @@
             rawTimestamps = [];
             chartMulti.update();
 
-            const logRef = query(ref(db, 'SistemAir_Log/' + tanggalFolder), limitToLast(2880));
+            // FIX BUG PATH: Membaca root node secara global agar pencarian tanggal akurat
+            const logRef = query(ref(db, 'SistemAir_Log'));
             
             get(logRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
                         const dataLog = childSnapshot.val();
                         let ts = dataLog.timestamp ? Number(dataLog.timestamp) : Date.now() / 1000;
-                        let waktuLabel = formatWaktu(new Date(ts * 1000));
+                        const dateObj = new Date(ts * 1000);
                         
-                        rawTimestamps.push(ts);
-                        chartMulti.data.labels.push(waktuLabel);
-                        chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
-                        chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
+                        const yyyy = dateObj.getFullYear();
+                        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const dd = String(dateObj.getDate()).padStart(2, '0');
+                        const tglLog = `${yyyy}-${mm}-${dd}`;
+                        
+                        if (tglLog === tanggalFolder) {
+                            let waktuLabel = formatWaktu(dateObj);
+                            
+                            rawTimestamps.push(ts);
+                            chartMulti.data.labels.push(waktuLabel);
+                            chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
+                            chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
+                            
+                            // FIX BUG UNTERLINE KEY: Menyelaraskan data tinggi_air database Anda
+                            chartMulti.data.datasets[2].data.push(dataLog.tinggi_air || dataLog.tinggiAir || 0);
+                        }
                     });
                 }
                 aturBatasTampilanGrafik();
@@ -296,7 +342,9 @@
                         chartMulti.data.labels.push(waktu);
                         chartMulti.data.datasets[0].data.push(d.pH || 0);
                         chartMulti.data.datasets[1].data.push(d.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
+                        
+                        // SINKRONISASI REALTIME KEY: tinggi_air
+                        chartMulti.data.datasets[2].data.push(d.tinggi_air || d.tinggiAir || 0);
 
                         if (chartMulti.data.labels.length > 2880) {
                             rawTimestamps.shift();
