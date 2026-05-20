@@ -75,7 +75,10 @@
                         <i class="fa-solid fa-database text-sm"></i>
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">LIVE RECORDS STORAGE</h2>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">LIVE RECORDS STORAGE</h2>
+                            <span id="total-data-badge" class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full inline-block">0 Data</span>
+                        </div>
                         <p class="text-xs text-slate-400 mt-0.5">Penyimpanan terenkripsi riwayat data aktif (Max 100 Terbaru).</p>
                     </div>
                 </div>
@@ -156,6 +159,7 @@
             window.location.href = "login.html"; 
         }
 
+        // Fungsi terapkanFilter diperbarui agar ikut menghitung jumlah baris yang tampil
         function terapkanFilter() {
             const inputTanggal = document.getElementById("filter-tanggal").value; 
             const inputWaktu = document.getElementById("filter-waktu").value.trim(); 
@@ -163,15 +167,17 @@
 
             let adaDataAsli = false;
             let adaDataTampil = false;
+            let totalTampil = 0;
+            let totalAsli = 0;
 
             barisTabel.forEach(tr => {
                 const tanggalData = tr.getAttribute("data-date"); 
                 const waktuData = tr.getAttribute("data-time"); 
                 
-                // Mencegah baris kosong (seperti pesan "Belum ada data") ikut ter-filter dan memicu error
                 if (!tanggalData || !waktuData) return;
                 
                 adaDataAsli = true;
+                totalAsli++;
                 let tampilTanggal = true;
                 let tampilWaktu = true;
 
@@ -186,10 +192,21 @@
                 if (tampilTanggal && tampilWaktu) {
                     tr.classList.remove("hidden");
                     adaDataTampil = true;
+                    totalTampil++;
                 } else {
                     tr.classList.add("hidden");
                 }
             });
+
+            // Update Badge Total Data secara Real-Time berdasarkan filter aktif
+            const totalDataBadge = document.getElementById('total-data-badge');
+            if (totalDataBadge) {
+                if (inputTanggal !== "" || inputWaktu !== "") {
+                    totalDataBadge.innerText = `${totalTampil} dari ${totalAsli} Data`;
+                } else {
+                    totalDataBadge.innerText = `${totalAsli} Data`;
+                }
+            }
 
             // UI Feedback jika pencarian filter tidak menemukan data
             const pesanKosong = document.getElementById("pesan-kosong-filter");
@@ -227,7 +244,6 @@
             let counterData = 0;
 
             barisData.forEach(tr => {
-                // BUG FIX: Jangan eksport baris yang di-hidden atau baris pesan teks "Kosong"
                 if (tr.classList.contains("hidden") || !tr.hasAttribute("data-date")) return;
 
                 counterData++;
@@ -357,6 +373,9 @@
 
             } else {
                 tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">Belum ada data riwayat yang terekam.</td></tr>`;
+                // Reset badge ke 0 jika database kosong
+                const totalDataBadge = document.getElementById('total-data-badge');
+                if (totalDataBadge) totalDataBadge.innerText = "0 Data";
             }
         });
     </script>
