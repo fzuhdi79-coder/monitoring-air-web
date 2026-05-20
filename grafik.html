@@ -67,7 +67,7 @@
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         <div class="border-b border-slate-200 pb-5">
             <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Real-time Advanced Charts</h1>
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan ketiga parameter utama sensor.</p>
+            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan ketiga parameter utama sensor secara individual.</p>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
@@ -79,15 +79,9 @@
                     <span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH)
                 </div>
             </div>
-            
-            <div class="flex w-full pb-4">
-                <div class="h-64 sm:h-80 md:h-96 flex-shrink-0 border-r border-slate-100 bg-white z-10" style="width: 35px;">
-                    <canvas id="y-axis-ph"></canvas>
-                </div>
-                <div class="w-full overflow-x-auto">
-                    <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 1500px;">
-                        <canvas id="chart-ph"></canvas>
-                    </div>
+            <div id="scroll-ph" class="w-full overflow-x-auto pb-4">
+                <div id="container-ph" class="relative h-64 sm:h-80 md:h-96" style="width: 100%;">
+                    <canvas id="chart-ph"></canvas>
                 </div>
             </div>
         </div>
@@ -101,15 +95,9 @@
                     <span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Water Turbidity (NTU)
                 </div>
             </div>
-            
-            <div class="flex w-full pb-4">
-                <div class="h-64 sm:h-80 md:h-96 flex-shrink-0 border-r border-slate-100 bg-white z-10" style="width: 35px;">
-                    <canvas id="y-axis-tb"></canvas>
-                </div>
-                <div class="w-full overflow-x-auto">
-                    <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 1500px;">
-                        <canvas id="chart-tb"></canvas>
-                    </div>
+            <div id="scroll-tb" class="w-full overflow-x-auto pb-4">
+                <div id="container-tb" class="relative h-64 sm:h-80 md:h-96" style="width: 100%;">
+                    <canvas id="chart-tb"></canvas>
                 </div>
             </div>
         </div>
@@ -123,15 +111,9 @@
                     <span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level (cm)
                 </div>
             </div>
-            
-            <div class="flex w-full pb-4">
-                <div class="h-64 sm:h-80 md:h-96 flex-shrink-0 border-r border-slate-100 bg-white z-10" style="width: 35px;">
-                    <canvas id="y-axis-lv"></canvas>
-                </div>
-                <div class="w-full overflow-x-auto">
-                    <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 1500px;">
-                        <canvas id="chart-lv"></canvas>
-                    </div>
+            <div id="scroll-lv" class="w-full overflow-x-auto pb-4">
+                <div id="container-lv" class="relative h-64 sm:h-80 md:h-96" style="width: 100%;">
+                    <canvas id="chart-lv"></canvas>
                 </div>
             </div>
         </div>
@@ -160,43 +142,26 @@
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
-        // HELPER: Mengunci nilai minimum & maksimum agar Sumbu Y dan Grafik sejajar
-        function createYAxis(ctxId, minV, maxV) {
-            return new Chart(document.getElementById(ctxId).getContext('2d'), {
-                type: 'line',
-                data: { labels: [''], datasets: [] },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                    scales: {
-                        x: { display: false },
-                        y: { min: minV, max: maxV, grid: { display: false }, ticks: { font: { size: 10 }, color: '#64748b', padding: 2 }, border: { display: false } }
-                    }
-                }
-            });
-        }
-
+        // ==============================================
+        // PERBAIKAN: Fungsi pembuat chart kembali normal (Tanpa split canvas)
+        // ==============================================
         function createMainChart(ctxId, color, minV, maxV) {
             return new Chart(document.getElementById(ctxId).getContext('2d'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: color, backgroundColor: color, tension: 0.3, pointRadius: 1, borderWidth: 2 }] },
+                data: { labels: [], datasets: [{ data: [], borderColor: color, backgroundColor: color, tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                        y: { min: minV, max: maxV, grid: { color: '#f1f5f9' }, ticks: { display: false }, border: { display: false } }
+                        // Sumbu Y akan tampil normal seperti semula dan tidak 0 lagi
+                        y: { min: minV, max: maxV, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
                     }
                 }
             });
         }
 
-        // 1. Inisialisasi 3 Sumbu Y Statis (Skala dikunci agar tidak error)
-        createYAxis('y-axis-ph', 0, 14);
-        createYAxis('y-axis-tb', 0, 150);
-        createYAxis('y-axis-lv', 0, 100);
-
-        // 2. Inisialisasi 3 Grafik Utama (Skala disamakan dengan Sumbu Y di atas)
+        // Kunci Skala agar tidak kebingungan
         const chartPh = createMainChart('chart-ph', '#10b981', 0, 14);
         const chartTb = createMainChart('chart-tb', '#f59e0b', 0, 150);
         const chartLv = createMainChart('chart-lv', '#3b82f6', 0, 100);
@@ -208,7 +173,28 @@
             return `${h}:${m}.${s}`;
         }
 
-        // Menarik Riwayat Terakhir
+        // ==============================================
+        // PERBAIKAN: Fungsi Pelebaran Grafik Dinamis
+        // ==============================================
+        function aturLebarDinamis(chart, containerId) {
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            const jumlahData = chart.data.labels.length;
+            
+            // Jarak antar titik ditentukan 25px. 
+            // Jika data sedikit, akan otomatis menggunakan lebar layar 100% (tidak ompong)
+            const lebarBaru = Math.max(container.parentElement.clientWidth, jumlahData * 25);
+            container.style.width = lebarBaru + 'px';
+            chart.resize();
+        }
+
+        // Fungsi Auto Scroll ke data paling baru (kanan)
+        function geserKeKanan(scrollId) {
+            const scrollDiv = document.getElementById(scrollId);
+            if(scrollDiv) scrollDiv.scrollLeft = scrollDiv.scrollWidth;
+        }
+
+        // Menarik Riwayat 24 Jam Terakhir
         const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(1440));
         get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
@@ -227,15 +213,28 @@
                     chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
                     chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
                 });
-                chartPh.update();
-                chartTb.update();
-                chartLv.update();
+                
+                chartPh.update(); chartTb.update(); chartLv.update();
+
+                // Atur lebarnya sesuai jumlah data yang ditarik
+                aturLebarDinamis(chartPh, 'container-ph');
+                aturLebarDinamis(chartTb, 'container-tb');
+                aturLebarDinamis(chartLv, 'container-lv');
+
+                // Jeda sedikit agar layar dirender sebelum digeser paksa
+                setTimeout(() => {
+                    geserKeKanan('scroll-ph');
+                    geserKeKanan('scroll-tb');
+                    geserKeKanan('scroll-lv');
+                }, 100);
             }
 
-            // Real-time Update
+            // Menerima Data Baru Real-time
             onValue(ref(db, 'SistemAir'), (snapshot) => {
                 if (snapshot.exists()) {
                     const d = snapshot.val();
+                    if(d.pH === undefined) return; // Cegah error jika format tidak cocok
+
                     const waktu = formatWaktu(new Date());
 
                     chartPh.data.labels.push(waktu);
@@ -246,15 +245,21 @@
                     chartTb.data.datasets[0].data.push(d.turbidity || 0);
                     chartLv.data.datasets[0].data.push(d.tinggiAir || 0);
 
-                    // Menjaga grafik tetap sepanjang 1440 titik
                     if (chartPh.data.labels.length > 1440) {
                         chartPh.data.labels.shift(); chartPh.data.datasets[0].data.shift();
                         chartTb.data.labels.shift(); chartTb.data.datasets[0].data.shift();
                         chartLv.data.labels.shift(); chartLv.data.datasets[0].data.shift();
                     }
-                    chartPh.update();
-                    chartTb.update();
-                    chartLv.update();
+                    
+                    chartPh.update(); chartTb.update(); chartLv.update();
+
+                    aturLebarDinamis(chartPh, 'container-ph');
+                    aturLebarDinamis(chartTb, 'container-tb');
+                    aturLebarDinamis(chartLv, 'container-lv');
+
+                    geserKeKanan('scroll-ph');
+                    geserKeKanan('scroll-tb');
+                    geserKeKanan('scroll-lv');
                 }
             });
         });
