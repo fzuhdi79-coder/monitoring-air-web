@@ -9,7 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
     
@@ -20,11 +24,12 @@
     <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
+                
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
                         <i class="fa-solid fa-droplet text-lg"></i>
                     </div>
-                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
+                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r flow-root from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
@@ -52,9 +57,6 @@
             <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
                 <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
             </a>
-            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
-            </a>
             <a href="grafik.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
                 <i class="fa-solid fa-chart-area mr-2 text-blue-200"></i> Analytics
             </a>
@@ -62,34 +64,42 @@
                 <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
             </a>
             <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
+            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95">
                 <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
             </button>
         </div>
     </nav>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        <div class="border-b border-slate-200 pb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="border-b border-slate-200 pb-5 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
             <div>
-                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Advanced Graphical History</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Gunakan kombinasi kalender dan timeframe untuk analisa telemetri tingkat lanjut.</p>
+                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Trading-Style Sensor Analytics</h1>
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Analisa volatilitas nilai pH air menggunakan grafik Candlestick (OHLC).</p>
             </div>
             
-            <div class="flex flex-wrap items-center gap-3 self-start lg:self-center">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 self-start xl:self-center">
+                
                 <div class="flex items-center space-x-2 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm">
                     <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
                     <input type="date" id="filter-tanggal-grafik" onchange="gantiTanggalGrafik()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
                 </div>
 
-                <div class="flex items-center bg-slate-200/70 p-1 rounded-xl border border-slate-200 shadow-inner" id="timeframe-container">
-                    <button onclick="ubahTimeframe('15p')" id="tf-15p" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">Live</button>
-                    <button onclick="ubahTimeframe('1h')" id="tf-1h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">1 Jam</button>
-                    <button onclick="ubahTimeframe('6h')" id="tf-6h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">6 Jam</button>
-                    <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam (Semua)</button>
+                <div class="flex items-center space-x-1.5 bg-white border border-slate-200 pl-2 pr-1.5 py-1 rounded-xl shadow-sm">
+                    <i class="fa-regular fa-clock text-slate-400 text-xs"></i>
+                    <input type="time" id="filter-jam-mulai" class="bg-transparent text-[11px] font-semibold text-slate-700 outline-none cursor-pointer" title="Jam Mulai">
+                    <span class="text-[10px] text-slate-400 font-bold">-</span>
+                    <input type="time" id="filter-jam-selesai" class="bg-transparent text-[11px] font-semibold text-slate-700 outline-none cursor-pointer" title="Jam Selesai">
+                    <button onclick="terapkanFilterJam()" class="ml-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-bold rounded-lg shadow-sm transition active:scale-95">CARI</button>
                 </div>
 
-                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1">
-                    <i class="fa-solid fa-compress text-[10px]"></i> Reset View
+                <div class="flex items-center bg-slate-200/70 p-1 rounded-xl border border-slate-200 shadow-inner" id="timeframe-container">
+                    <button onclick="ubahTimeframe('1h')" id="tf-1h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm">1 Jam</button>
+                    <button onclick="ubahTimeframe('6h')" id="tf-6h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">6 Jam</button>
+                    <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam</button>
+                </div>
+
+                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-xl border border-slate-200 transition active:scale-95 shadow-sm">
+                    <i class="fa-solid fa-arrows-rotate mr-1"></i> Reset
                 </button>
             </div>
         </div>
@@ -97,17 +107,17 @@
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Telemetry Analytics Stream <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">(Gunakan mouse drag / swipe jari untuk kustomisasi posisi geser)</span>
+                    <i class="fa-solid fa-chart-line" style="color: #10b981;"></i> Candlestick pH Volatility
                 </span>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> pH </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-amber-500 inline-block"></span> Turbidity </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-blue-500 inline-block"></span> Water Level </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-emerald-500 inline-block"></span> Naik (Bullish)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-rose-500 inline-block"></span> Turun (Bearish)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-0.5 w-3 bg-amber-400 inline-block"></span> Turbidity [Line]</div>
                 </div>
             </div>
             
             <div class="w-full">
-                <div class="relative h-64 sm:h-80 md:h-96 w-full">
+                <div class="relative h-72 sm:h-96 md:h-[450px] w-full">
                     <canvas id="chart-multi-parameter"></canvas>
                 </div>
             </div>
@@ -131,31 +141,53 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { getDatabase, ref, onValue, get, query } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
-        // State Global untuk Managemen Waktu Grafik
-        let currentTimeframe = '15p'; 
-        let rawTimestamps = []; 
-        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
-        let unsubscribeLiveStream = null;
+        let currentTimeframe = '1h'; // Default view
+        let rawTimestamps = [];
+        
+        // Objek untuk mengelompokkan data jadi Candlestick
+        let ohlcDataObj = {}; 
+        let rawTurbidity = [];
 
         const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
         const chartMulti = new Chart(ctx, {
-            type: 'line',
             data: {
-                labels: [],
                 datasets: [
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.2, pointRadius: 2, borderWidth: 2 }
+                    { 
+                        label: 'pH Volatility (Candlestick)', 
+                        type: 'candlestick', 
+                        data: [], 
+                        yAxisID: 'y',
+                        color: {
+                            up: '#10b981',    
+                            down: '#f43f5e',  
+                            unchanged: '#94a3b8',
+                        },
+                        borderColor: {
+                            up: '#059669', down: '#e11d48', unchanged: '#64748b'
+                        }
+                    },
+                    { 
+                        label: 'Turbidity (NTU)', 
+                        type: 'line', 
+                        data: [], 
+                        borderColor: '#fbbf24', 
+                        backgroundColor: 'transparent',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        tension: 0.3,
+                        yAxisID: 'y1'
+                    }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
                 plugins: { 
                     legend: { display: false },
                     zoom: {
@@ -164,80 +196,109 @@
                     }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' }, min: undefined, max: undefined },
-                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
+                    x: { 
+                        type: 'time', 
+                        time: { unit: 'minute', displayFormats: { minute: 'HH:mm' } },
+                        grid: { color: '#f8fafc' }, 
+                        ticks: { font: { size: 10 }, color: '#94a3b8' } 
+                    },
+                    y: { 
+                        type: 'linear', display: true, position: 'left', min: 0, max: 14,
+                        title: { display: true, text: 'Level pH', font: { size: 10, weight: 'bold' }, color: '#10b981' },
+                        grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#10b981' } 
+                    },
+                    y1: { 
+                        type: 'linear', display: true, position: 'right', min: 0,
+                        title: { display: true, text: 'Kekeruhan (NTU)', font: { size: 10, weight: 'bold' }, color: '#fbbf24' },
+                        grid: { drawOnChartArea: false }, ticks: { font: { size: 10 }, color: '#fbbf24' } 
+                    }
                 }
             }
         });
 
-        window.resetSkalaGrafik = function() { chartMulti.resetZoom(); };
+        window.resetSkalaGrafik = function() { 
+            // Kosongkan form jam
+            document.getElementById('filter-jam-mulai').value = "";
+            document.getElementById('filter-jam-selesai').value = "";
+            chartMulti.resetZoom(); 
+            ubahTimeframe('1h');
+        };
 
-        // FUNGSI LOGIKA TIMEFRAME INTERAKTIF (MANIPULASI MIN-MAX AXIS)
+        // Fungsi ketika Preset Tombol ditekan
         window.ubahTimeframe = function(tf) {
             currentTimeframe = tf;
             
-            // Perbarui Style Button Aktif
-            const tfs = ['15p', '1h', '6h', 'all'];
+            // Kosongkan form jam jika preset ditekan
+            document.getElementById('filter-jam-mulai').value = "";
+            document.getElementById('filter-jam-selesai').value = "";
+
+            const tfs = ['1h', '6h', 'all'];
             tfs.forEach(item => {
                 const btn = document.getElementById(`tf-${item}`);
-                if (item === tf) {
-                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200/50";
-                } else {
-                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
+                if (btn) {
+                    btn.className = (item === tf) 
+                        ? "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm"
+                        : "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
                 }
             });
-
-            chartMulti.resetZoom(); // Reset modifikasi zoom manual user sebelumnya
+            chartMulti.resetZoom();
             aturBatasTampilanGrafik();
             chartMulti.update();
         };
 
-        function aturBatasTampilanGrafik() {
-            const totalData = chartMulti.data.labels.length;
-            if (totalData === 0) return;
+        // Fungsi Eksekusi Filter Custom Jam
+        window.terapkanFilterJam = function() {
+            const tglDipilih = document.getElementById("filter-tanggal-grafik").value;
+            const jamMulai = document.getElementById("filter-jam-mulai").value;
+            const jamSelesai = document.getElementById("filter-jam-selesai").value;
 
-            if (currentTimeframe === '15p') {
-                const jumlahTampil = 15;
-                if (totalData > jumlahTampil) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampil];
-                    chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
-                } else {
-                    chartMulti.options.scales.x.min = undefined;
-                    chartMulti.options.scales.x.max = undefined;
-                }
+            if (!jamMulai || !jamSelesai) {
+                alert("Silakan lengkapi Jam Mulai dan Jam Selesai terlebih dahulu!");
+                return;
+            }
+
+            // Ubah format menjadi Timestamp Milliseconds
+            const msMulai = new Date(`${tglDipilih}T${jamMulai}:00`).getTime();
+            const msSelesai = new Date(`${tglDipilih}T${jamSelesai}:59`).getTime();
+
+            if (msMulai >= msSelesai) {
+                alert("Jam Mulai harus lebih awal daripada Jam Selesai!");
+                return;
+            }
+
+            // Ubah state jadi custom dan matikan warna tombol preset
+            currentTimeframe = 'custom';
+            const tfs = ['1h', '6h', 'all'];
+            tfs.forEach(item => {
+                const btn = document.getElementById(`tf-${item}`);
+                if (btn) btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
+            });
+
+            // Terapkan Zoom ke rentang waktu
+            chartMulti.options.scales.x.min = msMulai;
+            chartMulti.options.scales.x.max = msSelesai;
+            chartMulti.update();
+        };
+
+        function aturBatasTampilanGrafik() {
+            // Jangan timpa scale jika user sedang mode filter custom jam
+            if (currentTimeframe === 'custom') return;
+
+            if (rawTimestamps.length === 0) return;
+            const msTerakhir = rawTimestamps[rawTimestamps.length - 1];
+            
+            if (currentTimeframe === '1h') {
+                chartMulti.options.scales.x.min = msTerakhir - (3600 * 1000);
+                chartMulti.options.scales.x.max = msTerakhir + (60 * 1000); // padding kanan sedikit
             } 
-            else if (currentTimeframe === '1h' || currentTimeframe === '6h') {
-                const detikTerakhir = rawTimestamps[totalData - 1];
-                const durasiMundur = currentTimeframe === '1h' ? 3600 : 21600; // Hitungan detik dalam (1 jam / 6 jam)
-                const batasDetikMin = detikTerakhir - durasiMundur;
-                
-                let indeksTarget = 0;
-                for (let i = totalData - 1; i >= 0; i--) {
-                    if (rawTimestamps[i] < batasDetikMin) {
-                        indeksTarget = i + 1;
-                        break;
-                    }
-                }
-                
-                if (indeksTarget < totalData) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[indeksTarget];
-                    chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
-                } else {
-                    chartMulti.options.scales.x.min = undefined;
-                    chartMulti.options.scales.x.max = undefined;
-                }
+            else if (currentTimeframe === '6h') {
+                chartMulti.options.scales.x.min = msTerakhir - (21600 * 1000);
+                chartMulti.options.scales.x.max = msTerakhir + (60 * 1000);
             } 
             else if (currentTimeframe === 'all') {
                 chartMulti.options.scales.x.min = undefined;
                 chartMulti.options.scales.x.max = undefined;
             }
-        }
-
-        function formatWaktu(d) {
-            const h = String(d.getHours()).padStart(2, '0');
-            const m = String(d.getMinutes()).padStart(2, '0');
-            const s = String(d.getSeconds()).padStart(2, '0');
-            return `${h}:${m}.${s}`;
         }
 
         function dapatkanTanggalLokal(objDate) {
@@ -247,30 +308,55 @@
             return `${y}-${m}-${d}`;
         }
 
+        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
+        let unsubscribeLiveStream = null;
+
+        function tambahDataKeCandle(msTime, nilaiPh) {
+            const dateObj = new Date(msTime);
+            dateObj.setSeconds(0, 0);
+            const minuteKey = dateObj.getTime();
+
+            if (!ohlcDataObj[minuteKey]) {
+                ohlcDataObj[minuteKey] = { x: minuteKey, o: nilaiPh, h: nilaiPh, l: nilaiPh, c: nilaiPh };
+            } else {
+                ohlcDataObj[minuteKey].c = nilaiPh;
+                if (nilaiPh > ohlcDataObj[minuteKey].h) ohlcDataObj[minuteKey].h = nilaiPh;
+                if (nilaiPh < ohlcDataObj[minuteKey].l) ohlcDataObj[minuteKey].l = nilaiPh;
+            }
+        }
+
+        function konversiObjekKeArrayCandle() {
+            return Object.values(ohlcDataObj).sort((a, b) => a.x - b.x);
+        }
+
         window.muatGrafikPerTanggal = function(tanggalFolder) {
-            chartMulti.data.labels = [];
-            chartMulti.data.datasets[0].data = [];
-            chartMulti.data.datasets[1].data = [];
-            chartMulti.data.datasets[2].data = [];
+            ohlcDataObj = {};
             rawTimestamps = [];
+            rawTurbidity = [];
             chartMulti.update();
 
-            const logRef = query(ref(db, 'SistemAir_Log/' + tanggalFolder), limitToLast(2880));
+            const logRef = query(ref(db, 'SistemAir_Log'));
             
             get(logRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
                         const dataLog = childSnapshot.val();
-                        let ts = dataLog.timestamp ? Number(dataLog.timestamp) : Date.now() / 1000;
-                        let waktuLabel = formatWaktu(new Date(ts * 1000));
+                        let ts = dataLog.timestamp ? Number(dataLog.timestamp) * 1000 : Date.now();
+                        const dateObj = new Date(ts);
                         
-                        rawTimestamps.push(ts);
-                        chartMulti.data.labels.push(waktuLabel);
-                        chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
-                        chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
+                        const tglLog = dapatkanTanggalLokal(dateObj);
+                        
+                        if (tglLog === tanggalFolder) {
+                            rawTimestamps.push(ts);
+                            tambahDataKeCandle(ts, dataLog.pH || 0);
+                            rawTurbidity.push({ x: ts, y: dataLog.turbidity || 0 });
+                        }
                     });
                 }
+                
+                chartMulti.data.datasets[0].data = konversiObjekKeArrayCandle();
+                chartMulti.data.datasets[1].data = rawTurbidity;
+                
                 aturBatasTampilanGrafik();
                 chartMulti.update();
                 aktifkanAtauMatikanLiveStream(tanggalFolder);
@@ -289,24 +375,22 @@
                 unsubscribeLiveStream = onValue(ref(db, 'SistemAir'), (snapshot) => {
                     if (snapshot.exists()) {
                         const d = snapshot.val();
-                        let ts = d.timestamp ? Number(d.timestamp) : Date.now() / 1000;
-                        const waktu = formatWaktu(new Date(ts * 1000));
+                        let ts = d.timestamp ? Number(d.timestamp) * 1000 : Date.now();
+
+                        if (rawTimestamps.length > 0 && ts <= rawTimestamps[rawTimestamps.length - 1]) {
+                            return; 
+                        }
 
                         rawTimestamps.push(ts);
-                        chartMulti.data.labels.push(waktu);
-                        chartMulti.data.datasets[0].data.push(d.pH || 0);
-                        chartMulti.data.datasets[1].data.push(d.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
+                        
+                        tambahDataKeCandle(ts, d.pH || 0);
+                        chartMulti.data.datasets[0].data = konversiObjekKeArrayCandle();
+                        
+                        rawTurbidity.push({ x: ts, y: d.turbidity || 0 });
+                        chartMulti.data.datasets[1].data = rawTurbidity;
 
-                        if (chartMulti.data.labels.length > 2880) {
-                            rawTimestamps.shift();
-                            chartMulti.data.labels.shift();
-                            chartMulti.data.datasets[0].data.shift();
-                            chartMulti.data.datasets[1].data.shift();
-                            chartMulti.data.datasets[2].data.shift();
-                        }
                         aturBatasTampilanGrafik();
-                        chartMulti.update();
+                        chartMulti.update('none'); 
                     }
                 });
             }
