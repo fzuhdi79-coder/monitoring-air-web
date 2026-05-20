@@ -210,7 +210,7 @@
                             </h3>
                             <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)" class="text-[10px] sm:text-[11px] font-bold bg-slate-100 border border-slate-200 text-slate-600 rounded-md px-2 py-1 outline-none cursor-pointer" title="Pilih Tanggal Riwayat">
                         </div>
-                        <p id="label-keterangan-rekap" class="text-[11px] sm:text-xs text-slate-400 mt-1">*Data rata-rata sensor hari ini. Direset jam 00:00</p>
+                        <p id="label-keterangan-rekap" class="text-[11px] sm:text-xs text-slate-400 mt-1">*Data harian dikalkulasi langsung secara real-time dari riwayat Log.</p>
                         
                         <button onclick="downloadHarianCSV()" class="mt-2 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95 shadow-sm border border-emerald-500/20">
                             <i class="fa-solid fa-file-csv text-sm"></i> <span id="text-download-btn">Unduh Riwayat (CSV)</span>
@@ -362,52 +362,35 @@
             }
         });
 
-        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(20));
-        get(logRef).then((snapshot) => {
+        const logRefLast20 = query(ref(db, 'SistemAir_Log'), limitToLast(20));
+        get(logRefLast20).then((snapshot) => {
             if (snapshot.exists()) {
                 snapshot.forEach((childSnapshot) => {
                     const dataLog = childSnapshot.val();
-                    
-                    chartPh.data.labels.push('');
-                    chartPh.data.datasets[0].data.push(dataLog.pH || 0);
-
-                    chartTb.data.labels.push('');
-                    chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
-
-                    chartLv.data.labels.push('');
-                    chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
+                    chartPh.data.labels.push(''); chartPh.data.datasets[0].data.push(dataLog.pH || 0);
+                    chartTb.data.labels.push(''); chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
+                    chartLv.data.labels.push(''); chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
                 });
-                chartPh.update();
-                chartTb.update();
-                chartLv.update();
+                chartPh.update(); chartTb.update(); chartLv.update();
             }
         });
 
         function updateChartData(chart, newValue) {
             chart.data.labels.push('');
             chart.data.datasets[0].data.push(newValue);
-            if (chart.data.datasets[0].data.length > 20) {
-                chart.data.labels.shift();
-                chart.data.datasets[0].data.shift();
-            }
+            if (chart.data.datasets[0].data.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
             chart.update();
         }
 
         function updatePompaChart(waktu, valKuras, valIsi) {
             chartPompaKuras.data.labels.push(waktu);
             chartPompaKuras.data.datasets[0].data.push(valKuras);
-            if (chartPompaKuras.data.labels.length > 20) {
-                chartPompaKuras.data.labels.shift();
-                chartPompaKuras.data.datasets[0].data.shift();
-            }
+            if (chartPompaKuras.data.labels.length > 20) { chartPompaKuras.data.labels.shift(); chartPompaKuras.data.datasets[0].data.shift(); }
             chartPompaKuras.update();
 
             chartPompaIsi.data.labels.push(waktu);
             chartPompaIsi.data.datasets[0].data.push(valIsi);
-            if (chartPompaIsi.data.labels.length > 20) {
-                chartPompaIsi.data.labels.shift();
-                chartPompaIsi.data.datasets[0].data.shift();
-            }
+            if (chartPompaIsi.data.labels.length > 20) { chartPompaIsi.data.labels.shift(); chartPompaIsi.data.datasets[0].data.shift(); }
             chartPompaIsi.update();
         }
 
@@ -482,10 +465,8 @@
                 const bManual = document.getElementById('btn-mode-manual');
                 const pButtons = document.querySelectorAll('.btn-pump');
                 
-                const btnP1On = document.getElementById('btn-p1-on');
-                const btnP1Off = document.getElementById('btn-p1-off');
-                const btnP2On = document.getElementById('btn-p2-on');
-                const btnP2Off = document.getElementById('btn-p2-off');
+                const btnP1On = document.getElementById('btn-p1-on'); const btnP1Off = document.getElementById('btn-p1-off');
+                const btnP2On = document.getElementById('btn-p2-on'); const btnP2Off = document.getElementById('btn-p2-off');
 
                 const classBtnManualActive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-white text-slate-900 shadow-sm transition";
                 const classBtnManualInactive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-transparent text-slate-500 hover:bg-slate-300/50 transition cursor-pointer";
@@ -495,18 +476,15 @@
                 if (modeSistem === "AUTO") {
                     bAuto.className = "py-2.5 text-[10px] sm:text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
                     bManual.className = "py-2.5 text-[10px] sm:text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
-                    
                     pButtons.forEach(b => b.disabled = true);
 
                     btnP1On.className  = (pStat === "KURAS") ? classBtnAutoActive : classBtnAutoInactive;
                     btnP1Off.className = (pStat !== "KURAS") ? classBtnAutoActive : classBtnAutoInactive;
                     btnP2On.className  = (pStat === "ISI")   ? classBtnAutoActive : classBtnAutoInactive;
                     btnP2Off.className = (pStat !== "ISI")   ? classBtnAutoActive : classBtnAutoInactive;
-
                 } else {
                     bAuto.className = "py-2.5 text-[10px] sm:text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
                     bManual.className = "py-2.5 text-[10px] sm:text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
-                    
                     pButtons.forEach(b => b.disabled = false);
 
                     btnP1On.className  = (pStat === "KURAS") ? classBtnManualActive : classBtnManualInactive;
@@ -526,14 +504,12 @@
         });
 
         // ==========================================
-        // BUG FIX: PENGAMBILAN TANGGAL ZONA LOKAL (WIB)
+        // BUG FIX: KALKULASI REKAP DARI LOG SECARA REAL-TIME
         // ==========================================
         const now = new Date();
         const tahun = now.getFullYear();
         const bulan = String(now.getMonth() + 1).padStart(2, '0');
         const tanggal = String(now.getDate()).padStart(2, '0');
-        
-        // Memastikan format YYYY-MM-DD menggunakan waktu lokal, bukan UTC London
         const hariIni = `${tahun}-${bulan}-${tanggal}`;
         
         const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
@@ -544,33 +520,61 @@
             inputTanggalRekap.value = hariIni;
         }
 
-        let rekapListener = null;
+        let rekapUnsubscribe = null;
 
         window.muatDataHarian = function(tanggalPilihan) {
             if (labelKeteranganRekap) {
                 labelKeteranganRekap.innerText = (tanggalPilihan === hariIni) 
-                    ? "*Data rata-rata sensor hari ini. Direset jam 00:00" 
+                    ? "*Data harian dikalkulasi langsung secara real-time dari riwayat Log." 
                     : `*Data rata-rata sensor tanggal: ${tanggalPilihan}`;
             }
 
-            // Hentikan pendengar Firebase sebelumnya jika user mengganti-ganti tanggal
-            if (rekapListener) { rekapListener(); }
+            // Hentikan proses pendengar data log sebelumnya jika ada (menghemat memori browser)
+            if (rekapUnsubscribe) { rekapUnsubscribe(); }
 
-            rekapListener = onValue(ref(db, 'SistemAir_Harian/' + tanggalPilihan), (snapshot) => {
+            // LANGSUNG TEMBAK KE TABEL LOG UTAMA! (Bukan tabel Harian)
+            const logRootRef = ref(db, 'SistemAir_Log');
+            
+            rekapUnsubscribe = onValue(logRootRef, (snapshot) => {
+                let totalPh = 0, totalTb = 0, totalLv = 0;
+                let maxPh = -999, minPh = 999;
+                let jumlahData = 0;
+
                 if (snapshot.exists()) {
-                    const dataHarian = snapshot.val();
-                    
-                    document.getElementById('rata-ph').innerText = dataHarian.rata_pH ? dataHarian.rata_pH.toFixed(2) : "0.00";
-                    document.getElementById('rata-tb').innerText = dataHarian.rata_turbidity ? dataHarian.rata_turbidity.toFixed(0) + " NTU" : "0 NTU";
-                    document.getElementById('rata-lv').innerText = dataHarian.rata_tinggiAir ? dataHarian.rata_tinggiAir.toFixed(0) + " cm" : "0 cm";
-                    
-                    const pHMax = dataHarian.pH_maksimum ? dataHarian.pH_maksimum.toFixed(1) : "0.0";
-                    const pHMin = dataHarian.pH_minimum ? dataHarian.pH_minimum.toFixed(1) : "0.0";
-                    document.getElementById('maxmin-ph').innerText = pHMax + " / " + pHMin;
-                    
-                    // Fallback key penamaan Firebase agar kebal error (memastikan data sampel muncul)
-                    const totalSampelTerekam = dataHarian.total_sampel_hari_ini || dataHarian.total_sampel || dataHarian.sampel || 0;
-                    document.getElementById('total-sampel').innerText = totalSampelTerekam + " Data";
+                    snapshot.forEach((child) => {
+                        const d = child.val();
+                        if (d.timestamp) {
+                            const dateObj = new Date(d.timestamp * 1000);
+                            const yyyy = dateObj.getFullYear();
+                            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                            const dd = String(dateObj.getDate()).padStart(2, '0');
+                            const tglLog = `${yyyy}-${mm}-${dd}`;
+
+                            // Jika baris log ini cocok dengan tanggal yang dipilih user
+                            if (tglLog === tanggalPilihan) {
+                                jumlahData++;
+                                let ph = d.pH || 0;
+                                let tb = d.turbidity || 0;
+                                let lv = d.tinggiAir || 0;
+
+                                totalPh += ph;
+                                totalTb += tb;
+                                totalLv += lv;
+
+                                if (ph > maxPh) maxPh = ph;
+                                if (ph < minPh) minPh = ph;
+                            }
+                        }
+                    });
+                }
+
+                // Tampilkan ke layar UI
+                if (jumlahData > 0) {
+                    document.getElementById('rata-ph').innerText = (totalPh / jumlahData).toFixed(2);
+                    document.getElementById('rata-tb').innerText = Math.round(totalTb / jumlahData) + " NTU";
+                    document.getElementById('rata-lv').innerText = Math.round(totalLv / jumlahData) + " cm";
+                    document.getElementById('maxmin-ph').innerText = maxPh.toFixed(1) + " / " + minPh.toFixed(1);
+                    document.getElementById('total-sampel').innerText = jumlahData + " Data";
                 } else {
                     document.getElementById('rata-ph').innerText = "0.00";
                     document.getElementById('rata-tb').innerText = "0 NTU";
@@ -581,6 +585,7 @@
             });
         };
 
+        // Panggil rekap untuk tanggal hari ini secara default
         window.muatDataHarian(hariIni);
 
         window.downloadHarianCSV = async function() {
@@ -590,8 +595,8 @@
             if (btnTeks) btnTeks.innerText = "Memproses...";
             
             try {
-                const logRef = ref(db, 'SistemAir_Log');
-                const snap = await get(logRef);
+                const logRefNode = ref(db, 'SistemAir_Log');
+                const snap = await get(logRefNode);
                 
                 if(snap.exists()) {
                     let csvText = "Waktu_Data_Masuk,pH_Level,Kekeruhan_NTU,Tinggi_Air_CM\n";
