@@ -8,7 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+    
     <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -65,15 +69,20 @@
     </nav>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        <div class="border-b border-slate-200 pb-5">
-            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Real-time Advanced Charts</h1>
-            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan ketiga parameter utama sensor untuk <span class="font-bold text-slate-800" id="info-tanggal">Hari Ini</span>.</p>
+        <div class="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Real-time Advanced Charts</h1>
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan parameter sensor untuk <span class="font-bold text-slate-800" id="info-tanggal">Hari Ini</span>.</p>
+            </div>
+            <button onclick="resetSkalaGrafik()" class="self-start sm:self-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold rounded-lg border border-slate-200 transition active:scale-95">
+                <i class="fa-solid fa-arrows-rotate mr-1"></i> Reset Geser/Zoom
+            </button>
         </div>
 
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Multi-Sensor Datastream
+                    <i class="fa-solid fa-chart-line text-blue-500"></i> Multi-Sensor Datastream <span class="text-[10px] text-slate-400 font-normal">(Gunakan Mouse/Jari untuk menggeser grafik)</span>
                 </span>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
                     <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH) </div>
@@ -82,8 +91,8 @@
                 </div>
             </div>
             
-            <div class="w-full overflow-x-auto pb-4">
-                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 1000px;">
+            <div class="w-full">
+                <div class="relative h-64 sm:h-80 md:h-96 w-full">
                     <canvas id="chart-multi-parameter"></canvas>
                 </div>
             </div>
@@ -118,21 +127,45 @@
             data: {
                 labels: [],
                 datasets: [
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 2, borderWidth: 2 }
+                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 3, borderWidth: 2 },
+                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 3, borderWidth: 2 }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    // SUNTIKAN KONFIGURASI PLUGIN ZOOM & PAN
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'x', // Hanya ijinkan geser ke kanan-kiri (X-axis)
+                        },
+                        zoom: {
+                            wheel: { enabled: true }, // Bisa di-zoom in/out pakai scroll wheel mouse
+                            pinch: { enabled: true }, // Bisa di-zoom in/out pakai cubitan jari di HP
+                            mode: 'x',
+                        }
+                    }
+                },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    x: { 
+                        grid: { display: false }, 
+                        ticks: { font: { size: 9 }, color: '#94a3b8' },
+                        min: undefined, // Akan dihitung dinamis setelah data ditarik
+                        max: undefined
+                    },
                     y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
                 }
             }
         });
+
+        // Ekspos fungsi reset grafik ke objek window agar bisa diklik tombolnya
+        window.resetSkalaGrafik = function() {
+            chartMulti.resetZoom();
+        };
 
         // Helper fungsi format HH:mm.ss
         function formatWaktu(d) {
@@ -152,7 +185,6 @@
         let tanggalHariIni = dapatkanTanggalLokal(new Date());
         document.getElementById("info-tanggal").innerText = tanggalHariIni;
 
-        // Ambil data log folder tanggal hari ini (Maksimal 2880 data sesuai kapasitas harian)
         const logRef = query(ref(db, 'SistemAir_Log/' + tanggalHariIni), limitToLast(2880));
         
         get(logRef).then((snapshot) => {
@@ -170,10 +202,13 @@
                     chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
                     chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
                 });
+                
+                // Mengatur batas awal pandangan grafik (misal hanya menampilkan 10 data terakhir di layar awal)
+                // Sisa datanya otomatis tersembunyi dan baru terlihat jika digeser (pan)
+                aturBatasTampilanGrafik();
                 chartMulti.update();
             }
 
-            // Realtime Update monitoring stream
             onValue(ref(db, 'SistemAir'), (snapshot) => {
                 if (snapshot.exists()) {
                     const d = snapshot.val();
@@ -190,16 +225,30 @@
                         chartMulti.data.datasets[1].data.shift();
                         chartMulti.data.datasets[2].data.shift();
                     }
+
+                    aturBatasTampilanGrafik();
                     chartMulti.update();
                 }
             });
         });
 
-        // Auto-refresh otomatis jika mendeteksi pergantian tanggal di sistem laptop/HP user
+        // Fungsi pembatas pandangan agar grafik terpotong di layar dan memaksa user untuk menggesernya
+        function aturBatasTampilanGrafik() {
+            const totalData = chartMulti.data.labels.length;
+            const jumlahTampilLayar = 15; // Mengunci tampilan layar hanya memperlihatkan 15 titik data terupdate
+            
+            if (totalData > jumlahTampilLayar) {
+                chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampilLayar];
+                chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
+            } else {
+                chartMulti.options.scales.x.min = undefined;
+                chartMulti.options.scales.x.max = undefined;
+            }
+        }
+
         setInterval(() => {
             const cekHariBaru = dapatkanTanggalLokal(new Date());
             if(cekHariBaru !== tanggalHariIni) {
-                console.log("Hari berganti, merefresh grafik...");
                 window.location.reload();
             }
         }, 5000);
