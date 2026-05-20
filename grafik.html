@@ -2,184 +2,249 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Data Sistem Air</title>
-    <style>
-        /* CSS Sederhana agar tampilan rapi */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        .controls { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
-        .controls input[type="date"], .controls button { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
-        .btn-export { background-color: #28a745; color: white; border: none; cursor: pointer; transition: 0.3s; }
-        .btn-export:hover { background-color: #218838; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
-        th { background-color: #007bff; color: white; position: sticky; top: 0; }
-        tr:hover { background-color: #f1f1f1; }
-        .empty-msg { text-align: center; padding: 20px; color: #888; font-style: italic; }
-    </style>
+    <title>Realtime Telemetry Analytics - WQ System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-<div class="container">
-    <h2>Riwayat Log Sistem Akuarium</h2>
-    
-    <div class="controls">
-        <div>
-            <label for="tanggalFilter"><strong>Pilih Tanggal: </strong></label>
-            <input type="date" id="tanggalFilter">
+    <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
+                        <i class="fa-solid fa-droplet text-lg"></i>
+                    </div>
+                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
+                    <a href="index.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Overview</a>
+                    <a href="grafik.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Analytics</a>
+                    <a href="history.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Data Log</a>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
+                        <i class="fa-solid fa-power-off"></i> Sign Out
+                    </button>
+                </div>
+
+                <div class="flex md:hidden">
+                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
+                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-        <button class="btn-export" onclick="exportTableToCSV('Data_Akuarium.csv')">📥 Export CSV</button>
-    </div>
 
-    <div style="max-height: 500px; overflow-y: auto;">
-        <table id="logTable">
-            <thead>
-                <tr>
-                    <th>Waktu (Jam)</th>
-                    <th>pH Air</th>
-                    <th>Kekeruhan (NTU)</th>
-                    <th>Tinggi Air (cm)</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                </tbody>
-        </table>
-    </div>
-</div>
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
+            <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
+            </a>
+            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
+            </a>
+            <a href="grafik.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
+                <i class="fa-solid fa-chart-area mr-2 text-blue-200"></i> Analytics
+            </a>
+            <a href="history.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+                <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
+            </a>
+            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
+            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
+                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
+            </button>
+        </div>
+    </nav>
 
-<script type="module">
-    // 1. IMPORT FIREBASE V9
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+        <div class="border-b border-slate-200 pb-5">
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Real-time Advanced Charts</h1>
+            <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Garis tren fluktuasi pembacaan ketiga parameter utama sensor secara individual.</p>
+        </div>
 
-    // 2. MASUKKAN CONFIG FIREBASE ANDA DI SINI!
-    const firebaseConfig = {
-        apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", // Sesuaikan API Key 
-        databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "realtime-database-5c956",
-    };
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-flask text-emerald-500"></i> Trend Analisis - Potensial Hidrogen (pH)
+                </span>
+                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
+                    <span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> Water Quality (pH)
+                </div>
+            </div>
+            <div class="w-full overflow-x-auto pb-4">
+                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
+                    <canvas id="chart-ph"></canvas>
+                </div>
+            </div>
+        </div>
 
-    // 3. INISIALISASI FIREBASE
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-virus text-amber-500"></i> Trend Analisis - Kekeruhan Air (Turbidity)
+                </span>
+                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
+                    <span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Water Turbidity (NTU)
+                </div>
+            </div>
+            <div class="w-full overflow-x-auto pb-4">
+                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
+                    <canvas id="chart-turbidity"></canvas>
+                </div>
+            </div>
+        </div>
 
-    // 4. DEKLARASI ELEMEN HTML
-    const dateInput = document.getElementById('tanggalFilter');
-    const tableBody = document.getElementById('tableBody');
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-water text-blue-500"></i> Trend Analisis - Ketinggian Air (Water Level)
+                </span>
+                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold">
+                    <span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level (cm)
+                </div>
+            </div>
+            <div class="w-full overflow-x-auto pb-4">
+                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 3000px;">
+                    <canvas id="chart-waterlevel"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    // Dapatkan tanggal hari ini dengan format YYYY-MM-DD
-    function getTodayString() {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    }
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
+        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
+    </footer>
 
-    // Set kalender bawaan ke hari ini
-    dateInput.value = getTodayString();
-    
-    // Tarik data saat halaman pertama kali dibuka
-    fetchDataFromFirebase(dateInput.value);
+    <script>
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            hamburgerIcon.className = mobileMenu.classList.contains('hidden') ? "fa-solid fa-bars text-xl" : "fa-solid fa-xmark text-xl";
+        });
+        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+    </script>
 
-    // Tarik data baru ketika user mengganti tanggal di kalender
-    dateInput.addEventListener('change', (e) => {
-        fetchDataFromFirebase(e.target.value);
-    });
-
-    // 5. FUNGSI MENARIK DATA DARI FIREBASE BERDASARKAN TANGGAL
-    let currentListener = null; // Menyimpan referensi listener aktif
-    
-    function fetchDataFromFirebase(tanggalPilih) {
-        // Path sesuai dengan struktur ESP32 yang baru: SistemAir_Log/YYYY-MM-DD
-        const logRef = ref(db, `SistemAir_Log/${tanggalPilih}`);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getDatabase, ref, onValue, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
-        tableBody.innerHTML = '<tr><td colspan="4" class="empty-msg">Memuat data dari server...</td></tr>';
+        const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
+        const db = getDatabase(app);
 
-        onValue(logRef, (snapshot) => {
-            tableBody.innerHTML = ''; // Bersihkan tabel
-            
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                
-                // Ubah object Firebase menjadi array agar bisa diurutkan berdasarkan timestamp
-                const dataArray = Object.keys(data).map(key => ({
-                    id: key,
-                    ...data[key]
-                }));
-
-                // Urutkan data dari yang paling baru (Descending)
-                dataArray.sort((a, b) => b.timestamp - a.timestamp);
-
-                // Masukkan data ke dalam tabel
-                dataArray.forEach(item => {
-                    // Konversi Timestamp UNIX ke Jam lokal
-                    const dateObj = new Date(item.timestamp * 1000);
-                    const jam = String(dateObj.getHours()).padStart(2, '0');
-                    const menit = String(dateObj.getMinutes()).padStart(2, '0');
-                    const detik = String(dateObj.getSeconds()).padStart(2, '0');
-                    const waktuFormat = `${jam}:${menit}:${detik}`;
-
-                    const row = `<tr>
-                        <td>${waktuFormat}</td>
-                        <td>${item.pH.toFixed(2)}</td>
-                        <td>${item.turbidity}</td>
-                        <td>${item.tinggiAir.toFixed(1)}</td>
-                    </tr>`;
-                    tableBody.innerHTML += row;
-                });
-            } else {
-                tableBody.innerHTML = `<tr><td colspan="4" class="empty-msg">Tidak ada data untuk tanggal ${tanggalPilih}</td></tr>`;
+        // ==============================================
+        // PELENGKAPAN KODE: KONFIGURASI 3 GRAFIK TERPISAH
+        // ==============================================
+        
+        // 1. Setup Grafik pH
+        const ctxPh = document.getElementById('chart-ph').getContext('2d');
+        const chartPh = new Chart(ctxPh, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, layout: { padding: { left: 10 } }, plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } } }
             }
         });
-    }
 
-    // 6. FUNGSI EXPORT KE CSV (Dipanggil oleh tombol Export)
-    window.exportTableToCSV = function(filename) {
-        const csv = [];
-        const rows = document.querySelectorAll("table tr");
-        
-        for (let i = 0; i < rows.length; i++) {
-            const row = [], cols = rows[i].querySelectorAll("td, th");
-            for (let j = 0; j < cols.length; j++) 
-                row.push(cols[j].innerText);
-            csv.push(row.join(","));
+        // 2. Setup Grafik Turbidity
+        const ctxTb = document.getElementById('chart-turbidity').getContext('2d');
+        const chartTb = new Chart(ctxTb, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, layout: { padding: { left: 10 } }, plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } } }
+            }
+        });
+
+        // 3. Setup Grafik Water Level
+        const ctxLv = document.getElementById('chart-waterlevel').getContext('2d');
+        const chartLv = new Chart(ctxLv, {
+            type: 'line',
+            data: { labels: [], datasets: [{ label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 2, borderWidth: 2 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, layout: { padding: { left: 10 } }, plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } } }
+            }
+        });
+
+        function formatWaktu(d) {
+            const h = String(d.getHours()).padStart(2, '0');
+            const m = String(d.getMinutes()).padStart(2, '0');
+            const s = String(d.getSeconds()).padStart(2, '0');
+            return `${h}:${m}.${s}`;
         }
 
-        downloadCSV(csv.join("\n"), `Log_${dateInput.value}.csv`);
-    }
+        // ==============================================
+        // PELENGKAPAN KODE: INJEKSI DATA KE 3 GRAFIK
+        // ==============================================
+        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(1440));
+        get(logRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                snapshot.forEach((childSnapshot) => {
+                    const dataLog = childSnapshot.val();
+                    let waktuLabel = '--:--.--';
+                    
+                    if (dataLog.timestamp) {
+                        waktuLabel = formatWaktu(new Date(dataLog.timestamp * 1000));
+                    }
 
-    function downloadCSV(csv, filename) {
-        let csvFile;
-        let downloadLink;
+                    // Push Label ke 3 Grafik
+                    chartPh.data.labels.push(waktuLabel);
+                    chartTb.data.labels.push(waktuLabel);
+                    chartLv.data.labels.push(waktuLabel);
 
-        csvFile = new Blob([csv], {type: "text/csv"});
-        downloadLink = document.createElement("a");
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    }
+                    // Push Data ke 3 Grafik
+                    chartPh.data.datasets[0].data.push(dataLog.pH || 0);
+                    chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
+                    chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
+                });
+                chartPh.update();
+                chartTb.update();
+                chartLv.update();
+            }
 
-    // ==========================================
-    // 7. FITUR AUTOSAVE JAM 23:59:50 (OPSIONAL)
-    // ==========================================
-    // Fitur ini HANYA BEKERJA jika halaman web ini sedang DIBUKA/AKTIF di browser.
-    setInterval(() => {
-        const now = new Date();
-        // Cek apakah waktu menunjukkan jam 23:59:50 malam
-        if (now.getHours() === 23 && now.getMinutes() === 59 && now.getSeconds() === 50) {
-            console.log("Mengekspor otomatis data akhir hari...");
-            // Ganti nama file otomatis dengan tanggal hari ini
-            window.exportTableToCSV(`AutoSave_Log_${getTodayString()}.csv`);
-        }
-    }, 1000); // Mengecek setiap 1 detik
+            onValue(ref(db, 'SistemAir'), (snapshot) => {
+                if (snapshot.exists()) {
+                    const d = snapshot.val();
+                    const waktu = formatWaktu(new Date());
 
-</script>
+                    // Mencegah error jika data undefinded
+                    if(d.pH === undefined) return;
 
+                    // Push Label Real-time
+                    chartPh.data.labels.push(waktu);
+                    chartTb.data.labels.push(waktu);
+                    chartLv.data.labels.push(waktu);
+
+                    // Push Data Real-time
+                    chartPh.data.datasets[0].data.push(d.pH);
+                    chartTb.data.datasets[0].data.push(d.turbidity || 0);
+                    chartLv.data.datasets[0].data.push(d.tinggiAir || 0);
+
+                    // Batasi Data di 3 Grafik
+                    if (chartPh.data.labels.length > 1440) {
+                        chartPh.data.labels.shift(); chartPh.data.datasets[0].data.shift();
+                        chartTb.data.labels.shift(); chartTb.data.datasets[0].data.shift();
+                        chartLv.data.labels.shift(); chartLv.data.datasets[0].data.shift();
+                    }
+                    
+                    chartPh.update();
+                    chartTb.update();
+                    chartLv.update();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
