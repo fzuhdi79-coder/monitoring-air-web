@@ -503,9 +503,9 @@
             }
         });
 
-        // ==========================================
-        // BUG FIX: KALKULASI REKAP DARI LOG SECARA REAL-TIME
-        // ==========================================
+        // =========================================================
+        // SINKRONISASI REKAP LOG UTAMA (DENGAN FIX TIMESTAMPS OVERRIDE)
+        // =========================================================
         const now = new Date();
         const tahun = now.getFullYear();
         const bulan = String(now.getMonth() + 1).padStart(2, '0');
@@ -529,10 +529,9 @@
                     : `*Data rata-rata sensor tanggal: ${tanggalPilihan}`;
             }
 
-            // Hentikan proses pendengar data log sebelumnya jika ada (menghemat memori browser)
             if (rekapUnsubscribe) { rekapUnsubscribe(); }
 
-            // LANGSUNG TEMBAK KE TABEL LOG UTAMA! (Bukan tabel Harian)
+            // Dengarkan seluruh perubahan node Log secara realtime
             const logRootRef = ref(db, 'SistemAir_Log');
             
             rekapUnsubscribe = onValue(logRootRef, (snapshot) => {
@@ -543,32 +542,33 @@
                 if (snapshot.exists()) {
                     snapshot.forEach((child) => {
                         const d = child.val();
-                        if (d.timestamp) {
-                            const dateObj = new Date(d.timestamp * 1000);
-                            const yyyy = dateObj.getFullYear();
-                            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                            const dd = String(dateObj.getDate()).padStart(2, '0');
-                            const tglLog = `${yyyy}-${mm}-${dd}`;
+                        
+                        // FIX: Gunakan jam browser saat ini jika d.timestamp dikirim kosong oleh hardware
+                        const dateObj = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
+                        
+                        const yyyy = dateObj.getFullYear();
+                        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const dd = String(dateObj.getDate()).padStart(2, '0');
+                        const tglLog = `${yyyy}-${mm}-${dd}`;
 
-                            // Jika baris log ini cocok dengan tanggal yang dipilih user
-                            if (tglLog === tanggalPilihan) {
-                                jumlahData++;
-                                let ph = d.pH || 0;
-                                let tb = d.turbidity || 0;
-                                let lv = d.tinggiAir || 0;
+                        // Jika baris log ini cocok dengan tanggal pilihan user
+                        if (tglLog === tanggalPilihan) {
+                            jumlahData++;
+                            let ph = parseFloat(d.pH) || 0;
+                            let tb = parseFloat(d.turbidity) || 0;
+                            let lv = parseFloat(d.tinggiAir) || 0;
 
-                                totalPh += ph;
-                                totalTb += tb;
-                                totalLv += lv;
+                            totalPh += ph;
+                            totalTb += tb;
+                            totalLv += lv;
 
-                                if (ph > maxPh) maxPh = ph;
-                                if (ph < minPh) minPh = ph;
-                            }
+                            if (ph > maxPh) maxPh = ph;
+                            if (ph < minPh) minPh = ph;
                         }
                     });
                 }
 
-                // Tampilkan ke layar UI
+                // Tampilkan hasil penjumlahan secara langsung ke antarmuka (UI) web
                 if (jumlahData > 0) {
                     document.getElementById('rata-ph').innerText = (totalPh / jumlahData).toFixed(2);
                     document.getElementById('rata-tb').innerText = Math.round(totalTb / jumlahData) + " NTU";
@@ -585,7 +585,6 @@
             });
         };
 
-        // Panggil rekap untuk tanggal hari ini secara default
         window.muatDataHarian(hariIni);
 
         window.downloadHarianCSV = async function() {
@@ -604,18 +603,16 @@
 
                     snap.forEach(child => {
                         const rowData = child.val();
-                        if(rowData.timestamp) {
-                            const dateObj = new Date(rowData.timestamp * 1000);
-                            const yyyy = dateObj.getFullYear();
-                            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                            const dd = String(dateObj.getDate()).padStart(2, '0');
-                            const formatTglNode = `${yyyy}-${mm}-${dd}`;
-                            
-                            if(formatTglNode === tglPilihan) {
-                                const waktuJam = dateObj.toLocaleTimeString('id-ID');
-                                csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggiAir}\n`;
-                                rowCount++;
-                            }
+                        const dateObj = rowData.timestamp ? new Date(rowData.timestamp * 1000) : new Date();
+                        const yyyy = dateObj.getFullYear();
+                        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const dd = String(dateObj.getDate()).padStart(2, '0');
+                        const formatTglNode = `${yyyy}-${mm}-${dd}`;
+                        
+                        if(formatTglNode === tglPilihan) {
+                            const waktuJam = dateObj.toLocaleTimeString('id-ID');
+                            csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggiAir}\n`;
+                            rowCount++;
                         }
                     });
 
