@@ -284,6 +284,12 @@
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
+        const now = new Date();
+        const tahun = now.getFullYear();
+        const bulan = String(now.getMonth() + 1).padStart(2, '0');
+        const tanggal = String(now.getDate()).padStart(2, '0');
+        const hariIni = `${tahun}-${bulan}-${tanggal}`;
+
         function createMiniChart(canvasId, color) {
             return new Chart(document.getElementById(canvasId), {
                 type: 'line',
@@ -362,17 +368,10 @@
             }
         });
 
-        const now = new Date();
-        const tahun = now.getFullYear();
-        const bulan = String(now.getMonth() + 1).padStart(2, '0');
-        const tanggal = String(now.getDate()).padStart(2, '0');
-        const hariIni = `${tahun}-${bulan}-${tanggal}`;
-
         // =======================================================
-        // PERBAIKAN: Mengambil dari folder root agar saat log masuk
-        // bentuk "SistemAir_Log/12312..." terbaca dengan benar
+        // PERBAIKAN: Padding Array agar grafik tidak kosong/putus
         // =======================================================
-        const logRefLast20 = query(ref(db, 'SistemAir_Log'), limitToLast(20));
+        const logRefLast20 = query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20));
         get(logRefLast20).then((snapshot) => {
             if (snapshot.exists()) {
                 
@@ -387,13 +386,11 @@
                     
                     labelsPh.push(''); dataPh.push(dataLog.pH || 0);
                     labelsTb.push(''); dataTb.push(dataLog.turbidity || 0);
-                    // Sesuaikan dengan foto: tinggi_air
-                    labelsLv.push(''); dataLv.push(dataLog.tinggi_air || 0);
+                    labelsLv.push(''); dataLv.push(dataLog.tinggiAir || 0);
 
                     const ts = dataLog.timestamp ? dataLog.timestamp * 1000 : Date.now();
                     const waktuJam = new Date(ts).toLocaleTimeString('id-ID', { hour12: false });
                     
-                    // Sesuaikan dengan foto: pompaStatus
                     let pStat = dataLog.pompaStatus || "OFF";
                     let valKuras = (pStat === "KURAS") ? 1 : 0;
                     let valIsi = (pStat === "ISI") ? 1 : 0;
@@ -495,8 +492,7 @@
                     stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
                 }
 
-                // SINKRONISASI: tinggi_air 
-                let lv = d.tinggi_air || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
+                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
                 updateChartData(chartLv, lv);
                 let slv = document.getElementById('status-level');
                 if(lv < 20) {
@@ -571,9 +567,9 @@
 
             if (rekapUnsubscribe) { rekapUnsubscribe(); }
 
-            const logRootRef = ref(db, 'SistemAir_Log');
+            const logFolderRef = ref(db, 'SistemAir_Log/' + tanggalPilihan);
             
-            rekapUnsubscribe = onValue(logRootRef, (snapshot) => {
+            rekapUnsubscribe = onValue(logFolderRef, (snapshot) => {
                 let totalPh = 0, totalTb = 0, totalLv = 0;
                 let maxPh = -999, minPh = 999;
                 let jumlahData = 0;
@@ -582,26 +578,17 @@
                     snapshot.forEach((child) => {
                         const d = child.val();
                         
-                        const dateObj = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
-                        
-                        const yyyy = dateObj.getFullYear();
-                        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                        const dd = String(dateObj.getDate()).padStart(2, '0');
-                        const tglLog = `${yyyy}-${mm}-${dd}`;
+                        jumlahData++;
+                        let ph = parseFloat(d.pH) || 0;
+                        let tb = parseFloat(d.turbidity) || 0;
+                        let lv = parseFloat(d.tinggiAir) || 0;
 
-                        if (tglLog === tanggalPilihan) {
-                            jumlahData++;
-                            let ph = parseFloat(d.pH) || 0;
-                            let tb = parseFloat(d.turbidity) || 0;
-                            let lv = parseFloat(d.tinggi_air) || 0; // SINKRONISASI
+                        totalPh += ph;
+                        totalTb += tb;
+                        totalLv += lv;
 
-                            totalPh += ph;
-                            totalTb += tb;
-                            totalLv += lv;
-
-                            if (ph > maxPh) maxPh = ph;
-                            if (ph < minPh) minPh = ph;
-                        }
+                        if (ph > maxPh) maxPh = ph;
+                        if (ph < minPh) minPh = ph;
                     });
                 }
 
@@ -630,8 +617,8 @@
             if (btnTeks) btnTeks.innerText = "Memproses...";
             
             try {
-                const logRefNode = ref(db, 'SistemAir_Log');
-                const snap = await get(logRefNode);
+                const logFolderRef = ref(db, 'SistemAir_Log/' + tglPilihan);
+                const snap = await get(logFolderRef);
                 
                 if(snap.exists()) {
                     let csvText = "Waktu_Data_Masuk,pH_Level,Kekeruhan_NTU,Tinggi_Air_CM\n";
@@ -640,16 +627,10 @@
                     snap.forEach(child => {
                         const rowData = child.val();
                         const dateObj = rowData.timestamp ? new Date(rowData.timestamp * 1000) : new Date();
-                        const yyyy = dateObj.getFullYear();
-                        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                        const dd = String(dateObj.getDate()).padStart(2, '0');
-                        const formatTglNode = `${yyyy}-${mm}-${dd}`;
+                        const waktuJam = dateObj.toLocaleTimeString('id-ID');
                         
-                        if(formatTglNode === tglPilihan) {
-                            const waktuJam = dateObj.toLocaleTimeString('id-ID');
-                            csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggi_air}\n`; // SINKRONISASI
-                            rowCount++;
-                        }
+                        csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggiAir}\n`;
+                        rowCount++;
                     });
 
                     if(rowCount > 0) {
@@ -663,7 +644,7 @@
                         alert(`Tidak ditemukan satupun rekaman log yang cocok untuk tanggal ${tglPilihan}.`);
                     }
                 } else {
-                    alert("Database Data Log Anda masih kosong.");
+                    alert(`Database Data Log untuk tanggal ${tglPilihan} kosong atau tidak ditemukan.`);
                 }
             } catch (err) {
                 console.error("Gagal Download CSV:", err);
