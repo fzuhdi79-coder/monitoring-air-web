@@ -306,10 +306,10 @@
         const chartPompaKuras = new Chart(ctxKuras, {
             type: 'line',
             data: {
-                labels: [], 
+                labels: Array(20).fill('--:--:--'), 
                 datasets: [{
                     label: 'Pompa Kuras',
-                    data: [],
+                    data: Array(20).fill(0),
                     borderColor: '#f43f5e', 
                     backgroundColor: 'rgba(244, 63, 94, 0.05)',
                     fill: true, stepped: true, pointRadius: 0, borderWidth: 2
@@ -339,10 +339,10 @@
         const chartPompaIsi = new Chart(ctxIsi, {
             type: 'line',
             data: {
-                labels: [], 
+                labels: Array(20).fill('--:--:--'), 
                 datasets: [{
                     label: 'Pompa Isi',
-                    data: [],
+                    data: Array(20).fill(0),
                     borderColor: '#3b82f6', 
                     backgroundColor: 'rgba(59, 130, 246, 0.05)',
                     fill: true, stepped: true, pointRadius: 0, borderWidth: 2
@@ -368,24 +368,25 @@
             }
         });
 
-        // PERBAIKAN BUG MUAT AWAL: Sinkronisasi Sensor dan Grafik Pompa Sekaligus!
+        // =======================================================
+        // PERBAIKAN: Padding Array agar grafik tidak kosong/putus
+        // =======================================================
         const logRefLast20 = query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20));
         get(logRefLast20).then((snapshot) => {
             if (snapshot.exists()) {
                 
-                chartPh.data.labels = []; chartPh.data.datasets[0].data = [];
-                chartTb.data.labels = []; chartTb.data.datasets[0].data = [];
-                chartLv.data.labels = []; chartLv.data.datasets[0].data = [];
-                
-                chartPompaKuras.data.labels = []; chartPompaKuras.data.datasets[0].data = [];
-                chartPompaIsi.data.labels = []; chartPompaIsi.data.datasets[0].data = [];
+                let labelsKuras = []; let dataKuras = [];
+                let labelsIsi = []; let dataIsi = [];
+                let labelsPh = []; let dataPh = [];
+                let labelsTb = []; let dataTb = [];
+                let labelsLv = []; let dataLv = [];
 
                 snapshot.forEach((childSnapshot) => {
                     const dataLog = childSnapshot.val();
                     
-                    chartPh.data.labels.push(''); chartPh.data.datasets[0].data.push(dataLog.pH || 0);
-                    chartTb.data.labels.push(''); chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
-                    chartLv.data.labels.push(''); chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
+                    labelsPh.push(''); dataPh.push(dataLog.pH || 0);
+                    labelsTb.push(''); dataTb.push(dataLog.turbidity || 0);
+                    labelsLv.push(''); dataLv.push(dataLog.tinggiAir || 0);
 
                     const ts = dataLog.timestamp ? dataLog.timestamp * 1000 : Date.now();
                     const waktuJam = new Date(ts).toLocaleTimeString('id-ID', { hour12: false });
@@ -394,12 +395,25 @@
                     let valKuras = (pStat === "KURAS") ? 1 : 0;
                     let valIsi = (pStat === "ISI") ? 1 : 0;
                     
-                    chartPompaKuras.data.labels.push(waktuJam);
-                    chartPompaKuras.data.datasets[0].data.push(valKuras);
-                    
-                    chartPompaIsi.data.labels.push(waktuJam);
-                    chartPompaIsi.data.datasets[0].data.push(valIsi);
+                    labelsKuras.push(waktuJam); dataKuras.push(valKuras);
+                    labelsIsi.push(waktuJam); dataIsi.push(valIsi);
                 });
+
+                // Trik Jitu: Tambal (pad) kekosongan data dari depan (unshift) hingga pas 20 item
+                while(labelsPh.length < 20) {
+                    labelsPh.unshift(''); dataPh.unshift(0);
+                    labelsTb.unshift(''); dataTb.unshift(0);
+                    labelsLv.unshift(''); dataLv.unshift(0);
+                    labelsKuras.unshift('--:--:--'); dataKuras.unshift(0);
+                    labelsIsi.unshift('--:--:--'); dataIsi.unshift(0);
+                }
+
+                chartPh.data.labels = labelsPh; chartPh.data.datasets[0].data = dataPh;
+                chartTb.data.labels = labelsTb; chartTb.data.datasets[0].data = dataTb;
+                chartLv.data.labels = labelsLv; chartLv.data.datasets[0].data = dataLv;
+                
+                chartPompaKuras.data.labels = labelsKuras; chartPompaKuras.data.datasets[0].data = dataKuras;
+                chartPompaIsi.data.labels = labelsIsi; chartPompaIsi.data.datasets[0].data = dataIsi;
                 
                 chartPh.update(); chartTb.update(); chartLv.update();
                 chartPompaKuras.update(); chartPompaIsi.update();
