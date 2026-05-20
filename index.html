@@ -284,7 +284,6 @@
         const statusBadge = document.getElementById('koneksi-status');
         let timerSensor;
 
-        // Inisialisasi Tanggal Lokal Browser
         const now = new Date();
         const tahun = now.getFullYear();
         const bulan = String(now.getMonth() + 1).padStart(2, '0');
@@ -307,10 +306,10 @@
         const chartPompaKuras = new Chart(ctxKuras, {
             type: 'line',
             data: {
-                labels: Array(20).fill('--:--:--'), 
+                labels: [], 
                 datasets: [{
                     label: 'Pompa Kuras',
-                    data: Array(20).fill(0),
+                    data: [],
                     borderColor: '#f43f5e', 
                     backgroundColor: 'rgba(244, 63, 94, 0.05)',
                     fill: true, stepped: true, pointRadius: 0, borderWidth: 2
@@ -340,10 +339,10 @@
         const chartPompaIsi = new Chart(ctxIsi, {
             type: 'line',
             data: {
-                labels: Array(20).fill('--:--:--'), 
+                labels: [], 
                 datasets: [{
                     label: 'Pompa Isi',
-                    data: Array(20).fill(0),
+                    data: [],
                     borderColor: '#3b82f6', 
                     backgroundColor: 'rgba(59, 130, 246, 0.05)',
                     fill: true, stepped: true, pointRadius: 0, borderWidth: 2
@@ -369,17 +368,41 @@
             }
         });
 
-        // PERBAIKAN BUG 1: Muat Mini Grafik mengambil referensi dari folder tanggal hari ini
+        // PERBAIKAN BUG MUAT AWAL: Sinkronisasi Sensor dan Grafik Pompa Sekaligus!
         const logRefLast20 = query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20));
         get(logRefLast20).then((snapshot) => {
             if (snapshot.exists()) {
+                
+                chartPh.data.labels = []; chartPh.data.datasets[0].data = [];
+                chartTb.data.labels = []; chartTb.data.datasets[0].data = [];
+                chartLv.data.labels = []; chartLv.data.datasets[0].data = [];
+                
+                chartPompaKuras.data.labels = []; chartPompaKuras.data.datasets[0].data = [];
+                chartPompaIsi.data.labels = []; chartPompaIsi.data.datasets[0].data = [];
+
                 snapshot.forEach((childSnapshot) => {
                     const dataLog = childSnapshot.val();
+                    
                     chartPh.data.labels.push(''); chartPh.data.datasets[0].data.push(dataLog.pH || 0);
                     chartTb.data.labels.push(''); chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
                     chartLv.data.labels.push(''); chartLv.data.datasets[0].data.push(dataLog.tinggiAir || 0);
+
+                    const ts = dataLog.timestamp ? dataLog.timestamp * 1000 : Date.now();
+                    const waktuJam = new Date(ts).toLocaleTimeString('id-ID', { hour12: false });
+                    
+                    let pStat = dataLog.pompaStatus || "OFF";
+                    let valKuras = (pStat === "KURAS") ? 1 : 0;
+                    let valIsi = (pStat === "ISI") ? 1 : 0;
+                    
+                    chartPompaKuras.data.labels.push(waktuJam);
+                    chartPompaKuras.data.datasets[0].data.push(valKuras);
+                    
+                    chartPompaIsi.data.labels.push(waktuJam);
+                    chartPompaIsi.data.datasets[0].data.push(valIsi);
                 });
+                
                 chartPh.update(); chartTb.update(); chartLv.update();
+                chartPompaKuras.update(); chartPompaIsi.update();
             }
         });
 
@@ -511,9 +534,6 @@
             }
         });
 
-        // =========================================================
-        // PERBAIKAN BUG 2: Rekap Harian (Membaca folder tanggal yang benar)
-        // =========================================================
         const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
         const labelKeteranganRekap = document.getElementById('label-keterangan-rekap');
         
@@ -533,7 +553,6 @@
 
             if (rekapUnsubscribe) { rekapUnsubscribe(); }
 
-            // Kunci pembacaan hanya pada folder tanggal yang dipilih (SistemAir_Log/YYYY-MM-DD)
             const logFolderRef = ref(db, 'SistemAir_Log/' + tanggalPilihan);
             
             rekapUnsubscribe = onValue(logFolderRef, (snapshot) => {
@@ -577,9 +596,6 @@
 
         window.muatDataHarian(hariIni);
 
-        // =========================================================
-        // PERBAIKAN BUG 3: Download CSV membaca path folder yang tepat
-        // =========================================================
         window.downloadHarianCSV = async function() {
             const tglPilihan = document.getElementById('input-tanggal-rekap').value || hariIni;
             const btnTeks = document.getElementById('text-download-btn');
@@ -587,7 +603,6 @@
             if (btnTeks) btnTeks.innerText = "Memproses...";
             
             try {
-                // Tarik data langsung dari folder tanggal pilihan
                 const logFolderRef = ref(db, 'SistemAir_Log/' + tglPilihan);
                 const snap = await get(logFolderRef);
                 
