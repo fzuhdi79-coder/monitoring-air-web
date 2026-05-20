@@ -82,8 +82,10 @@
                 </div>
             </div>
             
-            <div class="relative w-full h-64 sm:h-80 md:h-96">
-                <canvas id="chart-multi-parameter"></canvas>
+            <div class="w-full overflow-x-auto pb-4">
+                <div class="relative h-64 sm:h-80 md:h-96" style="min-width: 1200px;">
+                    <canvas id="chart-multi-parameter"></canvas>
+                </div>
             </div>
         </div>
     </main>
@@ -105,7 +107,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        // PERBAIKAN: Menambahkan get, query, limitToLast untuk memanggil data masa lalu
+        import { getDatabase, ref, onValue, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
@@ -114,11 +117,12 @@
         const chartMulti = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: Array(20).fill('--:--:--'),
+                // PERBAIKAN: Array dikosongkan agar grafik murni terbentuk dari data riwayat Firebase, bukan 0 palsu
+                labels: [],
                 datasets: [
-                    { label: 'pH', data: Array(20).fill(0), borderColor: '#10b981', tension: 0.3, pointRadius: 0, borderWidth: 2 },
-                    { label: 'Turbidity', data: Array(20).fill(0), borderColor: '#f59e0b', tension: 0.3, pointRadius: 0, borderWidth: 2 },
-                    { label: 'Water Level', data: Array(20).fill(0), borderColor: '#3b82f6', tension: 0.3, pointRadius: 0, borderWidth: 2 }
+                    { label: 'pH', data: [], borderColor: '#10b981', tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Water Level', data: [], borderColor: '#3b82f6', tension: 0.3, pointRadius: 0, borderWidth: 2 }
                 ]
             },
             options: {
@@ -132,24 +136,48 @@
             }
         });
 
-        onValue(ref(db, 'SistemAir'), (snapshot) => {
+        // 1. TARIK HISTORY (50 Data Terakhir) SAAT HALAMAN PERTAMA DIBUKA
+        const logRef = query(ref(db, 'SistemAir_Log'), limitToLast(50));
+        get(logRef).then((snapshot) => {
             if (snapshot.exists()) {
-                const d = snapshot.val();
-                const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+                snapshot.forEach((childSnapshot) => {
+                    const dataLog = childSnapshot.val();
+                    let waktuAsli = '--:--:--';
+                    
+                    if (dataLog.timestamp) {
+                        const dateObj = new Date(dataLog.timestamp * 1000);
+                        waktuAsli = dateObj.toLocaleTimeString('id-ID', { hour12: false });
+                    }
 
-                chartMulti.data.labels.push(waktu);
-                chartMulti.data.datasets[0].data.push(d.pH || 0);
-                chartMulti.data.datasets[1].data.push(d.turbidity || 0);
-                chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
-
-                if (chartMulti.data.labels.length > 20) {
-                    chartMulti.data.labels.shift();
-                    chartMulti.data.datasets[0].data.shift();
-                    chartMulti.data.datasets[1].data.shift();
-                    chartMulti.data.datasets[2].data.shift();
-                }
+                    chartMulti.data.labels.push(waktuAsli);
+                    chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
+                    chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
+                    chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
+                });
                 chartMulti.update();
             }
+
+            // 2. SETELAH history berhasil dimuat, lanjutkan terima data baru (Real-Time)
+            onValue(ref(db, 'SistemAir'), (snapshot) => {
+                if (snapshot.exists()) {
+                    const d = snapshot.val();
+                    const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+
+                    chartMulti.data.labels.push(waktu);
+                    chartMulti.data.datasets[0].data.push(d.pH || 0);
+                    chartMulti.data.datasets[1].data.push(d.turbidity || 0);
+                    chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
+
+                    // Batasi hanya menyimpan 50 titik di layar agar grafik bisa digeser
+                    if (chartMulti.data.labels.length > 50) {
+                        chartMulti.data.labels.shift();
+                        chartMulti.data.datasets[0].data.shift();
+                        chartMulti.data.datasets[1].data.shift();
+                        chartMulti.data.datasets[2].data.shift();
+                    }
+                    chartMulti.update();
+                }
+            });
         });
     </script>
 </body>
