@@ -94,9 +94,11 @@
 
                         <div class="h-4 w-px bg-slate-300"></div> 
                         
-                        <div class="flex items-center space-x-2" title="Filter Berdasarkan Jam/Menit/Detik">
-                            <i class="fa-regular fa-clock text-slate-400 text-xs"></i>
-                            <input type="text" id="filter-waktu" oninput="terapkanFilter()" placeholder="Pukul (Cth: 18:30)" class="bg-transparent text-xs font-semibold text-slate-700 outline-none w-28 placeholder:text-slate-400 placeholder:font-normal">
+                        <div class="flex items-center space-x-1" title="Pilih Rentang Waktu (Mulai - Selesai)">
+                            <i class="fa-regular fa-clock text-slate-400 text-xs mr-1"></i>
+                            <input type="time" id="filter-waktu-mulai" onchange="terapkanFilter()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
+                            <span class="text-slate-400 font-bold px-1">-</span>
+                            <input type="time" id="filter-waktu-selesai" onchange="terapkanFilter()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
                         </div>
 
                         <div class="h-4 w-px bg-slate-300"></div> 
@@ -167,9 +169,11 @@
             window.location.href = "login.html"; 
         }
 
+        // LOGIKA FILTER DIPERBARUI UNTUK RENTANG WAKTU
         function terapkanFilter() {
             const inputTanggal = document.getElementById("filter-tanggal").value; 
-            const inputWaktu = document.getElementById("filter-waktu").value.trim(); 
+            const waktuMulai = document.getElementById("filter-waktu-mulai").value; 
+            const waktuSelesai = document.getElementById("filter-waktu-selesai").value; 
             const barisTabel = document.querySelectorAll("#table-body tr");
 
             let adaDataAsli = false;
@@ -192,8 +196,16 @@
                     tampilTanggal = (tanggalData === inputTanggal);
                 }
                 
-                if (inputWaktu !== "") {
-                    tampilWaktu = waktuData.includes(inputWaktu);
+                if (waktuMulai !== "" || waktuSelesai !== "") {
+                    const jamMenitData = waktuData.substring(0, 5); // Ambil HH:MM dari data
+                    
+                    if (waktuMulai !== "" && waktuSelesai !== "") {
+                        tampilWaktu = (jamMenitData >= waktuMulai && jamMenitData <= waktuSelesai);
+                    } else if (waktuMulai !== "") {
+                        tampilWaktu = (jamMenitData >= waktuMulai);
+                    } else if (waktuSelesai !== "") {
+                        tampilWaktu = (jamMenitData <= waktuSelesai);
+                    }
                 }
 
                 if (tampilTanggal && tampilWaktu) {
@@ -207,7 +219,7 @@
 
             const totalDataBadge = document.getElementById('total-data-badge');
             if (totalDataBadge) {
-                if (inputTanggal !== "" || inputWaktu !== "") {
+                if (inputTanggal !== "" || waktuMulai !== "" || waktuSelesai !== "") {
                     totalDataBadge.innerText = `${totalTampil} dari ${totalAsli} Data`;
                 } else {
                     totalDataBadge.innerText = `${totalAsli} Data`;
@@ -228,9 +240,11 @@
             }
         }
 
+        // RESET FILTER DIPERBARUI
         function resetFilter() {
             document.getElementById("filter-tanggal").value = "";
-            document.getElementById("filter-waktu").value = "";
+            document.getElementById("filter-waktu-mulai").value = "";
+            document.getElementById("filter-waktu-selesai").value = "";
             terapkanFilter(); 
         }
 
