@@ -20,11 +20,12 @@
     <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
+                
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
                         <i class="fa-solid fa-droplet text-lg"></i>
                     </div>
-                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
+                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r flow-root from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
@@ -52,9 +53,6 @@
             <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
                 <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
             </a>
-            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
-            </a>
             <a href="grafik.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
                 <i class="fa-solid fa-chart-area mr-2 text-blue-200"></i> Analytics
             </a>
@@ -62,7 +60,7 @@
                 <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
             </a>
             <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
+            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95">
                 <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
             </button>
         </div>
@@ -97,41 +95,62 @@
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-square-poll-vertical" style="color: rgb(0, 0, 0);"></i> Multi-Axis Sensor Dashboard <span class="text-[10px] text-slate-400 font-normal">Scroll / Seret grafik</span>
+                    <i class="fa-solid fa-square-poll-vertical"></i> Sensor Analytics Dashboard
                 </span>
-                <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> pH (Kiri)</div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-amber-400 inline-block"></span> Turbidity [Bar] (Kanan)</div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500/30 border border-blue-500 inline-block"></span> Water Level [Area] (Kanan)</div>
-                </div>
+                <span class="text-[10px] text-slate-400 font-normal">Scroll pada grafik untuk Zoom in/out</span>
             </div>
             
-            <div class="w-full">
-                <div class="relative h-64 sm:h-80 md:h-96 w-full">
-                    <canvas id="chart-multi-parameter"></canvas>
+            <div class="w-full flex flex-col gap-6">
+                <div class="border border-slate-100 rounded-xl p-3 shadow-sm bg-slate-50/50">
+                    <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> Historis Potensial Hidrogen (pH)
+                    </div>
+                    <div class="relative h-48 sm:h-56 w-full">
+                        <canvas id="chart-ph-history"></canvas>
+                    </div>
+                </div>
+
+                <div class="border border-slate-100 rounded-xl p-3 shadow-sm bg-slate-50/50">
+                    <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-amber-500 inline-block"></span> Historis Kekeruhan (Turbidity)
+                    </div>
+                    <div class="relative h-48 sm:h-56 w-full">
+                        <canvas id="chart-tb-history"></canvas>
+                    </div>
+                </div>
+
+                <div class="border border-slate-100 rounded-xl p-3 shadow-sm bg-slate-50/50">
+                    <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-blue-500 inline-block"></span> Historis Ketinggian Air (Level)
+                    </div>
+                    <div class="relative h-48 sm:h-56 w-full">
+                        <canvas id="chart-lv-history"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by ZudiJago. All Right Reserved.
-    </footer>
-
     <script>
         const hamburgerBtn = document.getElementById('hamburger-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const hamburgerIcon = document.getElementById('hamburger-icon');
+
         hamburgerBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
-            hamburgerIcon.className = mobileMenu.classList.contains('hidden') ? "fa-solid fa-bars text-xl" : "fa-solid fa-xmark text-xl";
+            if (mobileMenu.classList.contains('hidden')) {
+                hamburgerIcon.className = "fa-solid fa-bars text-xl";
+            } else {
+                hamburgerIcon.className = "fa-solid fa-xmark text-xl";
+            }
         });
+
         function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
     </script>
-
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { getDatabase, ref, onValue, get, query } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
         
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
@@ -139,74 +158,63 @@
         let currentTimeframe = '15p';
         let rawTimestamps = [];
 
-        const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
-        const chartMulti = new Chart(ctx, {
-            data: {
-                labels: [],
-                datasets: [
-                    { 
-                        label: 'pH', 
-                        type: 'line', 
-                        data: [], 
-                        borderColor: '#10b981', 
-                        backgroundColor: '#10b981', 
-                        tension: 0.4, 
-                        pointRadius: 2, 
-                        borderWidth: 2,
-                        yAxisID: 'y' // Sumbu Y Kiri
-                    },
-                    { 
-                        label: 'Turbidity', 
-                        type: 'bar', // INI DIA VARIAN BAR-NYA!
-                        data: [], 
-                        borderColor: '#fbbf24', 
-                        backgroundColor: 'rgba(251, 191, 36, 0.5)', 
-                        borderWidth: 1,
-                        yAxisID: 'y1', // Sumbu Y Kanan
-                        barPercentage: 0.6
-                    },
-                    { 
-                        label: 'Water Level', 
-                        type: 'line', // VARIAN AREA (Garis + Fill Bawah)
-                        data: [], 
-                        borderColor: '#3b82f6', 
-                        backgroundColor: 'rgba(59, 130, 246, 0.15)', 
-                        fill: true, 
-                        tension: 0.4, 
-                        pointRadius: 1, 
-                        borderWidth: 2,
-                        yAxisID: 'y1' // Sumbu Y Kanan
-                    }
-                ]
-            },
+        // Konfigurasi umum untuk zoom dan plugin
+        const commonOptions = {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: { 
+                legend: { display: false },
+                zoom: {
+                    pan: { enabled: true, mode: 'x' },
+                    zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
+                }
+            }
+        };
+
+        // Inisialisasi Chart pH
+        const ctxPh = document.getElementById('chart-ph-history').getContext('2d');
+        const chartPh = new Chart(ctxPh, {
+            data: { labels: [], datasets: [{ label: 'pH', type: 'line', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: { 
-                    legend: { display: false },
-                    zoom: {
-                        pan: { enabled: true, mode: 'x' },
-                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-                    }
-                },
+                ...commonOptions,
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' }, min: undefined, max: undefined },
-                    y: { 
-                        type: 'linear', display: true, position: 'left', min: 0, max: 14,
-                        title: { display: true, text: 'Skala pH', font: { size: 10, weight: 'bold' }, color: '#10b981' },
-                        grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#10b981' } 
-                    },
-                    y1: { 
-                        type: 'linear', display: true, position: 'right',
-                        title: { display: true, text: 'Kekeruhan (NTU) & Level (cm)', font: { size: 10, weight: 'bold' }, color: '#64748b' },
-                        grid: { drawOnChartArea: false }, ticks: { font: { size: 10 }, color: '#64748b' } 
-                    }
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    y: { title: { display: true, text: 'Skala pH', font: { size: 10, weight: 'bold' }, color: '#10b981' }, grid: { color: '#f1f5f9' }, min: 0, max: 14 }
                 }
             }
         });
 
-        window.resetSkalaGrafik = function() { chartMulti.resetZoom(); };
+        // Inisialisasi Chart Turbidity
+        const ctxTb = document.getElementById('chart-tb-history').getContext('2d');
+        const chartTb = new Chart(ctxTb, {
+            data: { labels: [], datasets: [{ label: 'Turbidity (NTU)', type: 'line', data: [], borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.15)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] },
+            options: {
+                ...commonOptions,
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    y: { title: { display: true, text: 'NTU', font: { size: 10, weight: 'bold' }, color: '#fbbf24' }, grid: { color: '#f1f5f9' }, min: 0 }
+                }
+            }
+        });
+
+        // Inisialisasi Chart Level
+        const ctxLv = document.getElementById('chart-lv-history').getContext('2d');
+        const chartLv = new Chart(ctxLv, {
+            data: { labels: [], datasets: [{ label: 'Tinggi Air (cm)', type: 'line', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.15)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] },
+            options: {
+                ...commonOptions,
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
+                    y: { title: { display: true, text: 'cm', font: { size: 10, weight: 'bold' }, color: '#3b82f6' }, grid: { color: '#f1f5f9' }, min: 0 }
+                }
+            }
+        });
+
+        window.resetSkalaGrafik = function() { 
+            chartPh.resetZoom(); 
+            chartTb.resetZoom(); 
+            chartLv.resetZoom(); 
+        };
 
         window.ubahTimeframe = function(tf) {
             currentTimeframe = tf;
@@ -219,23 +227,26 @@
                     btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
                 }
             });
-            chartMulti.resetZoom();
+            window.resetSkalaGrafik();
             aturBatasTampilanGrafik();
-            chartMulti.update();
+            
+            chartPh.update(); 
+            chartTb.update(); 
+            chartLv.update();
         };
 
         function aturBatasTampilanGrafik() {
-            const totalData = chartMulti.data.labels.length;
+            const totalData = chartPh.data.labels.length;
             if (totalData === 0) return;
+
+            let minX = undefined;
+            let maxX = undefined;
 
             if (currentTimeframe === '15p') {
                 const jumlahTampilLayar = 15; 
                 if (totalData > jumlahTampilLayar) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampilLayar];
-                    chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
-                } else {
-                    chartMulti.options.scales.x.min = undefined;
-                    chartMulti.options.scales.x.max = undefined;
+                    minX = chartPh.data.labels[totalData - jumlahTampilLayar];
+                    maxX = chartPh.data.labels[totalData - 1];
                 }
             } 
             else if (currentTimeframe === '1h' || currentTimeframe === '6h') {
@@ -251,17 +262,16 @@
                     }
                 }
                 if (indeksTarget < totalData) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[indeksTarget];
-                    chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
-                } else {
-                    chartMulti.options.scales.x.min = undefined;
-                    chartMulti.options.scales.x.max = undefined;
+                    minX = chartPh.data.labels[indeksTarget];
+                    maxX = chartPh.data.labels[totalData - 1];
                 }
             } 
-            else if (currentTimeframe === 'all') {
-                chartMulti.options.scales.x.min = undefined;
-                chartMulti.options.scales.x.max = undefined;
-            }
+
+            // Aplikasikan skala waktu yang sama ke ketiga chart
+            [chartPh, chartTb, chartLv].forEach(c => {
+                c.options.scales.x.min = minX;
+                c.options.scales.x.max = maxX;
+            });
         }
 
         function formatWaktu(d) {
@@ -282,31 +292,50 @@
         let unsubscribeLiveStream = null;
 
         window.muatGrafikPerTanggal = function(tanggalFolder) {
-            chartMulti.data.labels = [];
-            chartMulti.data.datasets[0].data = [];
-            chartMulti.data.datasets[1].data = [];
-            chartMulti.data.datasets[2].data = [];
+            // Bersihkan data lama di ketiga chart
+            [chartPh, chartTb, chartLv].forEach(c => {
+                c.data.labels = [];
+                c.data.datasets[0].data = [];
+                c.update();
+            });
             rawTimestamps = [];
-            chartMulti.update();
 
-            const logRef = query(ref(db, 'SistemAir_Log/' + tanggalFolder), limitToLast(2880));
+            // Membaca Log Secara Terpusat sesuai struktur db Anda
+            const logRef = query(ref(db, 'SistemAir_Log'));
             
             get(logRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
                         const dataLog = childSnapshot.val();
                         let ts = dataLog.timestamp ? Number(dataLog.timestamp) : Date.now() / 1000;
-                        let waktuLabel = formatWaktu(new Date(ts * 1000));
+                        const dateObj = new Date(ts * 1000);
                         
-                        rawTimestamps.push(ts);
-                        chartMulti.data.labels.push(waktuLabel);
-                        chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
-                        chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
+                        const yyyy = dateObj.getFullYear();
+                        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const dd = String(dateObj.getDate()).padStart(2, '0');
+                        const tglLog = `${yyyy}-${mm}-${dd}`;
+                        
+                        // Filter berdasarkan pilihan kalender
+                        if (tglLog === tanggalFolder) {
+                            let waktuLabel = formatWaktu(dateObj);
+                            
+                            rawTimestamps.push(ts);
+                            
+                            chartPh.data.labels.push(waktuLabel);
+                            chartPh.data.datasets[0].data.push(dataLog.pH || 0);
+
+                            chartTb.data.labels.push(waktuLabel);
+                            chartTb.data.datasets[0].data.push(dataLog.turbidity || 0);
+
+                            // SINKRONISASI PENTING: Mendukung properti tinggi_air
+                            chartLv.data.labels.push(waktuLabel);
+                            chartLv.data.datasets[0].data.push(dataLog.tinggi_air || dataLog.tinggiAir || 0);
+                        }
                     });
                 }
+                
                 aturBatasTampilanGrafik();
-                chartMulti.update();
+                chartPh.update(); chartTb.update(); chartLv.update();
                 aktifkanAtauMatikanLiveStream(tanggalFolder);
             });
         };
@@ -327,20 +356,27 @@
                         const waktu = formatWaktu(new Date(ts * 1000));
 
                         rawTimestamps.push(ts);
-                        chartMulti.data.labels.push(waktu);
-                        chartMulti.data.datasets[0].data.push(d.pH || 0);
-                        chartMulti.data.datasets[1].data.push(d.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
+                        
+                        chartPh.data.labels.push(waktu);
+                        chartPh.data.datasets[0].data.push(d.pH || 0);
 
-                        if (chartMulti.data.labels.length > 2880) {
+                        chartTb.data.labels.push(waktu);
+                        chartTb.data.datasets[0].data.push(d.turbidity || 0);
+
+                        chartLv.data.labels.push(waktu);
+                        chartLv.data.datasets[0].data.push(d.tinggi_air || d.tinggiAir || 0);
+
+                        // Batasi panjang array agar browser tidak lag (menampilkan 2880 poin setara seharian penuh)
+                        if (chartPh.data.labels.length > 2880) {
                             rawTimestamps.shift();
-                            chartMulti.data.labels.shift();
-                            chartMulti.data.datasets[0].data.shift();
-                            chartMulti.data.datasets[1].data.shift();
-                            chartMulti.data.datasets[2].data.shift();
+                            [chartPh, chartTb, chartLv].forEach(c => {
+                                c.data.labels.shift();
+                                c.data.datasets[0].data.shift();
+                            });
                         }
+                        
                         aturBatasTampilanGrafik();
-                        chartMulti.update();
+                        chartPh.update(); chartTb.update(); chartLv.update();
                     }
                 });
             }
@@ -358,6 +394,7 @@
         inputKalender.value = tanggalAktifPilihan;
         window.muatGrafikPerTanggal(tanggalAktifPilihan);
 
+        // Auto-refresh kalender setiap tengah malam
         setInterval(() => {
             const hariIniLokal = dapatkanTanggalLokal(new Date());
             if (inputKalender.value === tanggalAktifPilihan && hariIniLokal !== tanggalAktifPilihan) {
