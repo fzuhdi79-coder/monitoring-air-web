@@ -362,9 +362,6 @@
             }
         });
 
-        // =========================================================
-        // FIX: Ambil 20 Riwayat Terakhir untuk Sensor DAN Pompa saat Reload
-        // =========================================================
         const logRefLast20 = query(ref(db, 'SistemAir_Log'), limitToLast(20));
         get(logRefLast20).then((snapshot) => {
             if (snapshot.exists()) {
@@ -377,14 +374,12 @@
                 snapshot.forEach((childSnapshot) => {
                     const dataLog = childSnapshot.val();
                     
-                    // Tarik riwayat sensor
                     labelsPh.push(''); dataPh.push(dataLog.pH || 0);
                     labelsTb.push(''); dataTb.push(dataLog.turbidity || 0);
                     labelsLv.push(''); dataLv.push(dataLog.tinggiAir || 0);
 
-                    // Tarik riwayat pompa dan jamnya
-                    const ts = dataLog.timestamp ? dataLog.timestamp * 1000 : Date.now();
-                    const waktuJam = new Date(ts).toLocaleTimeString('id-ID', { hour12: false });
+                    const dateObj = dataLog.timestamp ? new Date(dataLog.timestamp * 1000) : new Date();
+                    const waktuJam = dateObj.toLocaleTimeString('id-ID', { hour12: false });
                     
                     let pStat = dataLog.pompaStatus || "OFF";
                     let valKuras = (pStat === "KURAS") ? 1 : 0;
@@ -394,7 +389,6 @@
                     labelsIsi.push(waktuJam); dataIsi.push(valIsi);
                 });
 
-                // Tambal (pad) array jika data log kurang dari 20 agar grafik proporsional
                 while(labelsPh.length < 20) {
                     labelsPh.unshift(''); dataPh.unshift(0);
                     labelsTb.unshift(''); dataTb.unshift(0);
@@ -403,7 +397,6 @@
                     labelsIsi.unshift('--:--:--'); dataIsi.unshift(0);
                 }
 
-                // Inject data riwayat ke grafik
                 chartPh.data.labels = labelsPh; chartPh.data.datasets[0].data = dataPh;
                 chartTb.data.labels = labelsTb; chartTb.data.datasets[0].data = dataTb;
                 chartLv.data.labels = labelsLv; chartLv.data.datasets[0].data = dataLv;
@@ -411,7 +404,6 @@
                 chartPompaKuras.data.labels = labelsKuras; chartPompaKuras.data.datasets[0].data = dataKuras;
                 chartPompaIsi.data.labels = labelsIsi; chartPompaIsi.data.datasets[0].data = dataIsi;
                 
-                // Update tampilan semua grafik
                 chartPh.update(); chartTb.update(); chartLv.update();
                 chartPompaKuras.update(); chartPompaIsi.update();
             }
@@ -425,20 +417,14 @@
         }
 
         function updatePompaChart(waktu, valKuras, valIsi) {
-            // Mencegah duplikasi data menumpuk pada detik yang sama dari onValue stream
-            if (chartPompaKuras.data.labels.length > 0 && chartPompaKuras.data.labels[chartPompaKuras.data.labels.length - 1] === waktu) {
-                chartPompaKuras.data.datasets[0].data[chartPompaKuras.data.datasets[0].data.length - 1] = valKuras;
-                chartPompaIsi.data.datasets[0].data[chartPompaIsi.data.datasets[0].data.length - 1] = valIsi;
-            } else {
-                chartPompaKuras.data.labels.push(waktu);
-                chartPompaKuras.data.datasets[0].data.push(valKuras);
-                if (chartPompaKuras.data.labels.length > 20) { chartPompaKuras.data.labels.shift(); chartPompaKuras.data.datasets[0].data.shift(); }
-
-                chartPompaIsi.data.labels.push(waktu);
-                chartPompaIsi.data.datasets[0].data.push(valIsi);
-                if (chartPompaIsi.data.labels.length > 20) { chartPompaIsi.data.labels.shift(); chartPompaIsi.data.datasets[0].data.shift(); }
-            }
+            chartPompaKuras.data.labels.push(waktu);
+            chartPompaKuras.data.datasets[0].data.push(valKuras);
+            if (chartPompaKuras.data.labels.length > 20) { chartPompaKuras.data.labels.shift(); chartPompaKuras.data.datasets[0].data.shift(); }
             chartPompaKuras.update();
+
+            chartPompaIsi.data.labels.push(waktu);
+            chartPompaIsi.data.datasets[0].data.push(valIsi);
+            if (chartPompaIsi.data.labels.length > 20) { chartPompaIsi.data.labels.shift(); chartPompaIsi.data.datasets[0].data.shift(); }
             chartPompaIsi.update();
         }
 
@@ -551,15 +537,12 @@
             }
         });
 
-        // =========================================================
-        // SINKRONISASI REKAP LOG UTAMA
-        // =========================================================
         const now = new Date();
         const tahun = now.getFullYear();
         const bulan = String(now.getMonth() + 1).padStart(2, '0');
         const tanggal = String(now.getDate()).padStart(2, '0');
         const hariIni = `${tahun}-${bulan}-${tanggal}`;
-        
+
         const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
         const labelKeteranganRekap = document.getElementById('label-keterangan-rekap');
         
@@ -589,6 +572,7 @@
                 if (snapshot.exists()) {
                     snapshot.forEach((child) => {
                         const d = child.val();
+                        
                         const dateObj = d.timestamp ? new Date(d.timestamp * 1000) : new Date();
                         
                         const yyyy = dateObj.getFullYear();
