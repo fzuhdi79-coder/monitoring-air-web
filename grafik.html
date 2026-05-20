@@ -72,7 +72,7 @@
         <div class="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Advanced Graphical History</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Pilih tanggal pada kalender dan rentang waktu untuk memunculkan tren grafik riwayat log data.</p>
+                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Gunakan kombinasi kalender dan rentang waktu untuk analisa data sensor lebih interaktif.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3 self-start sm:self-center">
@@ -97,12 +97,12 @@
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Analytics Datastream <span class="text-[10px] text-slate-400 font-normal">(Geser kanan/kiri pada grafik untuk menjelajah waktu)</span>
+                    <i class="fa-solid fa-chart-pie text-blue-500"></i> Multi-Axis Sensor Dashboard <span class="text-[10px] text-slate-400 font-normal">(Scroll / seret grafik untuk eksplorasi data)</span>
                 </span>
                 <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-emerald-500 inline-block"></span> pH </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-amber-500 inline-block"></span> Turbidity </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500 inline-block"></span> Water Level </div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> pH (Kiri)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-sm bg-amber-400 inline-block"></span> Turbidity [Bar] (Kanan)</div>
+                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded bg-blue-500/30 border border-blue-500 inline-block"></span> Water Level [Area] (Kanan)</div>
                 </div>
             </div>
             
@@ -136,24 +136,53 @@
         const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
         const db = getDatabase(app);
 
-        // State pendukung fitur timeframe tanpa merusak basis data asli
         let currentTimeframe = '15p';
         let rawTimestamps = [];
 
         const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
         const chartMulti = new Chart(ctx, {
-            type: 'line', // KODE ORI: Seluruh grafik tetap berjenis 'line'
             data: {
                 labels: [],
                 datasets: [
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, pointRadius: 3, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.3, pointRadius: 3, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 3, borderWidth: 2 }
+                    { 
+                        label: 'pH', 
+                        type: 'line', 
+                        data: [], 
+                        borderColor: '#10b981', 
+                        backgroundColor: '#10b981', 
+                        tension: 0.4, 
+                        pointRadius: 2, 
+                        borderWidth: 2,
+                        yAxisID: 'y' // Sumbu Y Kiri
+                    },
+                    { 
+                        label: 'Turbidity', 
+                        type: 'bar', // INI DIA VARIAN BAR-NYA!
+                        data: [], 
+                        borderColor: '#fbbf24', 
+                        backgroundColor: 'rgba(251, 191, 36, 0.5)', 
+                        borderWidth: 1,
+                        yAxisID: 'y1', // Sumbu Y Kanan
+                        barPercentage: 0.6
+                    },
+                    { 
+                        label: 'Water Level', 
+                        type: 'line', // VARIAN AREA (Garis + Fill Bawah)
+                        data: [], 
+                        borderColor: '#3b82f6', 
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)', 
+                        fill: true, 
+                        tension: 0.4, 
+                        pointRadius: 1, 
+                        borderWidth: 2,
+                        yAxisID: 'y1' // Sumbu Y Kanan
+                    }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
                 plugins: { 
                     legend: { display: false },
                     zoom: {
@@ -163,14 +192,22 @@
                 },
                 scales: {
                     x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' }, min: undefined, max: undefined },
-                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
+                    y: { 
+                        type: 'linear', display: true, position: 'left', min: 0, max: 14,
+                        title: { display: true, text: 'Skala pH', font: { size: 10, weight: 'bold' }, color: '#10b981' },
+                        grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#10b981' } 
+                    },
+                    y1: { 
+                        type: 'linear', display: true, position: 'right',
+                        title: { display: true, text: 'Kekeruhan (NTU) & Level (cm)', font: { size: 10, weight: 'bold' }, color: '#64748b' },
+                        grid: { drawOnChartArea: false }, ticks: { font: { size: 10 }, color: '#64748b' } 
+                    }
                 }
             }
         });
 
         window.resetSkalaGrafik = function() { chartMulti.resetZoom(); };
 
-        // FUNGSI BARU: Mengatur interaksi tombol timeframe tanpa merusak konfigurasi Chart original
         window.ubahTimeframe = function(tf) {
             currentTimeframe = tf;
             const tfs = ['15p', '1h', '6h', 'all'];
