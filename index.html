@@ -271,9 +271,9 @@
                 hamburgerIcon.className = "fa-solid fa-xmark text-xl";
             }
         });
-    </script>
 
-    <script>function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }</script>
+        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+    </script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
@@ -475,9 +475,6 @@
                     slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-600";
                 }
 
-                // ==========================================
-                // PERBAIKAN LOGIKA BUTTON PUMP ON/OFF
-                // ==========================================
                 let modeSistem = d.modeSistem || "AUTO";
                 let pStat = d.pompaStatus || "OFF";
 
@@ -490,11 +487,8 @@
                 const btnP2On = document.getElementById('btn-p2-on');
                 const btnP2Off = document.getElementById('btn-p2-off');
 
-                // Class styles yang reusable agar clean
                 const classBtnManualActive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-white text-slate-900 shadow-sm transition";
                 const classBtnManualInactive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-transparent text-slate-500 hover:bg-slate-300/50 transition cursor-pointer";
-                
-                // Class baru saat auto (biar kelihatan pudar tapi menyala sesuai pompa yang aktif)
                 const classBtnAutoActive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-slate-200 text-slate-500 cursor-not-allowed transition opacity-80";
                 const classBtnAutoInactive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-transparent text-slate-300 cursor-not-allowed transition opacity-50";
 
@@ -504,7 +498,6 @@
                     
                     pButtons.forEach(b => b.disabled = true);
 
-                    // Fitur UI Baru: Walau dikunci (AUTO), status tombol tetap menyesuaikan realita pompa!
                     btnP1On.className  = (pStat === "KURAS") ? classBtnAutoActive : classBtnAutoInactive;
                     btnP1Off.className = (pStat !== "KURAS") ? classBtnAutoActive : classBtnAutoInactive;
                     btnP2On.className  = (pStat === "ISI")   ? classBtnAutoActive : classBtnAutoInactive;
@@ -516,14 +509,12 @@
                     
                     pButtons.forEach(b => b.disabled = false);
 
-                    // BUG FIX: Highlight menyala sempurna walau salah satu pompa OFF
                     btnP1On.className  = (pStat === "KURAS") ? classBtnManualActive : classBtnManualInactive;
                     btnP1Off.className = (pStat !== "KURAS") ? classBtnManualActive : classBtnManualInactive;
                     btnP2On.className  = (pStat === "ISI")   ? classBtnManualActive : classBtnManualInactive;
                     btnP2Off.className = (pStat !== "ISI")   ? classBtnManualActive : classBtnManualInactive;
                 }
 
-                // Update Icon & Grafik Pompa
                 let valKuras = (pStat === "KURAS") ? 1 : 0;
                 let valIsi = (pStat === "ISI") ? 1 : 0;
                 
@@ -535,9 +526,16 @@
         });
 
         // ==========================================
-        // DATE PICKER & EKSPOR DATA CSV LOGIKA BARU
+        // BUG FIX: PENGAMBILAN TANGGAL ZONA LOKAL (WIB)
         // ==========================================
-        const hariIni = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const tahun = now.getFullYear();
+        const bulan = String(now.getMonth() + 1).padStart(2, '0');
+        const tanggal = String(now.getDate()).padStart(2, '0');
+        
+        // Memastikan format YYYY-MM-DD menggunakan waktu lokal, bukan UTC London
+        const hariIni = `${tahun}-${bulan}-${tanggal}`;
+        
         const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
         const labelKeteranganRekap = document.getElementById('label-keterangan-rekap');
         
@@ -555,18 +553,24 @@
                     : `*Data rata-rata sensor tanggal: ${tanggalPilihan}`;
             }
 
+            // Hentikan pendengar Firebase sebelumnya jika user mengganti-ganti tanggal
             if (rekapListener) { rekapListener(); }
 
             rekapListener = onValue(ref(db, 'SistemAir_Harian/' + tanggalPilihan), (snapshot) => {
                 if (snapshot.exists()) {
                     const dataHarian = snapshot.val();
+                    
                     document.getElementById('rata-ph').innerText = dataHarian.rata_pH ? dataHarian.rata_pH.toFixed(2) : "0.00";
                     document.getElementById('rata-tb').innerText = dataHarian.rata_turbidity ? dataHarian.rata_turbidity.toFixed(0) + " NTU" : "0 NTU";
                     document.getElementById('rata-lv').innerText = dataHarian.rata_tinggiAir ? dataHarian.rata_tinggiAir.toFixed(0) + " cm" : "0 cm";
+                    
                     const pHMax = dataHarian.pH_maksimum ? dataHarian.pH_maksimum.toFixed(1) : "0.0";
                     const pHMin = dataHarian.pH_minimum ? dataHarian.pH_minimum.toFixed(1) : "0.0";
                     document.getElementById('maxmin-ph').innerText = pHMax + " / " + pHMin;
-                    document.getElementById('total-sampel').innerText = (dataHarian.total_sampel_hari_ini || 0) + " Data";
+                    
+                    // Fallback key penamaan Firebase agar kebal error (memastikan data sampel muncul)
+                    const totalSampelTerekam = dataHarian.total_sampel_hari_ini || dataHarian.total_sampel || dataHarian.sampel || 0;
+                    document.getElementById('total-sampel').innerText = totalSampelTerekam + " Data";
                 } else {
                     document.getElementById('rata-ph').innerText = "0.00";
                     document.getElementById('rata-tb').innerText = "0 NTU";
@@ -579,7 +583,6 @@
 
         window.muatDataHarian(hariIni);
 
-        // PENYELESAIAN FUNGSI UNDUH CSV (Benar-benar mengambil dari Data Log)
         window.downloadHarianCSV = async function() {
             const tglPilihan = document.getElementById('input-tanggal-rekap').value || hariIni;
             const btnTeks = document.getElementById('text-download-btn');
@@ -587,7 +590,6 @@
             if (btnTeks) btnTeks.innerText = "Memproses...";
             
             try {
-                // Ambil rekaman dari database SistemAir_Log
                 const logRef = ref(db, 'SistemAir_Log');
                 const snap = await get(logRef);
                 
@@ -597,7 +599,6 @@
 
                     snap.forEach(child => {
                         const rowData = child.val();
-                        // Firebase ESP32 menyimpan timestamp berupa epoch Unix
                         if(rowData.timestamp) {
                             const dateObj = new Date(rowData.timestamp * 1000);
                             const yyyy = dateObj.getFullYear();
@@ -605,7 +606,6 @@
                             const dd = String(dateObj.getDate()).padStart(2, '0');
                             const formatTglNode = `${yyyy}-${mm}-${dd}`;
                             
-                            // Jika datanya cocok dengan tanggal yang dicari user
                             if(formatTglNode === tglPilihan) {
                                 const waktuJam = dateObj.toLocaleTimeString('id-ID');
                                 csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggiAir}\n`;
