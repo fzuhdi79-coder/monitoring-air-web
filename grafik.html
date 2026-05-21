@@ -52,9 +52,6 @@
             <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
                 <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
             </a>
-            <a href="speedometer.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-gauge-high mr-2 text-slate-500"></i> Gauges
-            </a>
             <a href="grafik.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
                 <i class="fa-solid fa-chart-area mr-2 text-blue-200"></i> Analytics
             </a>
@@ -104,7 +101,10 @@
                     <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1" title="Reset Posisi Grafik">
                         <i class="fa-solid fa-compress text-[10px]"></i>
                     </button>
-                    <button onclick="downloadDataCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1.5" title="Unduh data tanggal ini ke Excel">
+                    <button onclick="downloadChartImage()" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1.5" title="Unduh Gambar Grafik (PNG)">
+                        <i class="fa-solid fa-image text-[11px]"></i> <span class="hidden sm:inline">PNG</span>
+                    </button>
+                    <button onclick="downloadDataCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1.5" title="Unduh Data Excel (CSV)">
                         <i class="fa-solid fa-file-csv text-[11px]"></i> <span class="hidden sm:inline">CSV</span>
                     </button>
                 </div>
@@ -124,7 +124,7 @@
             </div>
             
             <div class="w-full">
-                <div class="relative h-64 sm:h-80 md:h-96 w-full">
+                <div class="relative h-64 sm:h-80 md:h-96 w-full bg-white rounded-xl" id="canvas-container">
                     <canvas id="chart-multi-parameter"></canvas>
                 </div>
             </div>
@@ -384,7 +384,29 @@
             }
         };
 
-        // --- FUNGSI UNDUH CSV BARU ---
+        // --- FUNGSI UNDUH GAMBAR GRAFIK (PNG) ---
+        window.downloadChartImage = function() {
+            const canvas = document.getElementById('chart-multi-parameter');
+            const tglPilihan = document.getElementById("filter-tanggal-grafik").value || "Riwayat";
+            
+            // Buat canvas sementara dengan background putih agar tidak transparan/hitam di galeri
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const ctxTemp = tempCanvas.getContext('2d');
+            
+            ctxTemp.fillStyle = '#ffffff';
+            ctxTemp.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            ctxTemp.drawImage(canvas, 0, 0);
+
+            const url = tempCanvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `WQ_Grafik_${tglPilihan}.png`;
+            link.click();
+        };
+
+        // --- FUNGSI UNDUH DATA (CSV) ---
         window.downloadDataCSV = async function() {
             const tglPilihan = document.getElementById("filter-tanggal-grafik").value;
             if (!tglPilihan) {
@@ -393,7 +415,6 @@
             }
 
             try {
-                // Ambil semua data dari folder tanggal tersebut
                 const logRefNode = query(ref(db, 'SistemAir_Log/' + tglPilihan));
                 const snap = await get(logRefNode);
                 
@@ -415,7 +436,7 @@
                         const url = URL.createObjectURL(blob);
                         const link = document.createElement('a');
                         link.href = url;
-                        link.download = `WQ_Grafik_Riwayat_${tglPilihan}.csv`;
+                        link.download = `WQ_Data_${tglPilihan}.csv`;
                         link.click();
                     } else {
                         alert(`Tidak ditemukan data untuk tanggal ${tglPilihan}.`);
