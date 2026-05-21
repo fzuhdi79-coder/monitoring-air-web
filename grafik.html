@@ -383,14 +383,22 @@
         inputKalender.value = tanggalAktifPilihan;
         window.muatGrafikPerTanggal(tanggalAktifPilihan);
 
+        // --- BUG FIX DI BAWAH INI ---
+        let hariIniTerakhir = dapatkanTanggalLokal(new Date());
+        
         setInterval(() => {
             const hariIniLokal = dapatkanTanggalLokal(new Date());
-            if (inputKalender.value === tanggalAktifPilihan && hariIniLokal !== tanggalAktifPilihan) {
-                tanggalAktifPilihan = hariIniLokal;
-                inputKalender.value = hariIniLokal;
-                window.muatGrafikPerTanggal(hariIniLokal);
+            // Hanya update & reload chart JIKA melewati tengah malam (hari berganti)
+            // DAN user sebelumnya memang sedang memantau tanggal hari itu.
+            if (hariIniLokal !== hariIniTerakhir) {
+                if (tanggalAktifPilihan === hariIniTerakhir) {
+                    tanggalAktifPilihan = hariIniLokal;
+                    inputKalender.value = hariIniLokal;
+                    window.muatGrafikPerTanggal(hariIniLokal);
+                }
+                hariIniTerakhir = hariIniLokal;
             }
-        }, 500);
+        }, 5000); 
     </script>
 </body>
 </html>
