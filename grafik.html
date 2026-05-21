@@ -100,9 +100,14 @@
                     <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam (Semua)</button>
                 </div>
 
-                <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1">
-                    <i class="fa-solid fa-compress text-[10px]"></i>
-                </button>
+                <div class="flex gap-1.5">
+                    <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1" title="Reset Posisi Grafik">
+                        <i class="fa-solid fa-compress text-[10px]"></i>
+                    </button>
+                    <button onclick="downloadDataCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1.5" title="Unduh data tanggal ini ke Excel">
+                        <i class="fa-solid fa-file-csv text-[11px]"></i> <span class="hidden sm:inline">CSV</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -379,17 +384,59 @@
             }
         };
 
+        // --- FUNGSI UNDUH CSV BARU ---
+        window.downloadDataCSV = async function() {
+            const tglPilihan = document.getElementById("filter-tanggal-grafik").value;
+            if (!tglPilihan) {
+                alert("Silakan pilih tanggal pada kalender terlebih dahulu!");
+                return;
+            }
+
+            try {
+                // Ambil semua data dari folder tanggal tersebut
+                const logRefNode = query(ref(db, 'SistemAir_Log/' + tglPilihan));
+                const snap = await get(logRefNode);
+                
+                if (snap.exists()) {
+                    let csvText = "Waktu_Data_Masuk,pH_Level,Kekeruhan_NTU,Tinggi_Air_CM\n";
+                    let rowCount = 0;
+
+                    snap.forEach(child => {
+                        const d = child.val();
+                        let ts = d.timestamp ? Number(d.timestamp) : Date.now() / 1000;
+                        let waktuJam = formatWaktu(new Date(ts * 1000));
+                        
+                        csvText += `${waktuJam},${d.pH || 0},${d.turbidity || 0},${d.tinggiAir || 0}\n`;
+                        rowCount++;
+                    });
+
+                    if (rowCount > 0) {
+                        const blob = new Blob([csvText], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `WQ_Grafik_Riwayat_${tglPilihan}.csv`;
+                        link.click();
+                    } else {
+                        alert(`Tidak ditemukan data untuk tanggal ${tglPilihan}.`);
+                    }
+                } else {
+                    alert(`Database untuk tanggal ${tglPilihan} kosong.`);
+                }
+            } catch (err) {
+                console.error("Gagal Download CSV:", err);
+                alert("Terjadi kesalahan jaringan saat mengunduh CSV.");
+            }
+        };
+
         const inputKalender = document.getElementById("filter-tanggal-grafik");
         inputKalender.value = tanggalAktifPilihan;
         window.muatGrafikPerTanggal(tanggalAktifPilihan);
 
-        // --- BUG FIX DI BAWAH INI ---
         let hariIniTerakhir = dapatkanTanggalLokal(new Date());
         
         setInterval(() => {
             const hariIniLokal = dapatkanTanggalLokal(new Date());
-            // Hanya update & reload chart JIKA melewati tengah malam (hari berganti)
-            // DAN user sebelumnya memang sedang memantau tanggal hari itu.
             if (hariIniLokal !== hariIniTerakhir) {
                 if (tanggalAktifPilihan === hariIniTerakhir) {
                     tanggalAktifPilihan = hariIniLokal;
