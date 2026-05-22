@@ -8,49 +8,127 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Animasi Muncul Halus */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Animasi Getar untuk Error */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            75% { transform: translateX(-6px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Latar Belakang Pola Titik (Dot Pattern) */
+        .bg-dots {
+            background-image: radial-gradient(rgba(148, 163, 184, 0.3) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-center items-center px-4">
+<body class="bg-gradient-to-br from-slate-100 via-blue-50 to-slate-200 bg-dots text-slate-800 min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden">
 
-    <div class="w-full max-w-sm bg-white rounded-2xl border border-slate-200 shadow-xl p-8 space-y-6">
-        <div class="text-center space-y-2">
-            <div class="inline-flex bg-blue-50 text-blue-600 p-3 rounded-2xl border border-blue-100 text-lg mb-2">
-                <i class="fa-solid fa-droplet"></i>
-            </div>
-            <h2 class="text-lg font-extrabold tracking-tight text-slate-900">Platform Authentication</h2>
-            <p class="text-xs text-slate-400">Monitoring IoT Sirkulasi Air</p>
-        </div>
+    <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-blue-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" style="animation-delay: 2s;"></div>
 
-        <div id="pesan-error" class="hidden p-3 bg-rose-50 border border-rose-150 rounded-xl text-xs font-semibold text-rose-600 flex items-center gap-2">
-            <i class="fa-solid fa-circle-exclamation text-sm"></i> ID atau Kata Sandi salah!
-        </div>
-
-        <div class="space-y-3.5">
-            <div>
-                <input type="text" id="username" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition" placeholder="ID Operator" onkeypress="cekEnter(event)">
+    <div class="w-full max-w-sm bg-white/80 backdrop-blur-xl rounded-3xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 space-y-7 animate-fade-in-up z-10 relative">
+        
+        <div class="text-center space-y-3">
+            <div class="relative inline-flex items-center justify-center w-14 h-14 bg-gradient-to-tr from-blue-500 to-indigo-500 text-white rounded-2xl shadow-lg shadow-blue-500/30 mb-1 transform transition hover:scale-105 duration-300">
+                <i class="fa-solid fa-droplet text-2xl"></i>
+                <div class="absolute inset-0 rounded-2xl border border-blue-400 animate-ping opacity-20"></div>
             </div>
             <div>
-                <input type="password" id="password" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-xs font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition" placeholder="Password" onkeypress="cekEnter(event)">
+                <h2 class="text-xl font-extrabold tracking-tight text-slate-900">WQ System</h2>
+                <p class="text-[11px] font-medium text-slate-500 uppercase tracking-widest mt-1">Platform Authentication</p>
             </div>
         </div>
 
-        <button onclick="prosesLogin()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition active:scale-[0.98] shadow-md">
-            Login
+        <div id="pesan-error" class="hidden p-3 bg-rose-50/80 backdrop-blur-sm border border-rose-200 rounded-xl text-xs font-semibold text-rose-600 flex items-center gap-2 shadow-sm transition-all">
+            <i class="fa-solid fa-circle-exclamation text-sm shrink-0"></i> 
+            <span>ID atau Kata Sandi salah!</span>
+        </div>
+
+        <div class="space-y-4">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                    <i class="fa-solid fa-user-shield text-sm"></i>
+                </div>
+                <input type="text" id="username" class="w-full pl-10 pr-4 py-3 bg-white/50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 placeholder:text-slate-400 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" placeholder="ID Operator" onkeypress="cekEnter(event)">
+            </div>
+            
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                    <i class="fa-solid fa-lock text-sm"></i>
+                </div>
+                <input type="password" id="password" class="w-full pl-10 pr-10 py-3 bg-white/50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 placeholder:text-slate-400 placeholder:font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm" placeholder="Password" onkeypress="cekEnter(event)">
+                <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
+                    <i class="fa-solid fa-eye" id="eye-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <button onclick="prosesLogin()" class="relative w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl transition-all duration-200 active:scale-[0.98] shadow-lg shadow-blue-500/25 flex justify-center items-center gap-2 group overflow-hidden">
+            <span>Sign In Securely</span>
+            <i class="fa-solid fa-arrow-right-to-bracket transition-transform group-hover:translate-x-1"></i>
         </button>
     </div>
 
+    <p class="mt-8 text-[10px] font-medium text-slate-400 z-10 animate-fade-in-up" style="animation-delay: 0.2s;">
+        &copy; 2026 WQ-SYSTEM. Secure Access Only.
+    </p>
+
     <script>
+        function togglePassword() {
+            const pwdInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                pwdInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
         function prosesLogin() {
             let u = document.getElementById('username').value;
             let p = document.getElementById('password').value;
+            const errBox = document.getElementById('pesan-error');
+
             if (u === "roy" && p === "1986") {
-                sessionStorage.setItem("statusLogin", "sukses");
-                window.location.href = "index.html";
+                // Efek loading sementara sebelum pindah (Opsional agar terlihat pro)
+                document.querySelector('button').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Authenticating...';
+                
+                setTimeout(() => {
+                    sessionStorage.setItem("statusLogin", "sukses");
+                    window.location.href = "index.html";
+                }, 500);
             } else {
-                const errBox = document.getElementById('pesan-error');
+                // Tampilkan error dan tambahkan animasi getar
                 errBox.classList.remove('hidden');
+                errBox.classList.remove('animate-shake');
+                
+                // Memicu ulang animasi (reflow)
+                void errBox.offsetWidth; 
+                errBox.classList.add('animate-shake');
             }
         }
+        
         function cekEnter(e) { if(e.key === "Enter") prosesLogin(); }
     </script>
 </body>
