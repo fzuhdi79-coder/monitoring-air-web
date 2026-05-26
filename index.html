@@ -5,403 +5,416 @@
 <script>if(sessionStorage.getItem("statusLogin")!=="sukses"){window.location.href="login.html";}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>System Overview — WQ System</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root {
-  --bg: #f7f7f6;
-  --surface: #ffffff;
-  --surface-2: #fafaf9;
-  --border: #e8e8e5;
-  --border-2: #f0f0ef;
-  --text-primary: #111110;
-  --text-secondary: #6f6f6c;
-  --text-muted: #b5b5b0;
-  --accent: #111110;
-  --green: #16a34a; --green-bg: #f0fdf4; --green-border: #bbf7d0;
-  --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fde68a;
-  --red: #dc2626;   --red-bg: #fff5f5;   --red-border: #fecaca;
-  --blue: #2563eb;  --blue-bg: #eff6ff;  --blue-border: #bfdbfe;
-  --radius-sm: 6px; --radius-md: 9px; --radius-lg: 12px; --radius-xl: 16px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --font-mono: 'DM Mono', monospace;
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+
+/* ── TOKENS ── */
+:root{
+  --bg:#f6f6f5;
+  --surface:#ffffff;
+  --surface-2:#fafaf9;
+  --border:#e5e5e2;
+  --border-2:#efefed;
+  --text-1:#111110;
+  --text-2:#737370;
+  --text-3:#b0b0ac;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --r-s:6px; --r-m:10px; --r-l:14px;
+  --shadow:0 1px 4px rgba(0,0,0,.06);
+  --green:#15803d; --green-bg:#f0fdf4; --green-bd:#bbf7d0;
+  --amber:#b45309; --amber-bg:#fffbeb; --amber-bd:#fde68a;
+  --red:#b91c1c;   --red-bg:#fff5f5;   --red-bd:#fecaca;
+  --blue:#1d4ed8;  --blue-bg:#eff6ff;  --blue-bd:#bfdbfe;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { height: 100%; }
-body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
-svg text { font-family: 'DM Sans', sans-serif !important; }
+[data-theme="dark"]{
+  --bg:#111110; --surface:#1a1a18; --surface-2:#202020;
+  --border:#2c2c2a; --border-2:#242422;
+  --text-1:#f0f0ee; --text-2:#9a9a96; --text-3:#585854;
+}
+
+/* ── BASE ── */
+body{font-family:var(--sans);background:var(--bg);color:var(--text-1);display:flex;flex-direction:column;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
 /* ── TOAST ── */
-#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-.toast { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--text-primary); color: #fff; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; box-shadow: 0 4px 24px rgba(0,0,0,.18); pointer-events: auto; animation: toastIn .3s cubic-bezier(.22,1,.36,1); max-width: 320px; }
-.toast.success { background: #166534; }
-.toast.error { background: #991b1b; }
-.toast.warning { background: #92400e; }
-.toast.out { animation: toastOut .25s ease forwards; }
-@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-@keyframes toastOut { to { opacity: 0; transform: translateY(8px); } }
-
-/* ── STALE OVERLAY ── */
-.stale-overlay { position: absolute; inset: 0; background: rgba(247,247,246,.75); border-radius: var(--radius-lg); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 10; }
-.stale-overlay.show { display: flex; }
-.stale-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; font-family: var(--font-mono); color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); padding: 5px 10px; border-radius: 20px; }
-
-/* ── SKELETON ── */
-.skeleton { background: linear-gradient(90deg, #f0f0ef 25%, #e8e8e5 50%, #f0f0ef 75%); background-size: 200% 100%; animation: shimmer 1.4s ease infinite; border-radius: 4px; }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+#toast-root{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:var(--r-m);font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.15);max-width:300px;animation:tin .28s cubic-bezier(.22,1,.36,1);}
+.toast.info{background:var(--text-1);color:#fff;}
+.toast.ok{background:#14532d;color:#fff;}
+.toast.warn{background:#78350f;color:#fff;}
+.toast.err{background:#7f1d1d;color:#fff;}
+.toast.out{animation:tout .22s ease forwards;}
+@keyframes tin{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@keyframes tout{to{opacity:0;transform:translateY(6px);}}
 
 /* ── NAV ── */
-.nav-root { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
-.nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.nav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; flex-shrink: 0; }
-.nav-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--text-primary); display: flex; align-items: center; justify-content: center; }
-.nav-brand-icon svg { width: 13px; height: 13px; }
-.nav-brand-name { font-size: 14px; font-weight: 600; letter-spacing: -.02em; color: var(--text-primary); }
-.nav-links { display: flex; align-items: center; gap: 2px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 3px; }
-.nav-link { padding: 5px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; letter-spacing: -.01em; text-decoration: none; color: var(--text-secondary); transition: color .15s, background .15s; }
-.nav-link:hover { color: var(--text-primary); background: #ebebea; }
-.nav-link.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow-sm); }
-.nav-right { display: flex; align-items: center; gap: 10px; }
-.nav-time { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
-.btn-ghost { height: 32px; padding: 0 12px; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s; }
-.btn-ghost:hover { border-color: #d4d4d4; color: var(--text-primary); background: var(--surface-2); }
-.nav-hamburger { display: none; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); width: 32px; height: 32px; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); }
-.mobile-nav { display: none; flex-direction: column; gap: 3px; padding: 10px 16px 14px; border-top: 1px solid var(--border); background: var(--surface); }
-.mobile-nav.open { display: flex; }
-.mobile-nav-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: background .15s, color .15s; }
-.mobile-nav-link:hover, .mobile-nav-link.active { background: var(--bg); color: var(--text-primary); }
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+[data-theme="dark"] nav{background:rgba(26,26,24,.88);}
+.nav-inner{max-width:1280px;margin:0 auto;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.brand-mark{width:28px;height:28px;border-radius:7px;background:var(--text-1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-mark svg{width:13px;height:13px;}
+.brand-name{font-size:14px;font-weight:600;letter-spacing:-.02em;color:var(--text-1);}
+.nav-tabs{display:flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-m);padding:3px;}
+.nav-tab{padding:5px 14px;border-radius:7px;font-size:13px;font-weight:500;text-decoration:none;color:var(--text-2);transition:color .14s,background .14s;}
+.nav-tab:hover{color:var(--text-1);background:var(--border-2);}
+.nav-tab.on{background:var(--surface);color:var(--text-1);box-shadow:var(--shadow);}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.nav-clock{font-family:var(--mono);font-size:12px;color:var(--text-3);}
+.icon-btn{width:32px;height:32px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;}
+.icon-btn:hover{background:var(--surface-2);color:var(--text-1);}
+.ghost-btn{height:32px;padding:0 12px;border-radius:var(--r-s);border:1px solid var(--border);background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .14s;}
+.ghost-btn:hover{background:var(--surface-2);color:var(--text-1);}
+.hbtn{display:none;width:32px;height:32px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-2);cursor:pointer;align-items:center;justify-content:center;}
+.mob-menu{display:none;flex-direction:column;gap:3px;padding:10px 16px 14px;border-top:1px solid var(--border);background:var(--surface);}
+.mob-menu.open{display:flex;}
+.mob-link{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--r-s);font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;transition:all .14s;}
+.mob-link:hover,.mob-link.on{background:var(--bg);color:var(--text-1);}
+.mob-divider{height:1px;background:var(--border);margin:4px 0;}
 
 /* ── PAGE ── */
-.page { max-width: 1280px; margin: 0 auto; padding: 28px 24px 56px; display: flex; flex-direction: column; gap: 24px; }
+.page{max-width:1280px;margin:0 auto;padding:28px 24px 56px;display:flex;flex-direction:column;gap:20px;}
 
 /* ── PAGE HEADER ── */
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-.page-title { font-size: 16px; font-weight: 600; letter-spacing: -.025em; }
-.page-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-#koneksi-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 20px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted); white-space: nowrap; transition: all .4s; flex-shrink: 0; }
+.pg-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.pg-title{font-size:16px;font-weight:600;letter-spacing:-.022em;}
+.pg-sub{font-size:13px;color:var(--text-3);margin-top:3px;}
+#conn-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;font-family:var(--mono);font-size:11px;font-weight:500;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);white-space:nowrap;transition:all .35s;flex-shrink:0;}
+
+/* ── GRID HELPERS ── */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.grid-3-1{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:20px;position:relative;overflow:hidden;}
+
+/* ── SKELETON ── */
+.sk{background:linear-gradient(90deg,var(--border-2) 25%,var(--border) 50%,var(--border-2) 75%);background-size:200% 100%;animation:shimmer 1.5s ease infinite;border-radius:4px;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* ── METRIC CARD ── */
-.metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; transition: box-shadow .2s; }
-.metric-card:hover { box-shadow: var(--shadow-sm); }
-.metric-top { display: flex; align-items: center; justify-content: space-between; }
-.metric-label { font-size: 11.5px; font-weight: 500; color: var(--text-muted); letter-spacing: .025em; text-transform: uppercase; }
-.metric-icon { width: 28px; height: 28px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
-.metric-value { font-size: 34px; font-weight: 600; letter-spacing: -.05em; line-height: 1; color: var(--text-primary); }
-.metric-unit { font-size: 14px; font-weight: 400; color: var(--text-muted); margin-left: 2px; }
-.metric-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .01em; padding: 3px 8px; border-radius: 4px; border: 1px solid transparent; margin-top: 6px; }
-.metric-delta { display: flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
-.metric-chart { height: 44px; }
-.metric-footer { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; padding-top: 10px; border-top: 1px solid var(--border-2); }
-
-/* skeleton placeholders inside metric card */
-.sk-val { height: 34px; width: 80px; }
-.sk-badge { height: 22px; width: 100px; margin-top: 6px; }
-.sk-chart { height: 44px; border-radius: 4px; }
-
-/* ── CHART CARD ── */
-.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
-.chart-title { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
-.chart-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; margin-bottom: 14px; }
-
-/* ── SECTION ── */
-.section-hd { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
-.section-hd::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-/* ── CONTROL CARD ── */
-.ctrl-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-.ctrl-title { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
-.ctrl-sub { font-size: 12px; color: var(--text-muted); }
-
-/* ── MODE TOGGLE ── */
-.mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 3px; }
-.mode-btn { padding: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; border-radius: 7px; border: none; cursor: pointer; transition: all .2s; letter-spacing: -.01em; }
-.mode-btn.active { background: var(--text-primary); color: #fff; }
-.mode-btn.inactive { background: transparent; color: var(--text-muted); }
-.mode-btn.inactive:hover { color: var(--text-primary); background: #ebebea; }
-
-/* ── PUMP ROW ── */
-.pump-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-sm); gap: 8px; }
-.pump-label { font-size: 12.5px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
-.pump-switch { display: flex; background: #ebebea; border: 1px solid var(--border); border-radius: 6px; padding: 2px; gap: 2px; }
-.btn-pump { padding: 4px 12px; font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 600; border-radius: 5px; border: none; cursor: pointer; transition: all .15s; background: transparent; color: var(--text-muted); }
-.btn-pump.pump-on { background: var(--text-primary); color: #fff; }
-.btn-pump.pump-off-active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow-sm); }
-.btn-pump:disabled { cursor: not-allowed; }
-
-/* ── RECAP ── */
-.recap-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-sm); }
-.recap-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
-.recap-val { font-family: var(--font-mono); font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); }
-
-/* ── DOWNLOAD BTN ── */
-.btn-download { width: 100%; padding: 9px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: all .15s; letter-spacing: -.01em; }
-.btn-download:hover { background: #333; }
-.btn-download:active { transform: scale(.99); }
+.mc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.mc-label{font-size:11.5px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.025em;}
+.mc-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.mc-val{font-size:36px;font-weight:600;letter-spacing:-.05em;line-height:1;color:var(--text-1);}
+.mc-unit{font-size:14px;font-weight:400;color:var(--text-3);margin-left:2px;}
+.mc-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;border:1px solid;margin-top:7px;}
+.mc-chart-wrap{height:40px;margin:12px 0;}
+.mc-footer{font-family:var(--mono);font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px;padding-top:10px;border-top:1px solid var(--border-2);}
+/* stale overlay */
+.stale-ov{position:absolute;inset:0;background:rgba(246,246,245,.8);border-radius:var(--r-l);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:5;}
+[data-theme="dark"] .stale-ov{background:rgba(17,17,16,.8);}
+.stale-ov.show{display:flex;}
+.stale-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:500;color:var(--red);background:var(--red-bg);border:1px solid var(--red-bd);padding:5px 11px;border-radius:20px;}
 
 /* ── UPTIME BAR ── */
-.uptime-bar { display: flex; gap: 3px; }
-.uptime-segment { flex: 1; height: 6px; border-radius: 2px; background: var(--green); opacity: .85; transition: opacity .2s; }
-.uptime-segment.gap { background: var(--border); }
-.uptime-segment.warn { background: var(--amber); }
+.uptime-bar-wrap{display:flex;gap:3px;}
+.ub-seg{flex:1;height:6px;border-radius:2px;transition:background .2s;}
+.ub-ok{background:#22c55e;opacity:.8;}
+.ub-warn{background:#f59e0b;opacity:.8;}
+.ub-empty{background:var(--border);}
 
-/* ── ANIMATIONS ── */
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-@keyframes spin-slow { to { transform: rotate(360deg); } }
-.pulse-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; animation: blink 2s ease infinite; }
+/* ── CHART CARD ── */
+.chart-hd{margin-bottom:14px;}
+.chart-title{font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--text-1);}
+.chart-sub{font-size:12px;color:var(--text-3);margin-top:2px;}
+.chart-body{position:relative;height:150px;}
+
+/* ── SECTION LABEL ── */
+.sec-label{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── CTRL CARD ── */
+.ctrl-title{font-size:13px;font-weight:600;letter-spacing:-.01em;margin-bottom:4px;}
+.ctrl-sub{font-size:12px;color:var(--text-3);margin-bottom:14px;}
+
+/* ── MODE TOGGLE ── */
+.mode-wrap{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-m);padding:3px;margin-bottom:12px;}
+.mode-btn{padding:8px;font-family:var(--sans);font-size:12px;font-weight:600;border-radius:7px;border:none;cursor:pointer;transition:all .18s;letter-spacing:-.01em;}
+.mode-btn.on{background:var(--text-1);color:#fff;}
+.mode-btn.off{background:transparent;color:var(--text-3);}
+.mode-btn.off:hover{background:var(--border-2);color:var(--text-1);}
+.mode-info{display:flex;align-items:center;gap:7px;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:var(--r-s);font-size:12px;font-weight:500;color:var(--text-2);}
+
+/* ── PUMP ROWS ── */
+.pump-rows{display:flex;flex-direction:column;gap:8px;}
+.pump-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:var(--r-s);}
+.pump-label{font-size:12.5px;font-weight:500;color:var(--text-2);display:flex;align-items:center;gap:8px;}
+.pump-sw{display:flex;background:var(--border-2);border:1px solid var(--border);border-radius:6px;padding:2px;gap:2px;}
+.pbtn{padding:4px 12px;font-family:var(--sans);font-size:11.5px;font-weight:600;border-radius:5px;border:none;cursor:pointer;transition:all .15s;background:transparent;color:var(--text-3);}
+.pbtn.act-on{background:var(--text-1);color:#fff;}
+.pbtn.act-off{background:var(--surface);color:var(--text-1);box-shadow:var(--shadow);}
+.pbtn:disabled{cursor:not-allowed;opacity:.45;}
+
+/* ── RECAP ── */
+.recap-rows{display:flex;flex-direction:column;gap:6px;}
+.recap-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:var(--r-s);}
+.recap-lbl{font-size:12px;font-weight:500;color:var(--text-2);display:flex;align-items:center;gap:7px;}
+.recap-val{font-family:var(--mono);font-size:12px;font-weight:500;padding:3px 8px;border-radius:5px;background:var(--surface);border:1px solid var(--border);color:var(--text-1);}
+.date-pick{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);border-radius:var(--r-s);padding:5px 8px;outline:none;cursor:pointer;}
+.dl-btn{width:100%;padding:9px;background:var(--text-1);color:#fff;border:none;border-radius:var(--r-s);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .15s,transform .1s;letter-spacing:-.01em;margin-bottom:12px;}
+.dl-btn:hover{opacity:.85;}
+.dl-btn:active{transform:scale(.99);}
+
+/* ── PULSE DOT ── */
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.dot.pulse{animation:blink 2s ease infinite;}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);background:var(--surface);padding:14px 24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:auto;}
 
 /* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  .nav-links, .nav-time, .btn-ghost { display: none; }
-  .nav-hamburger { display: flex; }
-  .page { padding: 18px 16px 48px; gap: 18px; }
+@media(max-width:900px){
+  .grid-3,.grid-3-1{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .grid-3,.grid-2,.grid-3-1{grid-template-columns:1fr;}
+  .nav-tabs,.nav-clock,.ghost-btn{display:none!important;}
+  .hbtn{display:flex;}
+  .page{padding:16px 16px 48px;}
 }
 </style>
 </head>
 <body>
 
-<!-- ── TOAST CONTAINER ── -->
-<div id="toast-container"></div>
+<div id="toast-root"></div>
 
-<!-- ── NAVBAR ── -->
-<nav class="nav-root">
+<!-- NAV -->
+<nav>
   <div class="nav-inner">
-    <a href="index.html" class="nav-brand">
-      <div class="nav-brand-icon">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C9.8 3 8 5.2 8 8.5C8 11 9.4 13.1 11.5 14.2L11 17H13L12.5 14.2C14.6 13.1 16 11 16 8.5C16 5.2 14.2 3 12 3Z" fill="white"/><rect x="10" y="17" width="4" height="2.5" rx="1" fill="white" opacity=".5"/></svg>
       </div>
-      <span class="nav-brand-name">WQ System</span>
+      <span class="brand-name">WQ System</span>
     </a>
 
-    <div class="nav-links">
-      <a href="index.html" class="nav-link active">Overview</a>
-      <a href="grafik.html" class="nav-link">Analytics</a>
-      <a href="history.html" class="nav-link">Data Log</a>
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab on">Overview</a>
+      <a href="grafik.html" class="nav-tab">Analytics</a>
+      <a href="history.html" class="nav-tab">Data Log</a>
     </div>
 
     <div class="nav-right">
-      <span class="nav-time" id="nav-clock">--:--:--</span>
-      <button onclick="toggleTheme()" class="btn-ghost" id="theme-btn" title="Toggle theme">
-        <i class="fa-regular fa-moon" style="font-size:12px;"></i>
-      </button>
-      <button onclick="logout()" class="btn-ghost">
-        <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i> Sign out
-      </button>
+      <span class="nav-clock" id="nav-clock">--:--:--</span>
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme"><i class="fa-regular fa-moon" style="font-size:12px;"></i></button>
+      <button class="ghost-btn" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i> Sign out</button>
+      <button class="hbtn" id="hbtn"><i class="fa-solid fa-bars" id="hicon" style="font-size:13px;"></i></button>
     </div>
-
-    <button class="nav-hamburger" id="hamburger-btn"><i id="hamburger-icon" class="fa-solid fa-bars" style="font-size:13px;"></i></button>
   </div>
-  <div class="mobile-nav" id="mobile-menu">
-    <a href="index.html" class="mobile-nav-link active"><i class="fa-solid fa-chart-pie" style="font-size:12px;width:16px;color:var(--text-muted);"></i> Overview</a>
-    <a href="grafik.html" class="mobile-nav-link"><i class="fa-solid fa-chart-area" style="font-size:12px;width:16px;color:var(--text-muted);"></i> Analytics</a>
-    <a href="history.html" class="mobile-nav-link"><i class="fa-solid fa-database" style="font-size:12px;width:16px;color:var(--text-muted);"></i> Data Log</a>
-    <div style="height:1px;background:var(--border);margin:4px 0;"></div>
-    <button onclick="logout()" style="width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;">
-      <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i> Sign out
+  <div class="mob-menu" id="mob-menu">
+    <a href="index.html" class="mob-link on"><i class="fa-solid fa-chart-pie" style="font-size:12px;color:var(--text-3);width:16px;"></i>Overview</a>
+    <a href="grafik.html" class="mob-link"><i class="fa-solid fa-chart-area" style="font-size:12px;color:var(--text-3);width:16px;"></i>Analytics</a>
+    <a href="history.html" class="mob-link"><i class="fa-solid fa-database" style="font-size:12px;color:var(--text-3);width:16px;"></i>Data Log</a>
+    <div class="mob-divider"></div>
+    <button onclick="logout()" style="width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-s);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
+      <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i>Sign out
     </button>
   </div>
 </nav>
 
-<!-- ── MAIN ── -->
+<!-- MAIN -->
 <main class="page">
 
-  <!-- Page header -->
-  <div class="page-header">
+  <!-- Header -->
+  <div class="pg-header">
     <div>
-      <div class="page-title">System Overview</div>
-      <div class="page-sub">Telemetri sensor kualitas air secara real-time.</div>
+      <div class="pg-title">System Overview</div>
+      <div class="pg-sub">Telemetri sensor kualitas air secara real-time.</div>
     </div>
-    <div id="koneksi-status"><span style="width:6px;height:6px;border-radius:50%;background:var(--text-muted);display:inline-block;"></span> SYNCING</div>
+    <div id="conn-badge"><span class="dot" style="background:var(--text-3);"></span> SYNCING</div>
   </div>
 
-  <!-- ── METRIC CARDS ── -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+  <!-- METRIC CARDS -->
+  <div class="grid-3">
 
     <!-- pH -->
-    <div class="metric-card" id="card-ph">
-      <div class="stale-overlay" id="stale-ph"><div class="stale-badge"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i> DATA STALE</div></div>
-      <div class="metric-top">
-        <span class="metric-label">pH Level</span>
-        <div class="metric-icon" style="background:var(--green-bg);color:var(--green);"><i class="fa-solid fa-flask" style="font-size:11px;"></i></div>
+    <div class="card" id="card-ph">
+      <div class="stale-ov" id="stale-ph"><div class="stale-pill"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i>DATA STALE</div></div>
+      <div class="mc-header">
+        <span class="mc-label">pH Level</span>
+        <div class="mc-icon" style="background:var(--green-bg);color:var(--green);"><i class="fa-solid fa-flask" style="font-size:11px;"></i></div>
       </div>
-      <div>
-        <div id="val-ph-wrap">
-          <div class="skeleton sk-val" id="sk-ph-val"></div>
-          <div class="skeleton sk-badge" id="sk-ph-badge"></div>
-        </div>
-        <div id="val-ph-real" style="display:none;">
-          <div class="metric-value" id="val-ph">—</div>
-          <div class="metric-badge" id="status-ph"></div>
-        </div>
+      <!-- skeleton -->
+      <div id="sk-ph">
+        <div class="sk" style="height:36px;width:80px;border-radius:6px;"></div>
+        <div class="sk" style="height:20px;width:100px;border-radius:4px;margin-top:8px;"></div>
       </div>
-      <div class="metric-chart" id="sk-ph-chart"><div class="skeleton" style="height:44px;"></div></div>
-      <canvas id="chart-ph" style="display:none;height:44px;"></canvas>
-      <div class="metric-footer" id="time-ph"><i class="fa-regular fa-clock"></i> Menunggu data...</div>
+      <!-- real -->
+      <div id="real-ph" style="display:none;">
+        <div class="mc-val" id="val-ph">—</div>
+        <div class="mc-badge" id="status-ph"></div>
+      </div>
+      <div class="mc-chart-wrap">
+        <div class="sk" id="sk-ph-chart" style="height:40px;"></div>
+        <canvas id="chart-ph" style="display:none;height:40px;"></canvas>
+      </div>
+      <div class="mc-footer" id="time-ph"><i class="fa-regular fa-clock"></i>Menunggu data...</div>
     </div>
 
     <!-- Turbidity -->
-    <div class="metric-card" id="card-tb">
-      <div class="stale-overlay" id="stale-tb"><div class="stale-badge"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i> DATA STALE</div></div>
-      <div class="metric-top">
-        <span class="metric-label">Kekeruhan Air</span>
-        <div class="metric-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="fa-solid fa-droplet" style="font-size:11px;"></i></div>
+    <div class="card" id="card-tb">
+      <div class="stale-ov" id="stale-tb"><div class="stale-pill"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i>DATA STALE</div></div>
+      <div class="mc-header">
+        <span class="mc-label">Kekeruhan Air</span>
+        <div class="mc-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="fa-solid fa-droplet" style="font-size:11px;"></i></div>
       </div>
-      <div>
-        <div id="val-tb-wrap">
-          <div class="skeleton sk-val" id="sk-tb-val"></div>
-          <div class="skeleton sk-badge" id="sk-tb-badge"></div>
-        </div>
-        <div id="val-tb-real" style="display:none;">
-          <div class="metric-value" id="val-turbidity">—</div>
-          <div class="metric-badge" id="status-turbidity"></div>
-        </div>
+      <div id="sk-tb">
+        <div class="sk" style="height:36px;width:80px;border-radius:6px;"></div>
+        <div class="sk" style="height:20px;width:100px;border-radius:4px;margin-top:8px;"></div>
       </div>
-      <div class="metric-chart" id="sk-tb-chart"><div class="skeleton" style="height:44px;"></div></div>
-      <canvas id="chart-turbidity" style="display:none;height:44px;"></canvas>
-      <div class="metric-footer" id="time-tb"><i class="fa-regular fa-clock"></i> Menunggu data...</div>
+      <div id="real-tb" style="display:none;">
+        <div class="mc-val" id="val-turbidity">—</div>
+        <div class="mc-badge" id="status-turbidity"></div>
+      </div>
+      <div class="mc-chart-wrap">
+        <div class="sk" id="sk-tb-chart" style="height:40px;"></div>
+        <canvas id="chart-turbidity" style="display:none;height:40px;"></canvas>
+      </div>
+      <div class="mc-footer" id="time-tb"><i class="fa-regular fa-clock"></i>Menunggu data...</div>
     </div>
 
     <!-- Level -->
-    <div class="metric-card" id="card-lv">
-      <div class="stale-overlay" id="stale-lv"><div class="stale-badge"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i> DATA STALE</div></div>
-      <div class="metric-top">
-        <span class="metric-label">Ketinggian Air</span>
-        <div class="metric-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fa-solid fa-water" style="font-size:11px;"></i></div>
+    <div class="card" id="card-lv">
+      <div class="stale-ov" id="stale-lv"><div class="stale-pill"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i>DATA STALE</div></div>
+      <div class="mc-header">
+        <span class="mc-label">Ketinggian Air</span>
+        <div class="mc-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fa-solid fa-water" style="font-size:11px;"></i></div>
       </div>
-      <div>
-        <div id="val-lv-wrap">
-          <div class="skeleton sk-val" id="sk-lv-val"></div>
-          <div class="skeleton sk-badge" id="sk-lv-badge"></div>
-        </div>
-        <div id="val-lv-real" style="display:none;">
-          <div class="metric-value" id="val-level">—</div>
-          <div class="metric-badge" id="status-level"></div>
-        </div>
+      <div id="sk-lv">
+        <div class="sk" style="height:36px;width:80px;border-radius:6px;"></div>
+        <div class="sk" style="height:20px;width:100px;border-radius:4px;margin-top:8px;"></div>
       </div>
-      <div class="metric-chart" id="sk-lv-chart"><div class="skeleton" style="height:44px;"></div></div>
-      <canvas id="chart-level" style="display:none;height:44px;"></canvas>
-      <div class="metric-footer" id="time-lv"><i class="fa-regular fa-clock"></i> Menunggu data...</div>
+      <div id="real-lv" style="display:none;">
+        <div class="mc-val" id="val-level">—</div>
+        <div class="mc-badge" id="status-level"></div>
+      </div>
+      <div class="mc-chart-wrap">
+        <div class="sk" id="sk-lv-chart" style="height:40px;"></div>
+        <canvas id="chart-level" style="display:none;height:40px;"></canvas>
+      </div>
+      <div class="mc-footer" id="time-lv"><i class="fa-regular fa-clock"></i>Menunggu data...</div>
     </div>
 
   </div>
 
-  <!-- ── SYSTEM HEALTH BAR ── -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;">
+  <!-- UPTIME BAR -->
+  <div class="card" style="padding:16px 20px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <div style="font-size:12.5px;font-weight:600;color:var(--text-primary);">System Uptime</div>
-      <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="uptime-label">Last 20 readings</div>
+      <span style="font-size:12.5px;font-weight:600;color:var(--text-1);">System Health</span>
+      <span style="font-family:var(--mono);font-size:10.5px;color:var(--text-3);">Last 20 readings</span>
     </div>
-    <div class="uptime-bar" id="uptime-bar">
+    <div class="uptime-bar-wrap" id="uptime-bar">
       <!-- filled by JS -->
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:6px;">
-      <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);">Oldest</span>
-      <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);">Now</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-3);">Oldest</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text-3);">Now</span>
     </div>
   </div>
 
-  <!-- ── PUMP CHARTS ── -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
-    <div class="chart-card">
-      <div class="chart-title">Pompa Drainage</div>
-      <div class="chart-sub">Status ON/OFF pompa kuras real-time</div>
-      <div style="position:relative;height:148px;"><canvas id="chart-pompa-kuras"></canvas></div>
+  <!-- PUMP CHARTS -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="chart-hd">
+        <div class="chart-title">Pompa Drainage (Kuras)</div>
+        <div class="chart-sub">Status ON/OFF pompa kuras real-time</div>
+      </div>
+      <div class="chart-body"><canvas id="chart-pompa-kuras"></canvas></div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">Pompa Inflow</div>
-      <div class="chart-sub">Status ON/OFF pompa isi real-time</div>
-      <div style="position:relative;height:148px;"><canvas id="chart-pompa-isi"></canvas></div>
+    <div class="card">
+      <div class="chart-hd">
+        <div class="chart-title">Pompa Inflow (Isi)</div>
+        <div class="chart-sub">Status ON/OFF pompa isi real-time</div>
+      </div>
+      <div class="chart-body"><canvas id="chart-pompa-isi"></canvas></div>
     </div>
   </div>
 
-  <!-- ── CONTROLS ── -->
-  <div class="section-hd">Actuator Controls</div>
+  <!-- CONTROLS -->
+  <div class="sec-label">Actuator Controls</div>
 
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+  <div class="grid-3-1">
 
-    <!-- Mode -->
-    <div class="ctrl-card">
-      <div>
-        <div class="ctrl-title">Automation Mode</div>
-        <div class="ctrl-sub">Mode otomatis mengeksekusi kuras-isi berdasarkan batas ambang sensor.</div>
+    <!-- Automation mode -->
+    <div class="card">
+      <div class="ctrl-title">Automation Mode</div>
+      <div class="ctrl-sub">Mode otomatis mengeksekusi kuras-isi berdasarkan batas ambang sensor.</div>
+      <div class="mode-wrap">
+        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="mode-btn on">Automated</button>
+        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="mode-btn off">Manual Override</button>
       </div>
-      <div class="mode-toggle">
-        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="mode-btn active">Automated</button>
-        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="mode-btn inactive">Manual Override</button>
-      </div>
-      <!-- mode indicator -->
-      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:var(--radius-sm);">
-        <span class="pulse-dot" id="mode-dot" style="background:var(--green);"></span>
-        <span style="font-size:12px;font-weight:500;color:var(--text-secondary);" id="mode-desc">Sistem berjalan otomatis</span>
+      <div class="mode-info">
+        <span class="dot pulse" id="mode-dot" style="background:#22c55e;"></span>
+        <span id="mode-desc">Sistem berjalan otomatis</span>
       </div>
     </div>
 
     <!-- Pump switch -->
-    <div class="ctrl-card">
-      <div>
-        <div class="ctrl-title">Pump Switch</div>
-        <div class="ctrl-sub">Kontrol manual aktif saat mode Manual Override.</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
+    <div class="card">
+      <div class="ctrl-title">Pump Switch</div>
+      <div class="ctrl-sub">Kontrol manual aktif saat mode Manual Override.</div>
+      <div class="pump-rows">
         <div class="pump-row">
           <span class="pump-label">
-            <i class="fa-solid fa-circle-nodes" id="icon-p1" style="font-size:11px;color:var(--text-muted);transition:color .3s;"></i>
+            <i class="fa-solid fa-circle-nodes" id="icon-p1" style="font-size:11px;color:var(--text-3);transition:color .3s;"></i>
             Pompa 1 — Drainage
           </span>
-          <div class="pump-switch">
-            <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump">ON</button>
-            <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
+          <div class="pump-sw">
+            <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="pbtn">ON</button>
+            <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="pbtn">OFF</button>
           </div>
         </div>
         <div class="pump-row">
           <span class="pump-label">
-            <i class="fa-solid fa-circle-nodes" id="icon-p2" style="font-size:11px;color:var(--text-muted);transition:color .3s;"></i>
+            <i class="fa-solid fa-circle-nodes" id="icon-p2" style="font-size:11px;color:var(--text-3);transition:color .3s;"></i>
             Pompa 2 — Inflow
           </span>
-          <div class="pump-switch">
-            <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump">ON</button>
-            <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
+          <div class="pump-sw">
+            <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="pbtn">ON</button>
+            <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="pbtn">OFF</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Daily recap -->
-    <div class="ctrl-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
-        <div>
-          <div class="ctrl-title">Rekap Sensor Harian</div>
-          <div class="ctrl-sub" id="label-keterangan-rekap">Data real-time dari riwayat log hari ini.</div>
-        </div>
-        <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)"
-          style="font-family:var(--font-mono);font-size:11px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius-sm);padding:5px 8px;outline:none;cursor:pointer;flex-shrink:0;">
+    <!-- Recap -->
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:4px;">
+        <div class="ctrl-title">Rekap Sensor Harian</div>
+        <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)" class="date-pick">
       </div>
-
-      <button onclick="downloadHarianCSV()" class="btn-download">
+      <div class="ctrl-sub" id="label-keterangan-rekap">Data real-time dari riwayat log hari ini.</div>
+      <button onclick="downloadHarianCSV()" class="dl-btn">
         <i class="fa-solid fa-arrow-down" style="font-size:11px;"></i>
         <span id="text-download-btn">Unduh CSV</span>
       </button>
-
-      <div style="display:flex;flex-direction:column;gap:6px;">
+      <div class="recap-rows">
         <div class="recap-row">
-          <span class="recap-label"><i class="fa-solid fa-flask" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Rata-rata pH</span>
+          <span class="recap-lbl"><i class="fa-solid fa-flask" style="font-size:10px;color:var(--text-3);width:14px;"></i>Rata-rata pH</span>
           <span class="recap-val" id="rata-ph" style="color:var(--green);">—</span>
         </div>
         <div class="recap-row">
-          <span class="recap-label"><i class="fa-solid fa-droplet" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Rata-rata Turbidity</span>
+          <span class="recap-lbl"><i class="fa-solid fa-droplet" style="font-size:10px;color:var(--text-3);width:14px;"></i>Rata-rata Turbidity</span>
           <span class="recap-val" id="rata-tb" style="color:var(--amber);">—</span>
         </div>
         <div class="recap-row">
-          <span class="recap-label"><i class="fa-solid fa-water" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Rata-rata Tinggi Air</span>
+          <span class="recap-lbl"><i class="fa-solid fa-water" style="font-size:10px;color:var(--text-3);width:14px;"></i>Rata-rata Tinggi Air</span>
           <span class="recap-val" id="rata-lv" style="color:var(--blue);">—</span>
         </div>
         <div class="recap-row">
-          <span class="recap-label"><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;width:14px;color:var(--text-muted);"></i> pH Max / Min</span>
+          <span class="recap-lbl"><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;color:var(--text-3);width:14px;"></i>pH Max / Min</span>
           <span class="recap-val" id="maxmin-ph" style="color:var(--red);">—</span>
         </div>
         <div class="recap-row">
-          <span class="recap-label"><i class="fa-solid fa-database" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Total Sampel</span>
+          <span class="recap-lbl"><i class="fa-solid fa-database" style="font-size:10px;color:var(--text-3);width:14px;"></i>Total Sampel</span>
           <span class="recap-val" id="total-sampel">—</span>
         </div>
       </div>
@@ -410,377 +423,294 @@ svg text { font-family: 'DM Sans', sans-serif !important; }
   </div>
 </main>
 
-<footer style="border-top:1px solid var(--border);background:var(--surface);padding:14px 24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:auto;">
-  &copy; 2026 WQ-SYSTEM &middot; Roykhan Muhammad &middot; <span id="footer-session">Session aktif</span>
-</footer>
-
-<!-- ── DARK MODE STYLE OVERRIDE ── -->
-<style id="dark-style"></style>
+<footer>&copy; 2026 WQ-SYSTEM &middot; Roykhan Muhammad &middot; <span id="footer-session">Session: 0m</span></footer>
 
 <script>
-/* ── CLOCK ── */
-function tickClock() {
-  const el = document.getElementById('nav-clock');
-  if (el) el.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false });
-}
-setInterval(tickClock, 1000); tickClock();
+/* CLOCK */
+function tickClock(){const e=document.getElementById('nav-clock');if(e)e.textContent=new Date().toLocaleTimeString('id-ID',{hour12:false});}
+setInterval(tickClock,1000);tickClock();
 
-/* ── SESSION TIMER ── */
-const sessionStart = Date.now();
-setInterval(() => {
-  const mins = Math.floor((Date.now() - sessionStart) / 60000);
-  const el = document.getElementById('footer-session');
-  if (el) el.textContent = `Session: ${mins}m`;
-}, 60000);
+/* SESSION TIMER */
+const t0=Date.now();
+setInterval(()=>{const e=document.getElementById('footer-session');if(e)e.textContent='Session: '+Math.floor((Date.now()-t0)/60000)+'m';},60000);
 
-/* ── TOAST ── */
-function showToast(msg, type = 'default') {
-  const c = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-circle-xmark' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-info';
-  t.innerHTML = `<i class="fa-solid ${icon}" style="font-size:13px;flex-shrink:0;"></i> ${msg}`;
-  c.appendChild(t);
-  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3500);
+/* TOAST */
+function toast(msg,type='info'){
+  const c=document.getElementById('toast-root');
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  const icons={info:'fa-circle-info',ok:'fa-check-circle',warn:'fa-triangle-exclamation',err:'fa-circle-xmark'};
+  el.innerHTML=`<i class="fa-solid ${icons[type]||icons.info}" style="font-size:12px;flex-shrink:0;"></i>${msg}`;
+  c.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),250);},3400);
 }
 
-/* ── DARK MODE ── */
-let darkMode = localStorage.getItem('wq-dark') === '1';
-function applyTheme() {
-  const ds = document.getElementById('dark-style');
-  const btn = document.getElementById('theme-btn');
-  if (darkMode) {
-    ds.textContent = `:root{--bg:#111110;--surface:#1a1a18;--surface-2:#1f1f1d;--border:#2a2a27;--border-2:#242422;--text-primary:#f0f0ee;--text-secondary:#a3a39e;--text-muted:#6b6b68;}body{color-scheme:dark;}`;
-    if (btn) btn.innerHTML = '<i class="fa-regular fa-sun" style="font-size:12px;"></i>';
-  } else {
-    ds.textContent = '';
-    if (btn) btn.innerHTML = '<i class="fa-regular fa-moon" style="font-size:12px;"></i>';
-  }
+/* DARK MODE */
+let dark=localStorage.getItem('wq-dark')==='1';
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',dark?'dark':'');
+  const b=document.getElementById('theme-btn');
+  if(b)b.innerHTML=dark?'<i class="fa-regular fa-sun" style="font-size:12px;"></i>':'<i class="fa-regular fa-moon" style="font-size:12px;"></i>';
 }
-function toggleTheme() {
-  darkMode = !darkMode;
-  localStorage.setItem('wq-dark', darkMode ? '1' : '0');
-  applyTheme();
-  showToast(darkMode ? 'Dark mode aktif' : 'Light mode aktif');
-}
+function toggleTheme(){dark=!dark;localStorage.setItem('wq-dark',dark?'1':'0');applyTheme();toast(dark?'Dark mode aktif':'Light mode aktif');}
 applyTheme();
 
-/* ── NAV MOBILE ── */
-const hBtn = document.getElementById('hamburger-btn');
-const mMenu = document.getElementById('mobile-menu');
-const hIcon = document.getElementById('hamburger-icon');
-hBtn.addEventListener('click', () => {
-  mMenu.classList.toggle('open');
-  hIcon.className = mMenu.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-  hIcon.style.fontSize = '13px';
+/* HAMBURGER */
+document.getElementById('hbtn').addEventListener('click',()=>{
+  const m=document.getElementById('mob-menu');
+  const ic=document.getElementById('hicon');
+  m.classList.toggle('open');
+  ic.className=m.classList.contains('open')?'fa-solid fa-xmark':'fa-solid fa-bars';
+  ic.style.fontSize='13px';
 });
 
-function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+function logout(){sessionStorage.removeItem('statusLogin');window.location.href='login.html';}
 
-/* ── UPTIME BAR ── */
-function updateUptimeBar(dataHistory) {
-  const bar = document.getElementById('uptime-bar');
-  if (!bar) return;
-  bar.innerHTML = '';
-  const total = 20;
-  const filled = Math.min(dataHistory.length, total);
-  for (let i = 0; i < total; i++) {
-    const seg = document.createElement('div');
-    seg.className = 'uptime-segment';
-    if (i >= filled) {
-      seg.classList.add('gap');
-    } else {
-      const idx = i;
-      const val = dataHistory[idx];
-      if (val && (val.ph < 6.5 || val.ph > 8.5 || val.tb > 100)) seg.classList.add('warn');
+/* UPTIME BAR */
+let dataHistory=[];
+function renderUptimeBar(){
+  const bar=document.getElementById('uptime-bar');
+  if(!bar)return;
+  bar.innerHTML='';
+  for(let i=0;i<20;i++){
+    const seg=document.createElement('div');
+    seg.className='ub-seg';
+    if(i>=dataHistory.length){seg.classList.add('ub-empty');}
+    else{
+      const v=dataHistory[i];
+      seg.classList.add((v&&(v.ph<6.5||v.ph>8.5||v.tb>100))?'ub-warn':'ub-ok');
     }
     bar.appendChild(seg);
   }
 }
 
-/* ── REVEAL SKELETON → REAL ── */
-function revealCard(prefix) {
-  const wrap = document.getElementById(`val-${prefix}-wrap`);
-  const real = document.getElementById(`val-${prefix}-real`);
-  const skChart = document.getElementById(`sk-${prefix}-chart`);
-  const realChart = document.getElementById(`chart-${prefix === 'lv' ? 'level' : prefix === 'tb' ? 'turbidity' : 'ph'}`);
-  if (wrap) wrap.style.display = 'none';
-  if (real) real.style.display = 'block';
-  if (skChart) skChart.style.display = 'none';
-  if (realChart) realChart.style.display = 'block';
+/* REVEAL SKELETON */
+function reveal(key){
+  const sk=document.getElementById('sk-'+key);
+  const re=document.getElementById('real-'+key);
+  const skC=document.getElementById('sk-'+key+'-chart');
+  const suffix=key==='tb'?'turbidity':key==='lv'?'level':key;
+  const ch=document.getElementById('chart-'+suffix);
+  if(sk)sk.style.display='none';
+  if(re)re.style.display='block';
+  if(skC)skC.style.display='none';
+  if(ch)ch.style.display='block';
 }
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import{getDatabase,ref,onValue,set,get,query,limitToLast}from"https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
-const db = getDatabase(app);
-const statusBadge = document.getElementById('koneksi-status');
-let timerSensor;
-let dataFirstReceived = false;
-let dataHistory = [];
+const app=initializeApp({apiKey:"AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",databaseURL:"https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"});
+const db=getDatabase(app);
+const badge=document.getElementById('conn-badge');
+let hwTimer,firstData=false,prevPh=null,prevTb=null,prevLv=null;
 
-const now = new Date();
-const hariIni = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+const now=new Date();
+const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-/* ── MINI CHARTS ── */
-function createMiniChart(id, color) {
-  return new Chart(document.getElementById(id), {
-    type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.4 }] },
-    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 300 }, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+/* MINI CHARTS */
+function miniChart(id,color){
+  return new Chart(document.getElementById(id),{
+    type:'line',
+    data:{labels:[],datasets:[{data:[],borderColor:color,borderWidth:1.5,pointRadius:0,fill:false,tension:0.4}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{display:false}},scales:{x:{display:false},y:{display:false}}}
   });
 }
-const chartPh  = createMiniChart('chart-ph',        '#16a34a');
-const chartTb  = createMiniChart('chart-turbidity', '#d97706');
-const chartLv  = createMiniChart('chart-level',     '#2563eb');
+const cPh=miniChart('chart-ph','#15803d');
+const cTb=miniChart('chart-turbidity','#b45309');
+const cLv=miniChart('chart-level','#1d4ed8');
 
-const pumpOpts = {
-  responsive: true, maintainAspectRatio: false,
-  animation: { duration: 200 },
-  plugins: { legend: { display: false } },
-  scales: {
-    x: { grid: { display: false }, ticks: { font: { size: 9, family: "'DM Mono',monospace" }, color: '#b5b5b0' } },
-    y: { min: -0.1, max: 1.1, ticks: { stepSize: 1, font: { size: 10, weight: '500' }, color: '#a3a39e', callback: v => v===1?'ON':v===0?'OFF':'' }, grid: { color: '#f0f0ef' } }
+const pOpts={
+  responsive:true,maintainAspectRatio:false,animation:{duration:200},
+  plugins:{legend:{display:false}},
+  scales:{
+    x:{grid:{display:false},ticks:{font:{size:9,family:"'DM Mono',monospace"},color:'#b0b0ac'}},
+    y:{min:-0.1,max:1.1,ticks:{stepSize:1,font:{size:10,weight:'500'},color:'#737370',callback:v=>v===1?'ON':v===0?'OFF':''},grid:{color:'#efefed'}}
   }
 };
-const chartPompaKuras = new Chart(document.getElementById('chart-pompa-kuras').getContext('2d'), {
-  type: 'line',
-  data: { labels: Array(20).fill(''), datasets: [{ data: Array(20).fill(0), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
-  options: pumpOpts
+const cKuras=new Chart(document.getElementById('chart-pompa-kuras').getContext('2d'),{
+  type:'line',
+  data:{labels:Array(20).fill(''),datasets:[{data:Array(20).fill(0),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.04)',fill:true,stepped:true,pointRadius:0,borderWidth:1.5}]},
+  options:pOpts
 });
-const chartPompaIsi = new Chart(document.getElementById('chart-pompa-isi').getContext('2d'), {
-  type: 'line',
-  data: { labels: Array(20).fill(''), datasets: [{ data: Array(20).fill(0), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
-  options: pumpOpts
+const cIsi=new Chart(document.getElementById('chart-pompa-isi').getContext('2d'),{
+  type:'line',
+  data:{labels:Array(20).fill(''),datasets:[{data:Array(20).fill(0),borderColor:'#1d4ed8',backgroundColor:'rgba(29,78,216,.04)',fill:true,stepped:true,pointRadius:0,borderWidth:1.5}]},
+  options:pOpts
 });
 
-/* ── LOAD HISTORY ── */
-get(query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20))).then(snap => {
-  if (!snap.exists()) return;
-  let lph=[], dph=[], ltb=[], dtb=[], llv=[], dlv=[], lk=[], dk=[], li=[], di=[];
-  snap.forEach(child => {
-    const d = child.val();
-    lph.push(''); dph.push(d.pH||0);
-    ltb.push(''); dtb.push(d.turbidity||0);
-    llv.push(''); dlv.push(d.tinggiAir||0);
-    const t = new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
-    const ps = d.pompaStatus||"OFF";
-    lk.push(t); dk.push(ps==="KURAS"?1:0);
-    li.push(t); di.push(ps==="ISI"?1:0);
-    dataHistory.push({ ph: d.pH||0, tb: d.turbidity||0 });
+/* LOAD HISTORY */
+get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
+  if(!snap.exists())return;
+  let lph=[],dph=[],ltb=[],dtb=[],llv=[],dlv=[],lk=[],dk=[],li=[],di=[];
+  snap.forEach(child=>{
+    const d=child.val();
+    lph.push('');dph.push(d.pH||0);
+    ltb.push('');dtb.push(d.turbidity||0);
+    llv.push('');dlv.push(d.tinggiAir||0);
+    const t=new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
+    const ps=d.pompaStatus||'OFF';
+    lk.push(t);dk.push(ps==='KURAS'?1:0);
+    li.push(t);di.push(ps==='ISI'?1:0);
+    dataHistory.push({ph:d.pH||0,tb:d.turbidity||0});
   });
-  while(lph.length < 20){ lph.unshift(''); dph.unshift(0); ltb.unshift(''); dtb.unshift(0); llv.unshift(''); dlv.unshift(0); lk.unshift(''); dk.unshift(0); li.unshift(''); di.unshift(0); }
-  chartPh.data.labels=lph; chartPh.data.datasets[0].data=dph;
-  chartTb.data.labels=ltb; chartTb.data.datasets[0].data=dtb;
-  chartLv.data.labels=llv; chartLv.data.datasets[0].data=dlv;
-  chartPompaKuras.data.labels=lk; chartPompaKuras.data.datasets[0].data=dk;
-  chartPompaIsi.data.labels=li;   chartPompaIsi.data.datasets[0].data=di;
-  [chartPh,chartTb,chartLv,chartPompaKuras,chartPompaIsi].forEach(c=>c.update());
-  updateUptimeBar(dataHistory);
+  while(lph.length<20){lph.unshift('');dph.unshift(0);ltb.unshift('');dtb.unshift(0);llv.unshift('');dlv.unshift(0);lk.unshift('');dk.unshift(0);li.unshift('');di.unshift(0);}
+  cPh.data.labels=lph;cPh.data.datasets[0].data=dph;
+  cTb.data.labels=ltb;cTb.data.datasets[0].data=dtb;
+  cLv.data.labels=llv;cLv.data.datasets[0].data=dlv;
+  cKuras.data.labels=lk;cKuras.data.datasets[0].data=dk;
+  cIsi.data.labels=li;cIsi.data.datasets[0].data=di;
+  [cPh,cTb,cLv,cKuras,cIsi].forEach(c=>c.update());
+  renderUptimeBar();
 });
 
-function pushChart(chart, val, label='') {
-  chart.data.labels.push(label);
-  chart.data.datasets[0].data.push(val);
-  if(chart.data.datasets[0].data.length > 20){ chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+function push(chart,val,lbl=''){
+  chart.data.labels.push(lbl);chart.data.datasets[0].data.push(val);
+  if(chart.data.datasets[0].data.length>20){chart.data.labels.shift();chart.data.datasets[0].data.shift();}
   chart.update();
 }
 
-/* ── STATUS UI ── */
-function setOnlineUI() {
-  statusBadge.innerHTML = `<span class="pulse-dot" style="background:#22c55e;"></span> LIVE`;
-  statusBadge.style.cssText = 'background:#f0fdf4;border-color:#bbf7d0;color:#16a34a;';
-  ['ph','tb','lv'].forEach(p => { const o = document.getElementById('stale-'+p); if(o) o.classList.remove('show'); });
+/* ONLINE / OFFLINE UI */
+function setOnline(){
+  badge.innerHTML=`<span class="dot pulse" style="background:#22c55e;"></span>LIVE`;
+  badge.style.cssText='background:var(--green-bg);border-color:var(--green-bd);color:var(--green);';
+  ['ph','tb','lv'].forEach(k=>{const o=document.getElementById('stale-'+k);if(o)o.classList.remove('show');});
 }
-function setOfflineUI(msg) {
-  statusBadge.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> ${msg}`;
-  statusBadge.style.cssText = 'background:#fff5f5;border-color:#fecaca;color:#dc2626;';
-  if (dataFirstReceived) {
-    ['ph','tb','lv'].forEach(p => { const o = document.getElementById('stale-'+p); if(o) o.classList.add('show'); });
-    showToast('Koneksi hardware terputus. Data mungkin tidak akurat.', 'error');
+function setOffline(msg){
+  badge.innerHTML=`<span class="dot pulse" style="background:#ef4444;"></span>${msg}`;
+  badge.style.cssText='background:var(--red-bg);border-color:var(--red-bd);color:var(--red);';
+  if(firstData){
+    ['ph','tb','lv'].forEach(k=>{const o=document.getElementById('stale-'+k);if(o)o.classList.add('show');});
+    toast('Koneksi hardware terputus — data mungkin tidak akurat.','err');
   }
 }
 
-onValue(ref(db, ".info/connected"), snap => { if(snap.val()!==true) setOfflineUI("OFFLINE"); });
+onValue(ref(db,'.info/connected'),s=>{if(s.val()!==true)setOffline('OFFLINE');});
 
-/* ── PREV VALUES for delta ── */
-let prevPh = null, prevTb = null, prevLv = null;
+/* MAIN LISTENER */
+onValue(ref(db,'SistemAir'),snap=>{
+  if(!snap.exists())return;
+  const d=snap.val();
+  const t=new Date().toLocaleTimeString('id-ID',{hour12:false});
+  setOnline();
+  clearTimeout(hwTimer);hwTimer=setTimeout(()=>setOffline('HW OFFLINE'),35000);
 
-onValue(ref(db, 'SistemAir'), snap => {
-  if (!snap.exists()) return;
-  const d = snap.val();
-  const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+  if(!firstData){firstData=true;['ph','tb','lv'].forEach(reveal);}
 
-  setOnlineUI();
-  clearTimeout(timerSensor);
-  timerSensor = setTimeout(() => setOfflineUI("HW OFFLINE"), 35000);
-
-  /* ── first-data reveal ── */
-  if (!dataFirstReceived) {
-    dataFirstReceived = true;
-    revealCard('ph'); revealCard('tb'); revealCard('lv');
+  /* pH */
+  const ph=d.pH||0;
+  document.getElementById('val-ph').textContent=ph.toFixed(2);
+  const sph=document.getElementById('status-ph');
+  if(ph<6.5||ph>8.5){
+    sph.textContent='⚠ CRITICAL';sph.style.cssText='background:var(--red-bg);color:var(--red);border-color:var(--red-bd);';
+    if(prevPh!==null&&prevPh>=6.5&&prevPh<=8.5)toast(`pH keluar batas: ${ph.toFixed(2)}`,'err');
+  }else{
+    sph.textContent='✓ OPTIMAL';sph.style.cssText='background:var(--green-bg);color:var(--green);border-color:var(--green-bd);';
   }
+  push(cPh,ph);
+  document.getElementById('time-ph').innerHTML=`<i class="fa-regular fa-clock"></i>${t}`;
+  prevPh=ph;
 
-  /* ── pH ── */
-  let ph = d.pH || 0;
-  document.getElementById('val-ph').textContent = ph.toFixed(2);
-  const sph = document.getElementById('status-ph');
-  if(ph < 6.5 || ph > 8.5){
-    sph.textContent = '⚠ CRITICAL'; sph.style.cssText = 'background:var(--red-bg);color:var(--red);border-color:var(--red-border);';
-    if(prevPh !== null && (prevPh >= 6.5 && prevPh <= 8.5)) showToast(`pH keluar batas: ${ph.toFixed(2)}`, 'error');
-  } else {
-    sph.textContent = '✓ OPTIMAL'; sph.style.cssText = 'background:var(--green-bg);color:var(--green);border-color:var(--green-border);';
+  /* Turbidity */
+  const tb=d.turbidity||0;
+  document.getElementById('val-turbidity').innerHTML=`${Math.round(tb)}<span class="mc-unit">NTU</span>`;
+  const stb=document.getElementById('status-turbidity');
+  if(tb<25){
+    stb.textContent='✓ CLEAR';stb.style.cssText='background:var(--green-bg);color:var(--green);border-color:var(--green-bd);';
+  }else if(tb<100){
+    stb.textContent='⚡ WARNING';stb.style.cssText='background:var(--amber-bg);color:var(--amber);border-color:var(--amber-bd);';
+    if(prevTb!==null&&prevTb<25)toast(`Turbidity meningkat: ${Math.round(tb)} NTU`,'warn');
+  }else{
+    stb.textContent='⚠ HAZARD';stb.style.cssText='background:var(--red-bg);color:var(--red);border-color:var(--red-bd);';
+    if(prevTb!==null&&prevTb<100)toast(`Turbidity kritis: ${Math.round(tb)} NTU`,'err');
   }
-  pushChart(chartPh, ph);
-  document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> ${waktu}`;
-  prevPh = ph;
+  push(cTb,tb);
+  document.getElementById('time-tb').innerHTML=`<i class="fa-regular fa-clock"></i>${t}`;
+  prevTb=tb;
 
-  /* ── Turbidity ── */
-  let tb = d.turbidity || 0;
-  document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="metric-unit">NTU</span>`;
-  const stb = document.getElementById('status-turbidity');
-  if(tb < 25){
-    stb.textContent = '✓ CLEAR'; stb.style.cssText = 'background:var(--green-bg);color:var(--green);border-color:var(--green-border);';
-  } else if(tb < 100){
-    stb.textContent = '⚡ WARNING'; stb.style.cssText = 'background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);';
-    if(prevTb !== null && prevTb < 25) showToast(`Turbidity meningkat: ${Math.round(tb)} NTU`, 'warning');
-  } else {
-    stb.textContent = '⚠ HAZARD'; stb.style.cssText = 'background:var(--red-bg);color:var(--red);border-color:var(--red-border);';
-    if(prevTb !== null && prevTb < 100) showToast(`Turbidity kritis: ${Math.round(tb)} NTU`, 'error');
+  /* Level */
+  const lv=d.tinggiAir||0;
+  document.getElementById('val-level').innerHTML=`${Math.round(lv)}<span class="mc-unit">cm</span>`;
+  const slv=document.getElementById('status-level');
+  if(lv<20){
+    slv.textContent='⚠ LOW';slv.style.cssText='background:var(--red-bg);color:var(--red);border-color:var(--red-bd);';
+    if(prevLv!==null&&prevLv>=20)toast(`Level air rendah: ${Math.round(lv)} cm`,'warn');
+  }else{
+    slv.textContent='✓ NORMAL';slv.style.cssText='background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd);';
   }
-  pushChart(chartTb, tb);
-  document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> ${waktu}`;
-  prevTb = tb;
+  push(cLv,lv);
+  document.getElementById('time-lv').innerHTML=`<i class="fa-regular fa-clock"></i>${t}`;
+  prevLv=lv;
 
-  /* ── Level ── */
-  let lv = d.tinggiAir || 0;
-  document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="metric-unit">cm</span>`;
-  const slv = document.getElementById('status-level');
-  if(lv < 20){
-    slv.textContent = '⚠ LOW'; slv.style.cssText = 'background:var(--red-bg);color:var(--red);border-color:var(--red-border);';
-    if(prevLv !== null && prevLv >= 20) showToast(`Level air rendah: ${Math.round(lv)} cm`, 'warning');
-  } else {
-    slv.textContent = '✓ NORMAL'; slv.style.cssText = 'background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border);';
-  }
-  pushChart(chartLv, lv);
-  document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> ${waktu}`;
-  prevLv = lv;
+  /* uptime */
+  dataHistory.push({ph,tb});if(dataHistory.length>20)dataHistory.shift();
+  renderUptimeBar();
 
-  /* ── uptime history ── */
-  dataHistory.push({ ph, tb });
-  if (dataHistory.length > 20) dataHistory.shift();
-  updateUptimeBar(dataHistory);
+  /* pump charts */
+  const ps=d.pompaStatus||'OFF';
+  push(cKuras,ps==='KURAS'?1:0,t);
+  push(cIsi,ps==='ISI'?1:0,t);
 
-  /* ── pump charts ── */
-  let pStat = d.pompaStatus || "OFF";
-  pushChart(chartPompaKuras, pStat==="KURAS"?1:0, waktu);
-  pushChart(chartPompaIsi,   pStat==="ISI"?1:0,   waktu);
+  /* mode & buttons */
+  const mode=d.modeSistem||'AUTO';
+  document.getElementById('btn-mode-auto').className='mode-btn '+(mode==='AUTO'?'on':'off');
+  document.getElementById('btn-mode-manual').className='mode-btn '+(mode==='MANUAL'?'on':'off');
+  document.getElementById('mode-desc').textContent=mode==='AUTO'?'Sistem berjalan otomatis':'Manual override aktif';
+  document.getElementById('mode-dot').style.background=mode==='AUTO'?'#22c55e':'#f59e0b';
 
-  /* ── mode & pump buttons ── */
-  let modeSistem = d.modeSistem || "AUTO";
+  const pumps=[document.getElementById('btn-p1-on'),document.getElementById('btn-p1-off'),document.getElementById('btn-p2-on'),document.getElementById('btn-p2-off')];
+  pumps.forEach(b=>{b.disabled=mode==='AUTO';b.style.opacity=mode==='AUTO'?'.4':'1';b.style.cursor=mode==='AUTO'?'not-allowed':'pointer';});
 
-  const bAuto   = document.getElementById('btn-mode-auto');
-  const bManual = document.getElementById('btn-mode-manual');
-  const mDesc   = document.getElementById('mode-desc');
-  const mDot    = document.getElementById('mode-dot');
+  document.getElementById('btn-p1-on').className ='pbtn '+(ps==='KURAS'?'act-on':'');
+  document.getElementById('btn-p1-off').className='pbtn '+(ps!=='KURAS'?'act-off':'');
+  document.getElementById('btn-p2-on').className ='pbtn '+(ps==='ISI'?'act-on':'');
+  document.getElementById('btn-p2-off').className='pbtn '+(ps!=='ISI'?'act-off':'');
 
-  const p1on  = document.getElementById('btn-p1-on');
-  const p1off = document.getElementById('btn-p1-off');
-  const p2on  = document.getElementById('btn-p2-on');
-  const p2off = document.getElementById('btn-p2-off');
-  const pumps = [p1on, p1off, p2on, p2off];
-
-  if (modeSistem === "AUTO") {
-    bAuto.className = 'mode-btn active'; bManual.className = 'mode-btn inactive';
-    mDesc.textContent = 'Sistem berjalan otomatis'; mDot.style.background = 'var(--green)';
-    pumps.forEach(b => { b.disabled = true; b.style.opacity = '.45'; b.style.cursor = 'not-allowed'; });
-  } else {
-    bAuto.className = 'mode-btn inactive'; bManual.className = 'mode-btn active';
-    mDesc.textContent = 'Manual override aktif'; mDot.style.background = 'var(--amber)';
-    pumps.forEach(b => { b.disabled = false; b.style.opacity = '1'; b.style.cursor = 'pointer'; });
-  }
-
-  p1on.className  = `btn-pump ${pStat==="KURAS" ? 'pump-on' : ''}`;
-  p1off.className = `btn-pump ${pStat!=="KURAS" ? 'pump-off-active' : ''}`;
-  p2on.className  = `btn-pump ${pStat==="ISI"   ? 'pump-on' : ''}`;
-  p2off.className = `btn-pump ${pStat!=="ISI"   ? 'pump-off-active' : ''}`;
-
-  document.getElementById('icon-p1').style.color = pStat==="KURAS" ? 'var(--red)'  : 'var(--text-muted)';
-  document.getElementById('icon-p2').style.color = pStat==="ISI"   ? 'var(--blue)' : 'var(--text-muted)';
+  document.getElementById('icon-p1').style.color=ps==='KURAS'?'var(--red)':'var(--text-3)';
+  document.getElementById('icon-p2').style.color=ps==='ISI'?'var(--blue)':'var(--text-3)';
 });
 
-/* ── CONTROLS ── */
-window.ubahMode = function(mode) {
-  set(ref(db, 'SistemAir/modeSistem'), mode);
-  showToast(`Mode diubah ke ${mode === 'AUTO' ? 'Automated' : 'Manual Override'}`);
-};
-window.ubahPompa = function(perintah) {
-  set(ref(db, 'SistemAir/pompaStatus'), perintah);
-  const label = perintah === 'KURAS' ? 'Pompa Drainage ON' : perintah === 'ISI' ? 'Pompa Inflow ON' : 'Pompa dimatikan';
-  showToast(label, perintah === 'OFF' ? 'default' : 'success');
-};
+/* CONTROLS */
+window.ubahMode=function(m){set(ref(db,'SistemAir/modeSistem'),m);toast(`Mode: ${m==='AUTO'?'Automated':'Manual Override'}`);};
+window.ubahPompa=function(p){set(ref(db,'SistemAir/pompaStatus'),p);toast(p==='KURAS'?'Pompa Drainage ON':p==='ISI'?'Pompa Inflow ON':'Pompa dimatikan',p==='OFF'?'info':'ok');};
 
-/* ── RECAP ── */
-const inputTgl = document.getElementById('input-tanggal-rekap');
-if (inputTgl) { inputTgl.max = hariIni; inputTgl.value = hariIni; }
-let rekapUnsub = null;
-
-window.muatDataHarian = function(tgl) {
-  const lbl = document.getElementById('label-keterangan-rekap');
-  if (lbl) lbl.textContent = tgl === hariIni ? 'Data real-time dari riwayat log hari ini.' : `Data rata-rata tanggal ${tgl}`;
-  if (rekapUnsub) rekapUnsub();
-  rekapUnsub = onValue(ref(db, 'SistemAir_Log/' + tgl), snap => {
-    let tph=0, ttb=0, tlv=0, maxPh=-999, minPh=999, n=0;
-    if (snap.exists()) {
-      snap.forEach(child => {
-        const d = child.val(); n++;
-        const ph = parseFloat(d.pH)||0, tb = parseFloat(d.turbidity)||0, lv = parseFloat(d.tinggiAir)||0;
-        tph += ph; ttb += tb; tlv += lv;
-        if(ph > maxPh) maxPh = ph; if(ph < minPh) minPh = ph;
-      });
-    }
-    document.getElementById('rata-ph').textContent    = n > 0 ? (tph/n).toFixed(2) : '—';
-    document.getElementById('rata-tb').textContent    = n > 0 ? Math.round(ttb/n) + ' NTU' : '—';
-    document.getElementById('rata-lv').textContent    = n > 0 ? Math.round(tlv/n) + ' cm' : '—';
-    document.getElementById('maxmin-ph').textContent  = n > 0 ? `${maxPh.toFixed(1)} / ${minPh.toFixed(1)}` : '—';
-    document.getElementById('total-sampel').textContent = n > 0 ? `${n} data` : '0 data';
+/* RECAP */
+const iDate=document.getElementById('input-tanggal-rekap');
+if(iDate){iDate.max=today;iDate.value=today;}
+let rcUnsub=null;
+window.muatDataHarian=function(tgl){
+  const lbl=document.getElementById('label-keterangan-rekap');
+  if(lbl)lbl.textContent=tgl===today?'Data real-time dari riwayat log hari ini.':`Data rata-rata tanggal ${tgl}`;
+  if(rcUnsub)rcUnsub();
+  rcUnsub=onValue(ref(db,'SistemAir_Log/'+tgl),snap=>{
+    let tph=0,ttb=0,tlv=0,maxPh=-999,minPh=999,n=0;
+    if(snap.exists()){snap.forEach(child=>{const d=child.val();n++;const ph=parseFloat(d.pH)||0,tb=parseFloat(d.turbidity)||0,lv=parseFloat(d.tinggiAir)||0;tph+=ph;ttb+=tb;tlv+=lv;if(ph>maxPh)maxPh=ph;if(ph<minPh)minPh=ph;});}
+    document.getElementById('rata-ph').textContent    =n>0?(tph/n).toFixed(2):'—';
+    document.getElementById('rata-tb').textContent    =n>0?Math.round(ttb/n)+' NTU':'—';
+    document.getElementById('rata-lv').textContent    =n>0?Math.round(tlv/n)+' cm':'—';
+    document.getElementById('maxmin-ph').textContent  =n>0?`${maxPh.toFixed(1)} / ${minPh.toFixed(1)}`:'—';
+    document.getElementById('total-sampel').textContent=n>0?`${n} data`:'0 data';
   });
 };
-window.muatDataHarian(hariIni);
+window.muatDataHarian(today);
 
-/* ── DOWNLOAD CSV ── */
-window.downloadHarianCSV = async function() {
-  const tgl = document.getElementById('input-tanggal-rekap').value || hariIni;
-  const btn = document.getElementById('text-download-btn');
-  if (btn) btn.textContent = 'Memproses...';
-  try {
-    const snap = await get(ref(db, 'SistemAir_Log/' + tgl));
-    if (snap.exists()) {
-      let csv = 'Waktu,pH,Kekeruhan_NTU,Tinggi_Air_CM\n'; let count = 0;
-      snap.forEach(child => {
-        const r = child.val();
-        const t = r.timestamp ? new Date(r.timestamp*1000).toLocaleTimeString('id-ID') : new Date().toLocaleTimeString('id-ID');
-        csv += `${t},${r.pH},${r.turbidity},${r.tinggiAir}\n`; count++;
-      });
-      if (count > 0) {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-        a.download = `WQ_Data_${tgl}.csv`; a.click();
-        showToast(`${count} baris data berhasil diunduh`, 'success');
-      } else {
-        showToast(`Tidak ada data untuk tanggal ${tgl}`, 'warning');
-      }
-    } else {
-      showToast(`Database kosong untuk tanggal ${tgl}`, 'warning');
-    }
-  } catch(err) {
-    console.error(err);
-    showToast('Gagal mengunduh CSV', 'error');
-  }
-  if (btn) btn.textContent = 'Unduh CSV';
+/* CSV */
+window.downloadHarianCSV=async function(){
+  const tgl=document.getElementById('input-tanggal-rekap').value||today;
+  const btn=document.getElementById('text-download-btn');
+  if(btn)btn.textContent='Memproses...';
+  try{
+    const snap=await get(ref(db,'SistemAir_Log/'+tgl));
+    if(snap.exists()){
+      let csv='Waktu,pH,Kekeruhan_NTU,Tinggi_Air_CM\n';let count=0;
+      snap.forEach(child=>{const r=child.val();const t=r.timestamp?new Date(r.timestamp*1000).toLocaleTimeString('id-ID'):new Date().toLocaleTimeString('id-ID');csv+=`${t},${r.pH},${r.turbidity},${r.tinggiAir}\n`;count++;});
+      if(count>0){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`WQ_Data_${tgl}.csv`;a.click();toast(`${count} baris data berhasil diunduh`,'ok');}
+      else toast(`Tidak ada data untuk ${tgl}`,'warn');
+    }else toast(`Database kosong untuk ${tgl}`,'warn');
+  }catch(e){console.error(e);toast('Gagal mengunduh CSV','err');}
+  if(btn)btn.textContent='Unduh CSV';
 };
 </script>
 </body>
