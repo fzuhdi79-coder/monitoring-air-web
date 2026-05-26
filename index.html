@@ -4,655 +4,654 @@
     <meta charset="UTF-8">
     <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Overview - WQ System</title>
+    <title>System Overview — WQ System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        .animate-ping-slow { animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
-        svg text { font-family: 'Inter', sans-serif !important; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: 'DM Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #f5f5f4; color: #1a1a1a; }
+        svg text { font-family: 'DM Sans', sans-serif !important; }
+
+        /* NAV */
+        .nav-root {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid #e8e8e5;
+        }
+        .nav-inner {
+            max-width: 1280px; margin: 0 auto;
+            padding: 0 24px;
+            height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 24px;
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 9px;
+            text-decoration: none; flex-shrink: 0;
+        }
+        .nav-brand-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            background: #1a1a1a;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nav-brand-icon svg { width: 13px; height: 13px; }
+        .nav-brand-name {
+            font-size: 14px; font-weight: 600; letter-spacing: -.02em; color: #1a1a1a;
+        }
+        .nav-links {
+            display: flex; align-items: center; gap: 2px;
+            background: #f5f5f4; border: 1px solid #e8e8e5;
+            border-radius: 9px; padding: 3px;
+        }
+        .nav-link {
+            padding: 5px 14px; border-radius: 7px;
+            font-size: 13px; font-weight: 500; letter-spacing: -.01em;
+            text-decoration: none; color: #737373;
+            transition: color .15s, background .15s;
+        }
+        .nav-link:hover { color: #1a1a1a; background: #ebebea; }
+        .nav-link.active { background: #ffffff; color: #1a1a1a; box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.06); }
+        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a3a3a3; font-family: 'DM Mono', monospace; }
+        .nav-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: blink 2s ease infinite; }
+        .nav-signout {
+            height: 32px; padding: 0 12px;
+            background: none; border: 1px solid #e8e8e5; border-radius: 7px;
+            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: #737373;
+            cursor: pointer; display: flex; align-items: center; gap-6px;
+            transition: border-color .15s, color .15s, background .15s;
+            gap: 6px;
+        }
+        .nav-signout:hover { border-color: #d4d4d4; color: #1a1a1a; background: #fafafa; }
+        .nav-hamburger {
+            display: none; background: none; border: 1px solid #e8e8e5; border-radius: 7px;
+            width: 32px; height: 32px; align-items: center; justify-content: center;
+            cursor: pointer; color: #737373;
+        }
+        .mobile-nav {
+            display: none; flex-direction: column; gap: 4px;
+            padding: 12px 16px 16px;
+            border-top: 1px solid #e8e8e5; background: #ffffff;
+        }
+        .mobile-nav.open { display: flex; }
+        .mobile-nav-link {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 12px; border-radius: 8px;
+            font-size: 13px; font-weight: 500; color: #525252;
+            text-decoration: none; transition: background .15s, color .15s;
+        }
+        .mobile-nav-link:hover, .mobile-nav-link.active { background: #f5f5f4; color: #1a1a1a; }
+        .mobile-nav-link.active { background: #f0f0ef; }
+        .mobile-divider { height: 1px; background: #f0f0ef; margin: 4px 0; }
+
+        /* PAGE */
+        .page-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 24px 48px; }
+
+        /* PAGE HEADER */
+        .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #e8e8e5; }
+        .page-title { font-size: 17px; font-weight: 600; letter-spacing: -.025em; color: #1a1a1a; }
+        .page-sub { font-size: 13px; color: #a3a3a3; margin-top: 3px; font-weight: 400; }
+
+        /* STATUS BADGE */
+        #koneksi-status {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 10px; border-radius: 20px;
+            font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+            border: 1px solid #e8e8e5; background: #fafafa; color: #a3a3a3;
+            white-space: nowrap; transition: all .3s;
+        }
+
+        /* METRIC CARDS */
+        .metric-card {
+            background: #ffffff; border: 1px solid #e8e8e5; border-radius: 12px;
+            padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;
+        }
+        .metric-label { font-size: 11.5px; font-weight: 500; color: #a3a3a3; letter-spacing: .02em; text-transform: uppercase; }
+        .metric-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .metric-value { font-size: 32px; font-weight: 600; letter-spacing: -.04em; color: #1a1a1a; line-height: 1; }
+        .metric-unit { font-size: 14px; font-weight: 400; color: #c4c4c0; margin-left: 2px; }
+        .metric-badge {
+            display: inline-flex; align-items: center;
+            font-size: 11px; font-weight: 600; letter-spacing: .01em;
+            padding: 3px 8px; border-radius: 4px; margin-top: 4px;
+        }
+        .metric-footer { font-family: 'DM Mono', monospace; font-size: 11px; color: #c4c4c0; display: flex; align-items: center; gap: 5px; padding-top: 10px; border-top: 1px solid #f5f5f4; }
+
+        /* CHART CARDS */
+        .chart-card { background: #ffffff; border: 1px solid #e8e8e5; border-radius: 12px; padding: 20px 22px; }
+        .chart-card-title { font-size: 13px; font-weight: 600; color: #1a1a1a; letter-spacing: -.01em; }
+        .chart-card-sub { font-size: 12px; color: #a3a3a3; margin-top: 2px; }
+
+        /* SECTION LABEL */
+        .section-label { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: #a3a3a3; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .section-label::after { content: ''; flex: 1; height: 1px; background: #e8e8e5; }
+
+        /* CONTROL CARDS */
+        .control-card { background: #ffffff; border: 1px solid #e8e8e5; border-radius: 12px; padding: 20px 22px; }
+        .control-card-title { font-size: 13px; font-weight: 600; color: #1a1a1a; letter-spacing: -.01em; }
+        .control-card-sub { font-size: 12px; color: #a3a3a3; margin-top: 3px; }
+
+        /* MODE TOGGLE */
+        .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: #f5f5f4; border: 1px solid #e8e8e5; border-radius: 9px; padding: 3px; margin-top: 14px; }
+        .mode-btn { padding: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; border-radius: 7px; border: none; cursor: pointer; transition: all .15s; letter-spacing: -.01em; }
+        .mode-btn-active { background: #1a1a1a; color: #ffffff; }
+        .mode-btn-inactive { background: transparent; color: #a3a3a3; }
+        .mode-btn-inactive:hover { color: #525252; background: #ebebea; }
+
+        /* PUMP ROW */
+        .pump-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #fafafa; border: 1px solid #f0f0ef; border-radius: 8px; gap: 10px; }
+        .pump-label { font-size: 12.5px; font-weight: 500; color: #525252; display: flex; align-items: center; gap: 7px; }
+        .pump-switch { display: flex; background: #ebebea; border: 1px solid #e0e0dd; border-radius: 6px; padding: 2px; gap: 2px; }
+        .btn-pump { padding: 4px 12px; font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 600; border-radius: 5px; border: none; cursor: pointer; transition: all .15s; }
+
+        /* RECAP */
+        .recap-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: #fafafa; border: 1px solid #f0f0ef; border-radius: 8px; }
+        .recap-label { font-size: 12px; font-weight: 500; color: #737373; display: flex; align-items: center; gap: 6px; }
+        .recap-val { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 5px; background: #ffffff; border: 1px solid #e8e8e5; }
+
+        /* DOWNLOAD BTN */
+        .btn-download { width: 100%; padding: 9px; background: #1a1a1a; color: #ffffff; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: background .15s; letter-spacing: -.01em; margin-bottom: 12px; }
+        .btn-download:hover { background: #333; }
+        .btn-download:active { transform: scale(.99); }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .nav-links, .nav-status, .nav-signout { display: none; }
+            .nav-hamburger { display: flex; }
+            .page-wrap { padding: 20px 16px 40px; }
+        }
+        @media (min-width: 769px) { .mobile-nav { display: none !important; } }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                
-                <div class="flex items-center space-x-3">
-                    <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
-                        <i class="fa-solid fa-droplet text-lg"></i>
-                    </div>
-                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r flow-root from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
-                </div>
-
-                <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
-                    <a href="index.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Overview</a>
-                    <a href="grafik.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Analytics</a>
-                    <a href="history.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Data Log</a>
-                </div>
-
-                <div class="hidden md:flex items-center space-x-4">
-                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
-                        <i class="fa-solid fa-power-off"></i> Sign Out
-                    </button>
-                </div>
-
-                <div class="flex md:hidden">
-                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
-                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
+<!-- ── NAVBAR ── -->
+<nav class="nav-root">
+    <div class="nav-inner">
+        <a href="index.html" class="nav-brand">
+            <div class="nav-brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3C9.8 3 8 5.2 8 8.5C8 11 9.4 13.1 11.5 14.2L11 17H13L12.5 14.2C14.6 13.1 16 11 16 8.5C16 5.2 14.2 3 12 3Z" fill="white"/>
+                    <rect x="10" y="17" width="4" height="2.5" rx="1" fill="white" opacity=".5"/>
+                </svg>
             </div>
+            <span class="nav-brand-name">WQ System</span>
+        </a>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-link active">Overview</a>
+            <a href="grafik.html" class="nav-link">Analytics</a>
+            <a href="history.html" class="nav-link">Data Log</a>
         </div>
 
-        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
-            <a href="index.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
-                <i class="fa-solid fa-chart-pie mr-2 text-blue-200"></i> Overview
-            </a>
-            <a href="grafik.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-chart-area mr-2 text-slate-500"></i> Analytics
-            </a>
-            <a href="history.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
-            </a>
-            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95">
-                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
+        <div class="nav-right">
+            <div class="nav-status">
+                <div class="nav-status-dot"></div>
+                <span>Live</span>
+            </div>
+            <button onclick="logout()" class="nav-signout">
+                <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i>
+                Sign out
             </button>
         </div>
-    </nav>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
-        
-        <div class="flex flex-row items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <button class="nav-hamburger" id="hamburger-btn" aria-label="Menu">
+            <i id="hamburger-icon" class="fa-solid fa-bars" style="font-size:13px;"></i>
+        </button>
+    </div>
+
+    <!-- Mobile nav -->
+    <div class="mobile-nav" id="mobile-menu">
+        <a href="index.html" class="mobile-nav-link active">
+            <i class="fa-solid fa-chart-pie" style="font-size:13px;width:16px;color:#a3a3a3;"></i> Overview
+        </a>
+        <a href="grafik.html" class="mobile-nav-link">
+            <i class="fa-solid fa-chart-area" style="font-size:13px;width:16px;color:#a3a3a3;"></i> Analytics
+        </a>
+        <a href="history.html" class="mobile-nav-link">
+            <i class="fa-solid fa-database" style="font-size:13px;width:16px;color:#a3a3a3;"></i> Data Log
+        </a>
+        <div class="mobile-divider"></div>
+        <button onclick="logout()" style="width:100%;padding:9px 12px;background:#fafafa;border:1px solid #e8e8e5;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#737373;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;">
+            <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:12px;"></i> Sign out
+        </button>
+    </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="page-wrap">
+
+    <!-- Page header -->
+    <div class="page-header">
+        <div>
+            <div class="page-title">System Overview</div>
+            <div class="page-sub">Telemetri sensor kualitas air secara real-time.</div>
+        </div>
+        <div id="koneksi-status">
+            <i class="fa-solid fa-rotate fa-spin" style="font-size:10px;"></i> SYNCING
+        </div>
+    </div>
+
+    <!-- ── METRIC CARDS ── -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:14px;">
+
+        <div class="metric-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span class="metric-label">pH / Potensial Hidrogen</span>
+                <div class="metric-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa-solid fa-flask" style="font-size:11px;"></i></div>
+            </div>
             <div>
-                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">System Overview</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5 sm:mt-1">Metrik pembacaan telemetri sensor kualitas air secara real-time.</p>
+                <div class="metric-value" id="val-ph">0.00</div>
+                <div id="status-ph" class="metric-badge" style="background:#f5f5f4;color:#a3a3a3;">Menunggu data...</div>
             </div>
-            <div id="koneksi-status" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-bold border shadow-sm transition-all duration-300 whitespace-nowrap">
-                <i class="fa-solid fa-rotate fa-spin"></i> SYNCING...
+            <div style="height:40px;"><canvas id="chart-ph"></canvas></div>
+            <div class="metric-footer" id="time-ph"><i class="fa-regular fa-clock"></i> --:--:--</div>
+        </div>
+
+        <div class="metric-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span class="metric-label">Kekeruhan Air</span>
+                <div class="metric-icon" style="background:#fffbeb;color:#d97706;"><i class="fa-solid fa-virus" style="font-size:11px;"></i></div>
+            </div>
+            <div>
+                <div class="metric-value" id="val-turbidity">0 <span class="metric-unit">NTU</span></div>
+                <div id="status-turbidity" class="metric-badge" style="background:#f5f5f4;color:#a3a3a3;">Menunggu data...</div>
+            </div>
+            <div style="height:40px;"><canvas id="chart-turbidity"></canvas></div>
+            <div class="metric-footer" id="time-tb"><i class="fa-regular fa-clock"></i> --:--:--</div>
+        </div>
+
+        <div class="metric-card" style="grid-column: span 1;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span class="metric-label">Volume / Ketinggian Air</span>
+                <div class="metric-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa-solid fa-water" style="font-size:11px;"></i></div>
+            </div>
+            <div>
+                <div class="metric-value" id="val-level">0 <span class="metric-unit">cm</span></div>
+                <div id="status-level" class="metric-badge" style="background:#f5f5f4;color:#a3a3a3;">Menunggu data...</div>
+            </div>
+            <div style="height:40px;"><canvas id="chart-level"></canvas></div>
+            <div class="metric-footer" id="time-lv"><i class="fa-regular fa-clock"></i> --:--:--</div>
+        </div>
+
+    </div>
+
+    <!-- ── PUMP CHARTS ── -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:28px;">
+        <div class="chart-card">
+            <div class="chart-card-title">Pompa Drainage (Kuras)</div>
+            <div class="chart-card-sub" style="margin-bottom:14px;">Status ON/OFF pompa pengurasan real-time</div>
+            <div style="position:relative;height:160px;"><canvas id="chart-pompa-kuras"></canvas></div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-card-title">Pompa Inflow (Isi)</div>
+            <div class="chart-card-sub" style="margin-bottom:14px;">Status ON/OFF pompa pengisian real-time</div>
+            <div style="position:relative;height:160px;"><canvas id="chart-pompa-isi"></canvas></div>
+        </div>
+    </div>
+
+    <!-- ── CONTROLS ── -->
+    <div class="section-label">Actuator Controls</div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
+
+        <!-- Mode -->
+        <div class="control-card">
+            <div class="control-card-title">Automation Mode</div>
+            <div class="control-card-sub">Sistem otomatis mengeksekusi kuras-isi berdasarkan batas ambang sensor secara otomatis.</div>
+            <div class="mode-toggle">
+                <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="mode-btn mode-btn-active">Automated</button>
+                <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="mode-btn mode-btn-inactive">Manual Override</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Potensial Hidrogen (pH)</span>
-                    <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600 text-xs"><i class="fa-solid fa-flask"></i></div>
-                </div>
-                <div class="flex items-end justify-between gap-2">
-                    <div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-ph">0.00</div>
-                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-ph">Menunggu data...</div>
+        <!-- Pump switch -->
+        <div class="control-card">
+            <div class="control-card-title">Pump Switch</div>
+            <div class="control-card-sub" style="margin-bottom:14px;">Kontrol pompa manual (aktif saat mode Manual Override).</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <div class="pump-row">
+                    <span class="pump-label">
+                        <i class="fa-solid fa-circle-nodes" id="icon-p1" style="font-size:11px;color:#c4c4c0;"></i>
+                        Pompa 1 — Drainage
+                    </span>
+                    <div class="pump-switch">
+                        <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump">ON</button>
+                        <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
                     </div>
-                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-ph"></canvas></div>
                 </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-ph">
-                    <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Kekeruhan Air</span>
-                    <div class="p-2 bg-amber-50 rounded-lg text-amber-600 text-xs"><i class="fa-solid fa-virus"></i></div>
-                </div>
-                <div class="flex items-end justify-between gap-2">
-                    <div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-turbidity">0 <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span></div>
-                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-turbidity">Menunggu data...</div>
+                <div class="pump-row">
+                    <span class="pump-label">
+                        <i class="fa-solid fa-circle-nodes" id="icon-p2" style="font-size:11px;color:#c4c4c0;"></i>
+                        Pompa 2 — Inflow
+                    </span>
+                    <div class="pump-switch">
+                        <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump">ON</button>
+                        <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
                     </div>
-                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-turbidity"></canvas></div>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-tb">
-                    <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between sm:col-span-2 lg:col-span-1">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Volume / Ketinggian Air</span>
-                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600 text-xs"><i class="fa-solid fa-water"></i></div>
-                </div>
-                <div class="flex items-end justify-between gap-2">
-                    <div>
-                        <div class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight" id="val-level">0 <span class="text-base sm:text-lg font-medium text-slate-400">cm</span></div>
-                        <div class="mt-2 inline-flex items-center text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full" id="status-level">Menunggu data...</div>
-                    </div>
-                    <div class="w-24 sm:w-28 h-12 flex-shrink-0"><canvas id="chart-level"></canvas></div>
-                </div>
-                <div class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-3" id="time-lv">
-                    <i class="fa-regular fa-clock"></i> LAST UPDATE: --:--:--
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
-                <div class="border-b border-slate-100 pb-3">
-                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-rose-500"></i> Grafik Status Pompa Kuras (Drainage)
-                    </h3>
-                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa pengurasan real-time.</p>
-                </div>
-                <div class="relative w-full h-40 sm:h-48 md:h-52">
-                    <canvas id="chart-pompa-kuras"></canvas>
-                </div>
+        <!-- Daily recap -->
+        <div class="control-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                <div class="control-card-title">Rekap Sensor Harian</div>
+                <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)"
+                    style="font-family:'DM Mono',monospace;font-size:11px;background:#f5f5f4;border:1px solid #e8e8e5;color:#525252;border-radius:6px;padding:4px 8px;outline:none;cursor:pointer;">
             </div>
+            <p id="label-keterangan-rekap" style="font-size:11.5px;color:#a3a3a3;margin-bottom:14px;">Data real-time dari riwayat log hari ini.</p>
 
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-4">
-                <div class="border-b border-slate-100 pb-3">
-                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-blue-500"></i> Grafik Status Pompa Isi (Inflow)
-                    </h3>
-                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">Monitoring grafik kondisi ON/OFF pompa pengisian real-time.</p>
-                </div>
-                <div class="relative w-full h-40 sm:h-48 md:h-52">
-                    <canvas id="chart-pompa-isi"></canvas>
-                </div>
-            </div>
-        </div>
+            <button onclick="downloadHarianCSV()" class="btn-download">
+                <i class="fa-solid fa-arrow-down" style="font-size:11px;"></i>
+                <span id="text-download-btn">Unduh CSV</span>
+            </button>
 
-        <div class="space-y-4">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-blue-500"></i> Actuators Control Center
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Smart Automation Mode</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Sistem Otomatis akan mengeksekusi kuras-isi berdasarkan batas ambang risiko sensor secara otomatis.</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-xl">
-                        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">AUTOMATED</button>
-                        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="py-2.5 text-[10px] sm:text-xs font-bold rounded-lg transition-all duration-200 truncate px-1">MANUAL OVERRIDE</button>
-                    </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <div class="recap-row">
+                    <span class="recap-label"><i class="fa-solid fa-flask" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Rata-rata pH</span>
+                    <span class="recap-val" id="rata-ph" style="color:#16a34a;">0.00</span>
                 </div>
-
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4">
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">Pump Switch</h3>
-                        <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Tombol pompa air (Hanya aktif pada mode manual override).</p>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p1"></i> Pompa 1 (Drainage)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
-                            </div>
-                        </div>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-circle-nodes text-slate-400" id="icon-p2"></i> Pompa 2 (Inflow)
-                            </span>
-                            <div class="flex bg-slate-200/70 p-0.5 rounded-lg border border-slate-200 self-end sm:self-auto">
-                                <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">ON</button>
-                                <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md transition">OFF</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="recap-row">
+                    <span class="recap-label"><i class="fa-solid fa-virus" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Rata-rata Turbidity</span>
+                    <span class="recap-val" id="rata-tb" style="color:#d97706;">0 NTU</span>
                 </div>
-
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 space-y-4 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
-                                <i class="fa-solid fa-chart-pie text-amber-500"></i> Rekap Sensor Harian
-                            </h3>
-                            <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)" class="text-[10px] sm:text-[11px] font-bold bg-slate-100 border border-slate-200 text-slate-600 rounded-md px-2 py-1 outline-none cursor-pointer" title="Pilih Tanggal Riwayat">
-                        </div>
-                        <p id="label-keterangan-rekap" class="text-[11px] sm:text-xs text-slate-400 mt-1">*Data harian dikalkulasi langsung secara real-time dari riwayat Log.</p>
-                        
-                        <button onclick="downloadHarianCSV()" class="mt-2 w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition active:scale-95 shadow-sm border border-emerald-500/20">
-                            <i class="fa-solid fa-file-csv text-sm"></i> <span id="text-download-btn">Unduh Riwayat (CSV)</span>
-                        </button>
-                    </div>
-                    <div class="space-y-2.5">
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-flask text-slate-400"></i> Rata-rata pH
-                            </span>
-                            <span id="rata-ph" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-emerald-600 shadow-sm">0.00</span>
-                        </div>
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-virus text-slate-400"></i> Rata-rata Turbidity
-                            </span>
-                            <span id="rata-tb" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-amber-600 shadow-sm">0 NTU</span>
-                        </div>
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-water text-slate-400"></i> Rata-rata Tinggi Air
-                            </span>
-                            <span id="rata-lv" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold font-mono rounded-md bg-white border border-slate-200 text-blue-600 shadow-sm">0 cm</span>
-                        </div>
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-arrow-up-right-from-square text-slate-400"></i> pH Max / Min
-                            </span>
-                            <span id="maxmin-ph" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-rose-600 shadow-sm">0.0 / 0.0</span>
-                        </div>
-                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 gap-2">
-                            <span class="text-[11px] sm:text-xs font-semibold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-database text-slate-400"></i> Total Sampel
-                            </span>
-                            <span id="total-sampel" class="px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-md bg-white border border-slate-200 text-slate-600 shadow-sm">0 Data</span>
-                        </div>
-                    </div>
+                <div class="recap-row">
+                    <span class="recap-label"><i class="fa-solid fa-water" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Rata-rata Tinggi Air</span>
+                    <span class="recap-val" id="rata-lv" style="color:#2563eb;">0 cm</span>
                 </div>
-
+                <div class="recap-row">
+                    <span class="recap-label"><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;color:#c4c4c0;width:14px;"></i> pH Max / Min</span>
+                    <span class="recap-val" id="maxmin-ph" style="color:#dc2626;">0.0 / 0.0</span>
+                </div>
+                <div class="recap-row">
+                    <span class="recap-label"><i class="fa-solid fa-database" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Total Sampel</span>
+                    <span class="recap-val" id="total-sampel">0 Data</span>
+                </div>
             </div>
         </div>
-    </main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by Roykhan Muhammad. All Right Reserved.
-    </footer>
+    </div>
+</main>
 
-    <script>
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
+<footer style="border-top:1px solid #e8e8e5;background:#ffffff;padding:16px 24px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:#c4c4c0;">
+    &copy; 2026 WQ-SYSTEM &middot; Roykhan Muhammad
+</footer>
 
-        hamburgerBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            if (mobileMenu.classList.contains('hidden')) {
-                hamburgerIcon.className = "fa-solid fa-bars text-xl";
-            } else {
-                hamburgerIcon.className = "fa-solid fa-xmark text-xl";
-            }
-        });
+<script>
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    hamburgerBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('open');
+        hamburgerIcon.className = mobileMenu.classList.contains('open')
+            ? "fa-solid fa-xmark" : "fa-solid fa-bars";
+        hamburgerIcon.style.fontSize = '13px';
+    });
+    function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+</script>
 
-        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
-    </script>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
-        
-        const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
-        const db = getDatabase(app);
-        const statusBadge = document.getElementById('koneksi-status');
-        let timerSensor;
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        const now = new Date();
-        const tahun = now.getFullYear();
-        const bulan = String(now.getMonth() + 1).padStart(2, '0');
-        const tanggal = String(now.getDate()).padStart(2, '0');
-        const hariIni = `${tahun}-${bulan}-${tanggal}`;
+    const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
+    const db = getDatabase(app);
+    const statusBadge = document.getElementById('koneksi-status');
+    let timerSensor;
 
-        function createMiniChart(canvasId, color) {
-            return new Chart(document.getElementById(canvasId), {
-                type: 'line',
-                data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-            });
-        }
+    const now = new Date();
+    const tahun = now.getFullYear();
+    const bulan = String(now.getMonth() + 1).padStart(2, '0');
+    const tanggal = String(now.getDate()).padStart(2, '0');
+    const hariIni = `${tahun}-${bulan}-${tanggal}`;
 
-        const chartPh = createMiniChart('chart-ph', '#10b981');
-        const chartTb = createMiniChart('chart-turbidity', '#f59e0b');
-        const chartLv = createMiniChart('chart-level', '#3b82f6');
-
-        const ctxKuras = document.getElementById('chart-pompa-kuras').getContext('2d');
-        const chartPompaKuras = new Chart(ctxKuras, {
+    function createMiniChart(canvasId, color) {
+        return new Chart(document.getElementById(canvasId), {
             type: 'line',
-            data: {
-                labels: Array(20).fill('--:--:--'), 
-                datasets: [{
-                    label: 'Pompa Kuras',
-                    data: Array(20).fill(0),
-                    borderColor: '#f43f5e', 
-                    backgroundColor: 'rgba(244, 63, 94, 0.05)',
-                    fill: true, stepped: true, pointRadius: 0, borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                    y: {
-                        min: -0.1, max: 1.1,
-                        ticks: {
-                            stepSize: 1, font: { size: 10, weight: 'bold' }, color: '#64748b',
-                            callback: function(value) {
-                                if (value === 1) return 'ON';
-                                if (value === 0) return 'OFF';
-                                return '';
-                            }
-                        },
-                        grid: { color: '#f1f5f9' }
-                    }
-                }
-            }
+            data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
         });
+    }
 
-        const ctxIsi = document.getElementById('chart-pompa-isi').getContext('2d');
-        const chartPompaIsi = new Chart(ctxIsi, {
-            type: 'line',
-            data: {
-                labels: Array(20).fill('--:--:--'), 
-                datasets: [{
-                    label: 'Pompa Isi',
-                    data: Array(20).fill(0),
-                    borderColor: '#3b82f6', 
-                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
-                    fill: true, stepped: true, pointRadius: 0, borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' } },
-                    y: {
-                        min: -0.1, max: 1.1,
-                        ticks: {
-                            stepSize: 1, font: { size: 10, weight: 'bold' }, color: '#64748b',
-                            callback: function(value) {
-                                if (value === 1) return 'ON';
-                                if (value === 0) return 'OFF';
-                                return '';
-                            }
-                        },
-                        grid: { color: '#f1f5f9' }
-                    }
-                }
+    const chartPh = createMiniChart('chart-ph', '#16a34a');
+    const chartTb = createMiniChart('chart-turbidity', '#d97706');
+    const chartLv = createMiniChart('chart-level', '#2563eb');
+
+    const pumpChartOptions = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 9, family: "'DM Mono', monospace" }, color: '#c4c4c0' } },
+            y: {
+                min: -0.1, max: 1.1,
+                ticks: { stepSize: 1, font: { size: 10, weight: '500' }, color: '#a3a3a3', callback: v => v === 1 ? 'ON' : v === 0 ? 'OFF' : '' },
+                grid: { color: '#f5f5f4' }
             }
-        });
-
-        // =======================================================
-        // PERBAIKAN: Padding Array agar grafik tidak kosong/putus
-        // =======================================================
-        const logRefLast20 = query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20));
-        get(logRefLast20).then((snapshot) => {
-            if (snapshot.exists()) {
-                
-                let labelsKuras = []; let dataKuras = [];
-                let labelsIsi = []; let dataIsi = [];
-                let labelsPh = []; let dataPh = [];
-                let labelsTb = []; let dataTb = [];
-                let labelsLv = []; let dataLv = [];
-
-                snapshot.forEach((childSnapshot) => {
-                    const dataLog = childSnapshot.val();
-                    
-                    labelsPh.push(''); dataPh.push(dataLog.pH || 0);
-                    labelsTb.push(''); dataTb.push(dataLog.turbidity || 0);
-                    labelsLv.push(''); dataLv.push(dataLog.tinggiAir || 0);
-
-                    const ts = dataLog.timestamp ? dataLog.timestamp * 1000 : Date.now();
-                    const waktuJam = new Date(ts).toLocaleTimeString('id-ID', { hour12: false });
-                    
-                    let pStat = dataLog.pompaStatus || "OFF";
-                    let valKuras = (pStat === "KURAS") ? 1 : 0;
-                    let valIsi = (pStat === "ISI") ? 1 : 0;
-                    
-                    labelsKuras.push(waktuJam); dataKuras.push(valKuras);
-                    labelsIsi.push(waktuJam); dataIsi.push(valIsi);
-                });
-
-                // Trik Jitu: Tambal (pad) kekosongan data dari depan (unshift) hingga pas 20 item
-                while(labelsPh.length < 20) {
-                    labelsPh.unshift(''); dataPh.unshift(0);
-                    labelsTb.unshift(''); dataTb.unshift(0);
-                    labelsLv.unshift(''); dataLv.unshift(0);
-                    labelsKuras.unshift('--:--:--'); dataKuras.unshift(0);
-                    labelsIsi.unshift('--:--:--'); dataIsi.unshift(0);
-                }
-
-                chartPh.data.labels = labelsPh; chartPh.data.datasets[0].data = dataPh;
-                chartTb.data.labels = labelsTb; chartTb.data.datasets[0].data = dataTb;
-                chartLv.data.labels = labelsLv; chartLv.data.datasets[0].data = dataLv;
-                
-                chartPompaKuras.data.labels = labelsKuras; chartPompaKuras.data.datasets[0].data = dataKuras;
-                chartPompaIsi.data.labels = labelsIsi; chartPompaIsi.data.datasets[0].data = dataIsi;
-                
-                chartPh.update(); chartTb.update(); chartLv.update();
-                chartPompaKuras.update(); chartPompaIsi.update();
-            }
-        });
-
-        function updateChartData(chart, newValue) {
-            chart.data.labels.push('');
-            chart.data.datasets[0].data.push(newValue);
-            if (chart.data.datasets[0].data.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
-            chart.update();
         }
+    };
 
-        function updatePompaChart(waktu, valKuras, valIsi) {
-            chartPompaKuras.data.labels.push(waktu);
-            chartPompaKuras.data.datasets[0].data.push(valKuras);
-            if (chartPompaKuras.data.labels.length > 20) { chartPompaKuras.data.labels.shift(); chartPompaKuras.data.datasets[0].data.shift(); }
-            chartPompaKuras.update();
+    const ctxKuras = document.getElementById('chart-pompa-kuras').getContext('2d');
+    const chartPompaKuras = new Chart(ctxKuras, {
+        type: 'line',
+        data: { labels: Array(20).fill('--:--'), datasets: [{ data: Array(20).fill(0), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
+        options: pumpChartOptions
+    });
 
-            chartPompaIsi.data.labels.push(waktu);
-            chartPompaIsi.data.datasets[0].data.push(valIsi);
-            if (chartPompaIsi.data.labels.length > 20) { chartPompaIsi.data.labels.shift(); chartPompaIsi.data.datasets[0].data.shift(); }
-            chartPompaIsi.update();
-        }
+    const ctxIsi = document.getElementById('chart-pompa-isi').getContext('2d');
+    const chartPompaIsi = new Chart(ctxIsi, {
+        type: 'line',
+        data: { labels: Array(20).fill('--:--'), datasets: [{ data: Array(20).fill(0), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
+        options: pumpChartOptions
+    });
 
-        window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
-        window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
-
-        function setOfflineUI(pesan) {
-            statusBadge.innerHTML = `<span class="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span> ${pesan}`;
-            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 border-rose-200 text-rose-600 shadow-sm";
-        }
-
-        function setOnlineUI() {
-            statusBadge.innerHTML = `<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span> LIVE DATASTREAM`;
-            statusBadge.className = "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm";
-        }
-
-        onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("NETWORK DISCONNECTED"); });
-
-        onValue(ref(db, 'SistemAir'), (snapshot) => {
-            if (snapshot.exists()) {
-                const d = snapshot.val();
-                const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
-                
-                setOnlineUI(); 
-                clearTimeout(timerSensor); 
-                timerSensor = setTimeout(() => { setOfflineUI("HARDWARE OFFLINE"); }, 35000); 
-                
-                document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
-                document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
-                document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> LAST UPDATE: ${waktu}`;
-
-                let ph = d.pH || 0; document.getElementById('val-ph').innerText = ph.toFixed(2);
-                updateChartData(chartPh, ph);
-                let sph = document.getElementById('status-ph');
-                if(ph < 6.5 || ph > 8.5) {
-                    sph.innerText = "CRITICAL LIMIT";
-                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                } else {
-                    sph.innerText = "OPTIMAL STABLE";
-                    sph.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
-                }
-
-                let tb = d.turbidity || 0; document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="text-base sm:text-lg font-medium text-slate-400">NTU</span>`;
-                updateChartData(chartTb, tb);
-                let stb = document.getElementById('status-turbidity');
-                if(tb < 25) {
-                    stb.innerText = "CLEAR WATER";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700";
-                } else if(tb < 100) {
-                    stb.innerText = "WARNING HIGH";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700";
-                } else {
-                    stb.innerText = "HAZARD CRITICAL";
-                    stb.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                }
-
-                let lv = d.tinggiAir || 0; document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="text-base sm:text-lg font-medium text-slate-400">cm</span>`;
-                updateChartData(chartLv, lv);
-                let slv = document.getElementById('status-level');
-                if(lv < 20) {
-                    slv.innerText = "LOW RESERVOIR";
-                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-600";
-                } else {
-                    slv.innerText = "SAFE STORAGE";
-                    slv.className = "mt-2 inline-flex items-center text-[10px] font-extrabold px-2.5 py-0.5 rounded-md bg-blue-50 border border-blue-200 text-blue-600";
-                }
-
-                let modeSistem = d.modeSistem || "AUTO";
+    const logRefLast20 = query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20));
+    get(logRefLast20).then((snapshot) => {
+        if (snapshot.exists()) {
+            let labelsKuras = [], dataKuras = [], labelsIsi = [], dataIsi = [];
+            let labelsPh = [], dataPh = [], labelsTb = [], dataTb = [], labelsLv = [], dataLv = [];
+            snapshot.forEach((child) => {
+                const d = child.val();
+                labelsPh.push(''); dataPh.push(d.pH || 0);
+                labelsTb.push(''); dataTb.push(d.turbidity || 0);
+                labelsLv.push(''); dataLv.push(d.tinggiAir || 0);
+                const waktu = new Date((d.timestamp ? d.timestamp * 1000 : Date.now())).toLocaleTimeString('id-ID', { hour12: false });
                 let pStat = d.pompaStatus || "OFF";
+                labelsKuras.push(waktu); dataKuras.push(pStat === "KURAS" ? 1 : 0);
+                labelsIsi.push(waktu); dataIsi.push(pStat === "ISI" ? 1 : 0);
+            });
+            while (labelsPh.length < 20) {
+                labelsPh.unshift(''); dataPh.unshift(0);
+                labelsTb.unshift(''); dataTb.unshift(0);
+                labelsLv.unshift(''); dataLv.unshift(0);
+                labelsKuras.unshift('--:--'); dataKuras.unshift(0);
+                labelsIsi.unshift('--:--'); dataIsi.unshift(0);
+            }
+            chartPh.data.labels = labelsPh; chartPh.data.datasets[0].data = dataPh;
+            chartTb.data.labels = labelsTb; chartTb.data.datasets[0].data = dataTb;
+            chartLv.data.labels = labelsLv; chartLv.data.datasets[0].data = dataLv;
+            chartPompaKuras.data.labels = labelsKuras; chartPompaKuras.data.datasets[0].data = dataKuras;
+            chartPompaIsi.data.labels = labelsIsi; chartPompaIsi.data.datasets[0].data = dataIsi;
+            chartPh.update(); chartTb.update(); chartLv.update();
+            chartPompaKuras.update(); chartPompaIsi.update();
+        }
+    });
 
-                const bAuto = document.getElementById('btn-mode-auto');
-                const bManual = document.getElementById('btn-mode-manual');
-                const pButtons = document.querySelectorAll('.btn-pump');
-                
-                const btnP1On = document.getElementById('btn-p1-on'); const btnP1Off = document.getElementById('btn-p1-off');
-                const btnP2On = document.getElementById('btn-p2-on'); const btnP2Off = document.getElementById('btn-p2-off');
+    function updateChartData(chart, newValue) {
+        chart.data.labels.push('');
+        chart.data.datasets[0].data.push(newValue);
+        if (chart.data.datasets[0].data.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+        chart.update();
+    }
 
-                const classBtnManualActive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-white text-slate-900 shadow-sm transition";
-                const classBtnManualInactive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-transparent text-slate-500 hover:bg-slate-300/50 transition cursor-pointer";
-                const classBtnAutoActive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-slate-200 text-slate-500 cursor-not-allowed transition opacity-80";
-                const classBtnAutoInactive = "btn-pump px-3 py-1 text-[10px] sm:text-[11px] font-bold rounded-md bg-transparent text-slate-300 cursor-not-allowed transition opacity-50";
+    function updatePompaChart(waktu, valKuras, valIsi) {
+        chartPompaKuras.data.labels.push(waktu); chartPompaKuras.data.datasets[0].data.push(valKuras);
+        if (chartPompaKuras.data.labels.length > 20) { chartPompaKuras.data.labels.shift(); chartPompaKuras.data.datasets[0].data.shift(); }
+        chartPompaKuras.update();
+        chartPompaIsi.data.labels.push(waktu); chartPompaIsi.data.datasets[0].data.push(valIsi);
+        if (chartPompaIsi.data.labels.length > 20) { chartPompaIsi.data.labels.shift(); chartPompaIsi.data.datasets[0].data.shift(); }
+        chartPompaIsi.update();
+    }
 
-                if (modeSistem === "AUTO") {
-                    bAuto.className = "py-2.5 text-[10px] sm:text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
-                    bManual.className = "py-2.5 text-[10px] sm:text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
-                    pButtons.forEach(b => b.disabled = true);
+    window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
+    window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
 
-                    btnP1On.className  = (pStat === "KURAS") ? classBtnAutoActive : classBtnAutoInactive;
-                    btnP1Off.className = (pStat !== "KURAS") ? classBtnAutoActive : classBtnAutoInactive;
-                    btnP2On.className  = (pStat === "ISI")   ? classBtnAutoActive : classBtnAutoInactive;
-                    btnP2Off.className = (pStat !== "ISI")   ? classBtnAutoActive : classBtnAutoInactive;
-                } else {
-                    bAuto.className = "py-2.5 text-[10px] sm:text-xs font-medium rounded-lg text-slate-400 hover:text-slate-600 w-full";
-                    bManual.className = "py-2.5 text-[10px] sm:text-xs font-bold rounded-lg bg-slate-900 text-white shadow-sm w-full";
-                    pButtons.forEach(b => b.disabled = false);
+    function setOfflineUI(msg) {
+        statusBadge.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block;"></span> ${msg}`;
+        statusBadge.style.background = '#fff5f5'; statusBadge.style.borderColor = '#fecaca'; statusBadge.style.color = '#dc2626';
+    }
+    function setOnlineUI() {
+        statusBadge.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;animation:blink 2s ease infinite;"></span> LIVE`;
+        statusBadge.style.background = '#f0fdf4'; statusBadge.style.borderColor = '#bbf7d0'; statusBadge.style.color = '#16a34a';
+    }
 
-                    btnP1On.className  = (pStat === "KURAS") ? classBtnManualActive : classBtnManualInactive;
-                    btnP1Off.className = (pStat !== "KURAS") ? classBtnManualActive : classBtnManualInactive;
-                    btnP2On.className  = (pStat === "ISI")   ? classBtnManualActive : classBtnManualInactive;
-                    btnP2Off.className = (pStat !== "ISI")   ? classBtnManualActive : classBtnManualInactive;
-                }
+    onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("OFFLINE"); });
 
-                let valKuras = (pStat === "KURAS") ? 1 : 0;
-                let valIsi = (pStat === "ISI") ? 1 : 0;
-                
-                document.getElementById('icon-p1').className = valKuras ? "fa-solid fa-circle-nodes text-rose-500 animate-pulse" : "fa-solid fa-circle-nodes text-slate-400";
-                document.getElementById('icon-p2').className = valIsi ? "fa-solid fa-circle-nodes text-blue-500 animate-pulse" : "fa-solid fa-circle-nodes text-slate-400";
-                
-                updatePompaChart(waktu, valKuras, valIsi);
+    onValue(ref(db, 'SistemAir'), (snapshot) => {
+        if (snapshot.exists()) {
+            const d = snapshot.val();
+            const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+            setOnlineUI();
+            clearTimeout(timerSensor);
+            timerSensor = setTimeout(() => setOfflineUI("HW OFFLINE"), 35000);
+
+            const timeHtml = (t) => `<i class="fa-regular fa-clock"></i> ${t}`;
+            document.getElementById('time-ph').innerHTML = timeHtml(waktu);
+            document.getElementById('time-tb').innerHTML = timeHtml(waktu);
+            document.getElementById('time-lv').innerHTML = timeHtml(waktu);
+
+            // pH
+            let ph = d.pH || 0;
+            document.getElementById('val-ph').innerText = ph.toFixed(2);
+            updateChartData(chartPh, ph);
+            const sph = document.getElementById('status-ph');
+            if (ph < 6.5 || ph > 8.5) {
+                sph.innerText = "CRITICAL LIMIT";
+                sph.style.cssText = "background:#fff5f5;color:#dc2626;border:1px solid #fecaca;";
+            } else {
+                sph.innerText = "OPTIMAL STABLE";
+                sph.style.cssText = "background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;";
+            }
+
+            // Turbidity
+            let tb = d.turbidity || 0;
+            document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="metric-unit">NTU</span>`;
+            updateChartData(chartTb, tb);
+            const stb = document.getElementById('status-turbidity');
+            if (tb < 25) { stb.innerText = "CLEAR WATER"; stb.style.cssText = "background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;"; }
+            else if (tb < 100) { stb.innerText = "WARNING HIGH"; stb.style.cssText = "background:#fffbeb;color:#d97706;border:1px solid #fde68a;"; }
+            else { stb.innerText = "HAZARD CRITICAL"; stb.style.cssText = "background:#fff5f5;color:#dc2626;border:1px solid #fecaca;"; }
+
+            // Level
+            let lv = d.tinggiAir || 0;
+            document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="metric-unit">cm</span>`;
+            updateChartData(chartLv, lv);
+            const slv = document.getElementById('status-level');
+            if (lv < 20) { slv.innerText = "LOW RESERVOIR"; slv.style.cssText = "background:#fff5f5;color:#dc2626;border:1px solid #fecaca;"; }
+            else { slv.innerText = "SAFE STORAGE"; slv.style.cssText = "background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;"; }
+
+            // Mode & pump
+            let modeSistem = d.modeSistem || "AUTO";
+            let pStat = d.pompaStatus || "OFF";
+
+            const bAuto = document.getElementById('btn-mode-auto');
+            const bManual = document.getElementById('btn-mode-manual');
+            const pButtons = document.querySelectorAll('.btn-pump');
+
+            const pump_active = "background:#1a1a1a;color:#ffffff;";
+            const pump_inactive = "background:transparent;color:#a3a3a3;cursor:pointer;";
+            const pump_auto_active = "background:#f0f0ef;color:#737373;cursor:not-allowed;opacity:.8;";
+            const pump_auto_inactive = "background:transparent;color:#d4d4d4;cursor:not-allowed;opacity:.5;";
+
+            if (modeSistem === "AUTO") {
+                bAuto.className = "mode-btn mode-btn-active";
+                bManual.className = "mode-btn mode-btn-inactive";
+                pButtons.forEach(b => { b.disabled = true; });
+                document.getElementById('btn-p1-on').style.cssText = (pStat === "KURAS") ? pump_auto_active : pump_auto_inactive;
+                document.getElementById('btn-p1-off').style.cssText = (pStat !== "KURAS") ? pump_auto_active : pump_auto_inactive;
+                document.getElementById('btn-p2-on').style.cssText = (pStat === "ISI") ? pump_auto_active : pump_auto_inactive;
+                document.getElementById('btn-p2-off').style.cssText = (pStat !== "ISI") ? pump_auto_active : pump_auto_inactive;
+            } else {
+                bAuto.className = "mode-btn mode-btn-inactive";
+                bManual.className = "mode-btn mode-btn-active";
+                pButtons.forEach(b => { b.disabled = false; });
+                document.getElementById('btn-p1-on').style.cssText = (pStat === "KURAS") ? pump_active : pump_inactive;
+                document.getElementById('btn-p1-off').style.cssText = (pStat !== "KURAS") ? pump_active : pump_inactive;
+                document.getElementById('btn-p2-on').style.cssText = (pStat === "ISI") ? pump_active : pump_inactive;
+                document.getElementById('btn-p2-off').style.cssText = (pStat !== "ISI") ? pump_active : pump_inactive;
+            }
+
+            let valKuras = (pStat === "KURAS") ? 1 : 0;
+            let valIsi = (pStat === "ISI") ? 1 : 0;
+            document.getElementById('icon-p1').style.color = valKuras ? '#ef4444' : '#c4c4c0';
+            document.getElementById('icon-p2').style.color = valIsi ? '#2563eb' : '#c4c4c0';
+            updatePompaChart(waktu, valKuras, valIsi);
+        }
+    });
+
+    const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
+    if (inputTanggalRekap) { inputTanggalRekap.max = hariIni; inputTanggalRekap.value = hariIni; }
+
+    let rekapUnsubscribe = null;
+
+    window.muatDataHarian = function(tanggalPilihan) {
+        const lbl = document.getElementById('label-keterangan-rekap');
+        if (lbl) lbl.innerText = (tanggalPilihan === hariIni) ? "Data real-time dari riwayat log hari ini." : `Data rata-rata tanggal: ${tanggalPilihan}`;
+        if (rekapUnsubscribe) rekapUnsubscribe();
+        rekapUnsubscribe = onValue(ref(db, 'SistemAir_Log/' + tanggalPilihan), (snapshot) => {
+            let totalPh = 0, totalTb = 0, totalLv = 0, maxPh = -999, minPh = 999, jumlahData = 0;
+            if (snapshot.exists()) {
+                snapshot.forEach((child) => {
+                    const d = child.val(); jumlahData++;
+                    let ph = parseFloat(d.pH) || 0, tb = parseFloat(d.turbidity) || 0, lv = parseFloat(d.tinggiAir) || 0;
+                    totalPh += ph; totalTb += tb; totalLv += lv;
+                    if (ph > maxPh) maxPh = ph; if (ph < minPh) minPh = ph;
+                });
+            }
+            if (jumlahData > 0) {
+                document.getElementById('rata-ph').innerText = (totalPh / jumlahData).toFixed(2);
+                document.getElementById('rata-tb').innerText = Math.round(totalTb / jumlahData) + " NTU";
+                document.getElementById('rata-lv').innerText = Math.round(totalLv / jumlahData) + " cm";
+                document.getElementById('maxmin-ph').innerText = maxPh.toFixed(1) + " / " + minPh.toFixed(1);
+                document.getElementById('total-sampel').innerText = jumlahData + " Data";
+            } else {
+                document.getElementById('rata-ph').innerText = "0.00";
+                document.getElementById('rata-tb').innerText = "0 NTU";
+                document.getElementById('rata-lv').innerText = "0 cm";
+                document.getElementById('maxmin-ph').innerText = "0.0 / 0.0";
+                document.getElementById('total-sampel').innerText = "0 Data";
             }
         });
+    };
+    window.muatDataHarian(hariIni);
 
-        const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
-        const labelKeteranganRekap = document.getElementById('label-keterangan-rekap');
-        
-        if (inputTanggalRekap) {
-            inputTanggalRekap.max = hariIni;
-            inputTanggalRekap.value = hariIni;
-        }
-
-        let rekapUnsubscribe = null;
-
-        window.muatDataHarian = function(tanggalPilihan) {
-            if (labelKeteranganRekap) {
-                labelKeteranganRekap.innerText = (tanggalPilihan === hariIni) 
-                    ? "*Data harian dikalkulasi langsung secara real-time dari riwayat Log." 
-                    : `*Data rata-rata sensor tanggal: ${tanggalPilihan}`;
-            }
-
-            if (rekapUnsubscribe) { rekapUnsubscribe(); }
-
-            const logFolderRef = ref(db, 'SistemAir_Log/' + tanggalPilihan);
-            
-            rekapUnsubscribe = onValue(logFolderRef, (snapshot) => {
-                let totalPh = 0, totalTb = 0, totalLv = 0;
-                let maxPh = -999, minPh = 999;
-                let jumlahData = 0;
-
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        const d = child.val();
-                        
-                        jumlahData++;
-                        let ph = parseFloat(d.pH) || 0;
-                        let tb = parseFloat(d.turbidity) || 0;
-                        let lv = parseFloat(d.tinggiAir) || 0;
-
-                        totalPh += ph;
-                        totalTb += tb;
-                        totalLv += lv;
-
-                        if (ph > maxPh) maxPh = ph;
-                        if (ph < minPh) minPh = ph;
-                    });
-                }
-
-                if (jumlahData > 0) {
-                    document.getElementById('rata-ph').innerText = (totalPh / jumlahData).toFixed(2);
-                    document.getElementById('rata-tb').innerText = Math.round(totalTb / jumlahData) + " NTU";
-                    document.getElementById('rata-lv').innerText = Math.round(totalLv / jumlahData) + " cm";
-                    document.getElementById('maxmin-ph').innerText = maxPh.toFixed(1) + " / " + minPh.toFixed(1);
-                    document.getElementById('total-sampel').innerText = jumlahData + " Data";
-                } else {
-                    document.getElementById('rata-ph').innerText = "0.00";
-                    document.getElementById('rata-tb').innerText = "0 NTU";
-                    document.getElementById('rata-lv').innerText = "0 cm";
-                    document.getElementById('maxmin-ph').innerText = "0.0 / 0.0";
-                    document.getElementById('total-sampel').innerText = "0 Data";
-                }
-            });
-        };
-
-        window.muatDataHarian(hariIni);
-
-        window.downloadHarianCSV = async function() {
-            const tglPilihan = document.getElementById('input-tanggal-rekap').value || hariIni;
-            const btnTeks = document.getElementById('text-download-btn');
-            
-            if (btnTeks) btnTeks.innerText = "Memproses...";
-            
-            try {
-                const logFolderRef = ref(db, 'SistemAir_Log/' + tglPilihan);
-                const snap = await get(logFolderRef);
-                
-                if(snap.exists()) {
-                    let csvText = "Waktu_Data_Masuk,pH_Level,Kekeruhan_NTU,Tinggi_Air_CM\n";
-                    let rowCount = 0;
-
-                    snap.forEach(child => {
-                        const rowData = child.val();
-                        const dateObj = rowData.timestamp ? new Date(rowData.timestamp * 1000) : new Date();
-                        const waktuJam = dateObj.toLocaleTimeString('id-ID');
-                        
-                        csvText += `${waktuJam},${rowData.pH},${rowData.turbidity},${rowData.tinggiAir}\n`;
-                        rowCount++;
-                    });
-
-                    if(rowCount > 0) {
-                        const blob = new Blob([csvText], { type: 'text/csv' });
-                        const url = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `WQ_Data_Riwayat_${tglPilihan}.csv`;
-                        link.click();
-                    } else {
-                        alert(`Tidak ditemukan satupun rekaman log yang cocok untuk tanggal ${tglPilihan}.`);
-                    }
-                } else {
-                    alert(`Database Data Log untuk tanggal ${tglPilihan} kosong atau tidak ditemukan.`);
-                }
-            } catch (err) {
-                console.error("Gagal Download CSV:", err);
-                alert("Terjadi kesalahan jaringan saat mengunduh CSV. Coba muat ulang halaman.");
-            }
-            
-            if (btnTeks) btnTeks.innerText = "Unduh Riwayat (CSV)";
-        }
-    </script>
+    window.downloadHarianCSV = async function() {
+        const tgl = document.getElementById('input-tanggal-rekap').value || hariIni;
+        const btnTeks = document.getElementById('text-download-btn');
+        if (btnTeks) btnTeks.innerText = "Memproses...";
+        try {
+            const snap = await get(ref(db, 'SistemAir_Log/' + tgl));
+            if (snap.exists()) {
+                let csv = "Waktu,pH,Kekeruhan_NTU,Tinggi_Air_CM\n"; let count = 0;
+                snap.forEach(child => {
+                    const r = child.val();
+                    const t = r.timestamp ? new Date(r.timestamp * 1000).toLocaleTimeString('id-ID') : new Date().toLocaleTimeString('id-ID');
+                    csv += `${t},${r.pH},${r.turbidity},${r.tinggiAir}\n`; count++;
+                });
+                if (count > 0) {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+                    a.download = `WQ_Data_${tgl}.csv`; a.click();
+                } else { alert(`Tidak ada data log untuk tanggal ${tgl}.`); }
+            } else { alert(`Database kosong untuk tanggal ${tgl}.`); }
+        } catch (err) { console.error(err); alert("Gagal mengunduh CSV."); }
+        if (btnTeks) btnTeks.innerText = "Unduh CSV";
+    };
+</script>
 </body>
 </html>
