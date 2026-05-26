@@ -6,247 +6,153 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sign In — WQ System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;}
+html{height:100%;font-size:16px;}
 body{
-  font-family:'Geist',system-ui,sans-serif;
-  background:#080909;
-  color:#e8eaed;
-  display:flex;
-  align-items:stretch;
+  font-family:'Inter',system-ui,sans-serif;
   min-height:100vh;
+  background:#fafafa;
+  color:#0a0a0a;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
   -webkit-font-smoothing:antialiased;
 }
 
-/* ─── LAYOUT ─── */
-.shell{
-  display:grid;
-  grid-template-columns:1fr 1px 1fr;
+/* ── CARD ── */
+.card{
   width:100%;
-}
-.divider-v{background:rgba(255,255,255,0.06);}
-
-/* ─── LEFT ─── */
-.left{
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  padding:48px 56px;
-  position:relative;
-  overflow:hidden;
-}
-.left::before{
-  content:'';
-  position:absolute;
-  width:640px;height:640px;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(99,102,241,.07) 0%,transparent 70%);
-  top:-200px;left:-200px;
-  pointer-events:none;
-}
-
-.brand{
-  display:flex;align-items:center;gap:10px;
-  opacity:0;animation:up .5s .05s cubic-bezier(.22,1,.36,1) forwards;
-}
-.brand-mark{
-  width:30px;height:30px;border-radius:8px;
-  background:#1a1b1e;
-  border:1px solid rgba(255,255,255,0.1);
-  display:flex;align-items:center;justify-content:center;
-}
-.brand-mark svg{width:14px;height:14px;opacity:.8;}
-.brand-name{font-size:14px;font-weight:500;letter-spacing:-.01em;color:#c9cbd0;}
-
-.left-body{padding:0 0 48px;}
-
-.left-body .tag{
-  display:inline-flex;align-items:center;gap:6px;
-  font-family:'Geist Mono',monospace;
-  font-size:11px;
-  color:rgba(255,255,255,.3);
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  margin-bottom:28px;
-  opacity:0;animation:up .5s .12s cubic-bezier(.22,1,.36,1) forwards;
-}
-.tag-dot{width:5px;height:5px;border-radius:50%;background:#6366f1;}
-
-.left-body h1{
-  font-size:clamp(2.2rem,3.8vw,3.2rem);
-  font-weight:300;
-  line-height:1.1;
-  letter-spacing:-.04em;
-  color:#f4f5f7;
-  margin-bottom:20px;
-  opacity:0;animation:up .6s .18s cubic-bezier(.22,1,.36,1) forwards;
-}
-.left-body h1 em{
-  font-style:normal;
-  color:rgba(255,255,255,.25);
-}
-
-.left-body .desc{
-  font-size:14px;
-  line-height:1.75;
-  color:rgba(255,255,255,.35);
-  max-width:300px;
-  font-weight:300;
-  opacity:0;animation:up .6s .24s cubic-bezier(.22,1,.36,1) forwards;
-}
-
-.stats{
-  display:flex;gap:0;
-  margin-top:52px;
-  border:1px solid rgba(255,255,255,.06);
+  max-width:400px;
+  background:#ffffff;
+  border:1px solid #e5e5e5;
   border-radius:12px;
-  overflow:hidden;
-  opacity:0;animation:up .6s .3s cubic-bezier(.22,1,.36,1) forwards;
-}
-.stat{
-  flex:1;padding:18px 20px;
-  border-right:1px solid rgba(255,255,255,.06);
-}
-.stat:last-child{border-right:none;}
-.stat-val{font-size:20px;font-weight:500;letter-spacing:-.03em;color:#e8eaed;margin-bottom:3px;}
-.stat-label{font-size:11px;color:rgba(255,255,255,.28);font-weight:400;letter-spacing:.01em;}
-
-.left-foot{
-  font-family:'Geist Mono',monospace;
-  font-size:11px;
-  color:rgba(255,255,255,.18);
-  opacity:0;animation:up .5s .36s cubic-bezier(.22,1,.36,1) forwards;
+  padding:40px;
 }
 
-/* ─── RIGHT ─── */
-.right{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:48px 56px;
+/* ── HEADER ── */
+.logo{
+  display:flex;align-items:center;gap:9px;
+  margin-bottom:32px;
 }
+.logo-icon{
+  width:28px;height:28px;border-radius:7px;
+  background:#0a0a0a;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.logo-icon svg{width:13px;height:13px;fill:none;}
+.logo-text{font-size:14px;font-weight:500;color:#0a0a0a;letter-spacing:-.01em;}
 
-.form-wrap{
-  width:100%;
-  max-width:340px;
+.card-title{
+  font-size:18px;font-weight:500;letter-spacing:-.025em;
+  color:#0a0a0a;margin-bottom:6px;
 }
+.card-sub{font-size:13.5px;color:#737373;font-weight:400;line-height:1.5;margin-bottom:28px;}
 
-.form-head{
-  margin-bottom:36px;
-  opacity:0;animation:up .5s .1s cubic-bezier(.22,1,.36,1) forwards;
-}
-.form-head h2{
-  font-size:20px;font-weight:500;letter-spacing:-.025em;
-  color:#f4f5f7;margin-bottom:6px;
-}
-.form-head p{font-size:13px;color:rgba(255,255,255,.35);font-weight:300;}
-
-/* error */
+/* ── ERROR ── */
 .err{
   display:none;
   align-items:center;gap:8px;
-  padding:10px 14px;
-  border-radius:8px;
-  border:1px solid rgba(239,68,68,.2);
-  background:rgba(239,68,68,.06);
-  font-size:12.5px;
-  color:#f87171;
-  margin-bottom:20px;
+  padding:10px 12px;
+  border-radius:7px;
+  border:1px solid #fecaca;
+  background:#fff5f5;
+  font-size:13px;color:#b91c1c;
+  margin-bottom:16px;
 }
 .err.on{display:flex;}
-.err.shake{animation:shake .38s ease;}
+.err.shake{animation:shake .35s ease;}
 
-/* fields */
-.fields{display:flex;flex-direction:column;gap:14px;margin-bottom:20px;}
-
-.field{
-  opacity:0;animation:up .5s cubic-bezier(.22,1,.36,1) forwards;
-}
-.field:nth-child(1){animation-delay:.18s;}
-.field:nth-child(2){animation-delay:.24s;}
+/* ── FORM ── */
+.fields{display:flex;flex-direction:column;gap:16px;margin-bottom:20px;}
 
 .field label{
   display:block;
-  font-size:11.5px;
-  font-weight:500;
-  color:rgba(255,255,255,.35);
-  letter-spacing:.02em;
-  text-transform:uppercase;
-  margin-bottom:8px;
+  font-size:13px;font-weight:500;
+  color:#0a0a0a;
+  margin-bottom:6px;
 }
 
 .inp-wrap{position:relative;}
 .inp-wrap input{
   width:100%;
-  background:#111215;
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:9px;
-  padding:11px 14px;
-  font-family:'Geist',sans-serif;
-  font-size:14px;
-  font-weight:400;
-  color:#e8eaed;
+  border:1px solid #e5e5e5;
+  border-radius:7px;
+  padding:10px 13px;
+  font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:400;
+  color:#0a0a0a;
+  background:#ffffff;
   outline:none;
-  transition:border-color .18s,background .18s;
+  transition:border-color .15s,box-shadow .15s;
   -webkit-appearance:none;
 }
-.inp-wrap input::placeholder{color:rgba(255,255,255,.2);font-size:13px;}
-.inp-wrap input:hover{border-color:rgba(255,255,255,.14);}
+.inp-wrap input::placeholder{color:#a3a3a3;}
+.inp-wrap input:hover{border-color:#d4d4d4;}
 .inp-wrap input:focus{
-  border-color:rgba(99,102,241,.6);
-  background:#13141a;
+  border-color:#0a0a0a;
+  box-shadow:0 0 0 3px rgba(10,10,10,.06);
 }
 
 .eye-btn{
-  position:absolute;right:12px;top:50%;transform:translateY(-50%);
-  background:none;border:none;cursor:pointer;padding:4px;
-  color:rgba(255,255,255,.22);transition:color .15s;
-  display:flex;align-items:center;
+  position:absolute;right:11px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;padding:3px;
+  color:#a3a3a3;transition:color .15s;display:flex;
 }
-.eye-btn:hover{color:rgba(255,255,255,.5);}
+.eye-btn:hover{color:#525252;}
 
-/* submit */
-.submit{
-  width:100%;
-  padding:11px;
-  background:#6366f1;
-  border:none;border-radius:9px;
-  font-family:'Geist',sans-serif;
+/* ── BUTTON ── */
+.btn-primary{
+  width:100%;padding:10px;
+  background:#0a0a0a;
+  border:1px solid #0a0a0a;
+  border-radius:7px;
+  font-family:'Inter',sans-serif;
   font-size:14px;font-weight:500;
-  color:#fff;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:7px;
-  transition:background .18s,opacity .18s,transform .12s;
+  color:#ffffff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:background .15s,opacity .15s,transform .1s;
   letter-spacing:-.01em;
-  opacity:0;animation:up .5s .3s cubic-bezier(.22,1,.36,1) forwards;
 }
-.submit:hover{background:#5254cc;}
-.submit:active{transform:scale(.985);}
-.submit:disabled{opacity:.5;cursor:not-allowed;}
+.btn-primary:hover{background:#262626;border-color:#262626;}
+.btn-primary:active{transform:scale(.99);}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none;}
 
-.submit svg{transition:transform .18s;}
-.submit:hover svg{transform:translateX(2px);}
-
-/* status strip */
-.status{
-  display:flex;align-items:center;justify-content:center;gap:7px;
+/* ── FOOTER ── */
+.card-footer{
   margin-top:24px;
-  font-size:12px;color:rgba(255,255,255,.2);
-  opacity:0;animation:up .5s .36s cubic-bezier(.22,1,.36,1) forwards;
+  padding-top:20px;
+  border-top:1px solid #f0f0f0;
+  display:flex;align-items:center;justify-content:space-between;
 }
-.live-dot{
-  width:5px;height:5px;border-radius:50%;
-  background:#34d399;
-  animation:blink 2.4s ease infinite;
+.status-row{display:flex;align-items:center;gap:6px;}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:#22c55e;
+}
+.status-text{font-size:12px;color:#a3a3a3;}
+.footer-brand{font-size:12px;color:#d4d4d4;}
+
+/* ── PAGE FOOTER ── */
+.page-foot{
+  margin-top:24px;
+  font-size:12px;color:#d4d4d4;
+  text-align:center;
 }
 
-/* ─── KEYFRAMES ─── */
-@keyframes up{
-  from{opacity:0;transform:translateY(12px);}
-  to{opacity:1;transform:none;}
+/* ── SPINNER ── */
+.spinner{
+  width:14px;height:14px;
+  border:1.5px solid rgba(255,255,255,.35);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
 }
+
 @keyframes shake{
   0%,100%{transform:none;}
   20%{transform:translateX(-5px);}
@@ -255,117 +161,72 @@ body{
   80%{transform:translateX(4px);}
 }
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes blink{
-  0%,100%{opacity:1;}
-  50%{opacity:.3;}
-}
 
-.spinner{
-  width:14px;height:14px;
-  border:1.5px solid rgba(255,255,255,.3);
-  border-top-color:#fff;
-  border-radius:50%;
-  animation:spin .65s linear infinite;
-}
-
-@media(max-width:700px){
-  .shell{grid-template-columns:1fr;}
-  .left{display:none;}
-  .divider-v{display:none;}
-  .right{padding:40px 28px;}
+/* ── RESPONSIVE ── */
+@media(max-width:480px){
+  .card{padding:28px 24px;border-radius:10px;}
 }
 </style>
 </head>
 <body>
 
-<div class="shell">
+<div class="card">
 
-  <!-- LEFT -->
-  <div class="left">
-    <div class="brand">
-      <div class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 4C10 4 8 6 8 9C8 11.2 9.2 13 11 14C10.7 15 10 16 9.5 17H14.5C14 16 13.3 15 13 14C14.8 13 16 11.2 16 9C16 6 14 4 12 4Z" fill="white"/>
-          <rect x="9.5" y="17" width="5" height="2" rx="1" fill="white" opacity=".5"/>
-        </svg>
-      </div>
-      <span class="brand-name">WQ System</span>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3C9.8 3 8 5.2 8 8.5C8 11 9.4 13.1 11.5 14.2L11 17H13L12.5 14.2C14.6 13.1 16 11 16 8.5C16 5.2 14.2 3 12 3Z" fill="white"/>
+        <rect x="10" y="17" width="4" height="2.5" rx="1" fill="white" opacity=".55"/>
+      </svg>
     </div>
-
-    <div class="left-body">
-      <div class="tag"><span class="tag-dot"></span>Water Quality Platform</div>
-      <h1>Built for<br>precision<br><em>monitoring.</em></h1>
-      <p class="desc">Platform operasional kualitas air dengan analitik real-time untuk operator lapangan dan manajer sistem.</p>
-
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-val">99.9%</div>
-          <div class="stat-label">Uptime</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val">&lt;1s</div>
-          <div class="stat-label">Latensi data</div>
-        </div>
-        <div class="stat">
-          <div class="stat-val">24/7</div>
-          <div class="stat-label">Monitoring</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="left-foot">&copy; 2026 WQ-SYSTEM · ZudiJago</div>
+    <span class="logo-text">WQ System</span>
   </div>
 
-  <div class="divider-v"></div>
+  <div class="card-title">Masuk ke akun Anda</div>
+  <div class="card-sub">Masukkan kredensial operator untuk mengakses dashboard.</div>
 
-  <!-- RIGHT -->
-  <div class="right">
-    <div class="form-wrap">
+  <div class="err" id="err">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.5" r=".6" fill="currentColor"/>
+    </svg>
+    <span>ID Operator atau kata sandi salah.</span>
+  </div>
 
-      <div class="form-head">
-        <h2>Masuk ke akun Anda</h2>
-        <p>Gunakan kredensial operator yang diberikan admin.</p>
+  <div class="fields">
+    <div class="field">
+      <label for="username">ID Operator</label>
+      <div class="inp-wrap">
+        <input type="text" id="username" placeholder="Masukkan ID Anda" autocomplete="username" onkeypress="onEnter(event)">
       </div>
-
-      <div class="err" id="err">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".5" fill="currentColor"/></svg>
-        <span>ID atau kata sandi tidak valid.</span>
-      </div>
-
-      <div class="fields">
-        <div class="field">
-          <label for="username">ID Operator</label>
-          <div class="inp-wrap">
-            <input type="text" id="username" placeholder="Masukkan ID anda" autocomplete="username" onkeypress="onEnter(event)">
-          </div>
-        </div>
-        <div class="field">
-          <label for="password">Kata Sandi</label>
-          <div class="inp-wrap">
-            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" onkeypress="onEnter(event)" style="padding-right:40px;">
-            <button class="eye-btn" type="button" onclick="togglePwd()" aria-label="Tampilkan sandi">
-              <svg id="eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <button class="submit" id="btn" onclick="doLogin()">
-        <span id="btn-label">Masuk</span>
-        <svg id="btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </button>
-
-      <div class="status">
-        <div class="live-dot"></div>
-        <span>Semua sistem berjalan normal</span>
-      </div>
-
     </div>
+    <div class="field">
+      <label for="password">Kata Sandi</label>
+      <div class="inp-wrap">
+        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" onkeypress="onEnter(event)" style="padding-right:38px;">
+        <button class="eye-btn" type="button" onclick="togglePwd()" aria-label="Tampilkan kata sandi">
+          <svg id="eye" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="btn" onclick="doLogin()">
+    <span id="btn-label">Masuk</span>
+  </button>
+
+  <div class="card-footer">
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <span class="status-text">Semua sistem normal</span>
+    </div>
+    <span class="footer-brand">v2.1.0</span>
   </div>
 
 </div>
+
+<div class="page-foot">&copy; 2026 WQ-SYSTEM &middot; ZudiJago</div>
 
 <script>
 const eyeOpen=`<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
@@ -384,11 +245,12 @@ function doLogin(){
   const p=document.getElementById('password').value;
   const err=document.getElementById('err');
   const btn=document.getElementById('btn');
+  const lbl=document.getElementById('btn-label');
 
   if(u==='zudi'&&p==='jago'){
     btn.disabled=true;
-    document.getElementById('btn-label').textContent='Mengautentikasi';
-    document.getElementById('btn-arrow').outerHTML='<div class="spinner"></div>';
+    lbl.textContent='Memproses...';
+    btn.insertAdjacentHTML('beforeend','<div class="spinner"></div>');
     setTimeout(()=>{
       sessionStorage.setItem('statusLogin','sukses');
       window.location.href='index.html';
@@ -398,6 +260,7 @@ function doLogin(){
     void err.offsetWidth;
     err.classList.add('on','shake');
     document.getElementById('password').value='';
+    document.getElementById('password').focus();
   }
 }
 
