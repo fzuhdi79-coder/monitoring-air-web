@@ -1,657 +1,787 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Overview — WQ System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        *, *::before, *::after { box-sizing: border-box; }
-        body { font-family: 'DM Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: #f5f5f4; color: #1a1a1a; }
-        svg text { font-family: 'DM Sans', sans-serif !important; }
+<meta charset="UTF-8">
+<script>if(sessionStorage.getItem("statusLogin")!=="sukses"){window.location.href="login.html";}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Overview — WQ System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --bg: #f7f7f6;
+  --surface: #ffffff;
+  --surface-2: #fafaf9;
+  --border: #e8e8e5;
+  --border-2: #f0f0ef;
+  --text-primary: #111110;
+  --text-secondary: #6f6f6c;
+  --text-muted: #b5b5b0;
+  --accent: #111110;
+  --green: #16a34a; --green-bg: #f0fdf4; --green-border: #bbf7d0;
+  --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fde68a;
+  --red: #dc2626;   --red-bg: #fff5f5;   --red-border: #fecaca;
+  --blue: #2563eb;  --blue-bg: #eff6ff;  --blue-border: #bfdbfe;
+  --radius-sm: 6px; --radius-md: 9px; --radius-lg: 12px; --radius-xl: 16px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --font-mono: 'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+svg text { font-family: 'DM Sans', sans-serif !important; }
 
-        /* NAV */
-        .nav-root {
-            position: sticky; top: 0; z-index: 50;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid #e8e8e5;
-        }
-        .nav-inner {
-            max-width: 1280px; margin: 0 auto;
-            padding: 0 24px;
-            height: 56px;
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 24px;
-        }
-        .nav-brand {
-            display: flex; align-items: center; gap: 9px;
-            text-decoration: none; flex-shrink: 0;
-        }
-        .nav-brand-icon {
-            width: 28px; height: 28px; border-radius: 7px;
-            background: #1a1a1a;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .nav-brand-icon svg { width: 13px; height: 13px; }
-        .nav-brand-name {
-            font-size: 14px; font-weight: 600; letter-spacing: -.02em; color: #1a1a1a;
-        }
-        .nav-links {
-            display: flex; align-items: center; gap: 2px;
-            background: #f5f5f4; border: 1px solid #e8e8e5;
-            border-radius: 9px; padding: 3px;
-        }
-        .nav-link {
-            padding: 5px 14px; border-radius: 7px;
-            font-size: 13px; font-weight: 500; letter-spacing: -.01em;
-            text-decoration: none; color: #737373;
-            transition: color .15s, background .15s;
-        }
-        .nav-link:hover { color: #1a1a1a; background: #ebebea; }
-        .nav-link.active { background: #ffffff; color: #1a1a1a; box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.06); }
-        .nav-right { display: flex; align-items: center; gap: 12px; }
-        .nav-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a3a3a3; font-family: 'DM Mono', monospace; }
-        .nav-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: blink 2s ease infinite; }
-        .nav-signout {
-            height: 32px; padding: 0 12px;
-            background: none; border: 1px solid #e8e8e5; border-radius: 7px;
-            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: #737373;
-            cursor: pointer; display: flex; align-items: center; gap-6px;
-            transition: border-color .15s, color .15s, background .15s;
-            gap: 6px;
-        }
-        .nav-signout:hover { border-color: #d4d4d4; color: #1a1a1a; background: #fafafa; }
-        .nav-hamburger {
-            display: none; background: none; border: 1px solid #e8e8e5; border-radius: 7px;
-            width: 32px; height: 32px; align-items: center; justify-content: center;
-            cursor: pointer; color: #737373;
-        }
-        .mobile-nav {
-            display: none; flex-direction: column; gap: 4px;
-            padding: 12px 16px 16px;
-            border-top: 1px solid #e8e8e5; background: #ffffff;
-        }
-        .mobile-nav.open { display: flex; }
-        .mobile-nav-link {
-            display: flex; align-items: center; gap: 8px;
-            padding: 9px 12px; border-radius: 8px;
-            font-size: 13px; font-weight: 500; color: #525252;
-            text-decoration: none; transition: background .15s, color .15s;
-        }
-        .mobile-nav-link:hover, .mobile-nav-link.active { background: #f5f5f4; color: #1a1a1a; }
-        .mobile-nav-link.active { background: #f0f0ef; }
-        .mobile-divider { height: 1px; background: #f0f0ef; margin: 4px 0; }
+/* ── TOAST ── */
+#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--text-primary); color: #fff; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; box-shadow: 0 4px 24px rgba(0,0,0,.18); pointer-events: auto; animation: toastIn .3s cubic-bezier(.22,1,.36,1); max-width: 320px; }
+.toast.success { background: #166534; }
+.toast.error { background: #991b1b; }
+.toast.warning { background: #92400e; }
+.toast.out { animation: toastOut .25s ease forwards; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(8px); } }
 
-        /* PAGE */
-        .page-wrap { max-width: 1280px; margin: 0 auto; padding: 28px 24px 48px; }
+/* ── STALE OVERLAY ── */
+.stale-overlay { position: absolute; inset: 0; background: rgba(247,247,246,.75); border-radius: var(--radius-lg); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 10; }
+.stale-overlay.show { display: flex; }
+.stale-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; font-family: var(--font-mono); color: var(--red); background: var(--red-bg); border: 1px solid var(--red-border); padding: 5px 10px; border-radius: 20px; }
 
-        /* PAGE HEADER */
-        .page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #e8e8e5; }
-        .page-title { font-size: 17px; font-weight: 600; letter-spacing: -.025em; color: #1a1a1a; }
-        .page-sub { font-size: 13px; color: #a3a3a3; margin-top: 3px; font-weight: 400; }
+/* ── SKELETON ── */
+.skeleton { background: linear-gradient(90deg, #f0f0ef 25%, #e8e8e5 50%, #f0f0ef 75%); background-size: 200% 100%; animation: shimmer 1.4s ease infinite; border-radius: 4px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* STATUS BADGE */
-        #koneksi-status {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 5px 10px; border-radius: 20px;
-            font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
-            border: 1px solid #e8e8e5; background: #fafafa; color: #a3a3a3;
-            white-space: nowrap; transition: all .3s;
-        }
+/* ── NAV ── */
+.nav-root { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+.nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.nav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; flex-shrink: 0; }
+.nav-brand-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--text-primary); display: flex; align-items: center; justify-content: center; }
+.nav-brand-icon svg { width: 13px; height: 13px; }
+.nav-brand-name { font-size: 14px; font-weight: 600; letter-spacing: -.02em; color: var(--text-primary); }
+.nav-links { display: flex; align-items: center; gap: 2px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 3px; }
+.nav-link { padding: 5px 14px; border-radius: 7px; font-size: 13px; font-weight: 500; letter-spacing: -.01em; text-decoration: none; color: var(--text-secondary); transition: color .15s, background .15s; }
+.nav-link:hover { color: var(--text-primary); background: #ebebea; }
+.nav-link.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.nav-time { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+.btn-ghost { height: 32px; padding: 0 12px; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all .15s; }
+.btn-ghost:hover { border-color: #d4d4d4; color: var(--text-primary); background: var(--surface-2); }
+.nav-hamburger { display: none; background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); width: 32px; height: 32px; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); }
+.mobile-nav { display: none; flex-direction: column; gap: 3px; padding: 10px 16px 14px; border-top: 1px solid var(--border); background: var(--surface); }
+.mobile-nav.open { display: flex; }
+.mobile-nav-link { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: background .15s, color .15s; }
+.mobile-nav-link:hover, .mobile-nav-link.active { background: var(--bg); color: var(--text-primary); }
 
-        /* METRIC CARDS */
-        .metric-card {
-            background: #ffffff; border: 1px solid #e8e8e5; border-radius: 12px;
-            padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;
-        }
-        .metric-label { font-size: 11.5px; font-weight: 500; color: #a3a3a3; letter-spacing: .02em; text-transform: uppercase; }
-        .metric-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-        .metric-value { font-size: 32px; font-weight: 600; letter-spacing: -.04em; color: #1a1a1a; line-height: 1; }
-        .metric-unit { font-size: 14px; font-weight: 400; color: #c4c4c0; margin-left: 2px; }
-        .metric-badge {
-            display: inline-flex; align-items: center;
-            font-size: 11px; font-weight: 600; letter-spacing: .01em;
-            padding: 3px 8px; border-radius: 4px; margin-top: 4px;
-        }
-        .metric-footer { font-family: 'DM Mono', monospace; font-size: 11px; color: #c4c4c0; display: flex; align-items: center; gap: 5px; padding-top: 10px; border-top: 1px solid #f5f5f4; }
+/* ── PAGE ── */
+.page { max-width: 1280px; margin: 0 auto; padding: 28px 24px 56px; display: flex; flex-direction: column; gap: 24px; }
 
-        /* CHART CARDS */
-        .chart-card { background: #ffffff; border: 1px solid #e8e8e5; border-radius: 12px; padding: 20px 22px; }
-        .chart-card-title { font-size: 13px; font-weight: 600; color: #1a1a1a; letter-spacing: -.01em; }
-        .chart-card-sub { font-size: 12px; color: #a3a3a3; margin-top: 2px; }
+/* ── PAGE HEADER ── */
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.page-title { font-size: 16px; font-weight: 600; letter-spacing: -.025em; }
+.page-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+#koneksi-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 20px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted); white-space: nowrap; transition: all .4s; flex-shrink: 0; }
 
-        /* SECTION LABEL */
-        .section-label { font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; color: #a3a3a3; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .section-label::after { content: ''; flex: 1; height: 1px; background: #e8e8e5; }
+/* ── METRIC CARD ── */
+.metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; transition: box-shadow .2s; }
+.metric-card:hover { box-shadow: var(--shadow-sm); }
+.metric-top { display: flex; align-items: center; justify-content: space-between; }
+.metric-label { font-size: 11.5px; font-weight: 500; color: var(--text-muted); letter-spacing: .025em; text-transform: uppercase; }
+.metric-icon { width: 28px; height: 28px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+.metric-value { font-size: 34px; font-weight: 600; letter-spacing: -.05em; line-height: 1; color: var(--text-primary); }
+.metric-unit { font-size: 14px; font-weight: 400; color: var(--text-muted); margin-left: 2px; }
+.metric-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .01em; padding: 3px 8px; border-radius: 4px; border: 1px solid transparent; margin-top: 6px; }
+.metric-delta { display: flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+.metric-chart { height: 44px; }
+.metric-footer { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; padding-top: 10px; border-top: 1px solid var(--border-2); }
 
-        /* CONTROL CARDS */
-        .control-card { background: #ffffff; border: 1px solid #e8e8e5; border-radius: 12px; padding: 20px 22px; }
-        .control-card-title { font-size: 13px; font-weight: 600; color: #1a1a1a; letter-spacing: -.01em; }
-        .control-card-sub { font-size: 12px; color: #a3a3a3; margin-top: 3px; }
+/* skeleton placeholders inside metric card */
+.sk-val { height: 34px; width: 80px; }
+.sk-badge { height: 22px; width: 100px; margin-top: 6px; }
+.sk-chart { height: 44px; border-radius: 4px; }
 
-        /* MODE TOGGLE */
-        .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: #f5f5f4; border: 1px solid #e8e8e5; border-radius: 9px; padding: 3px; margin-top: 14px; }
-        .mode-btn { padding: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; border-radius: 7px; border: none; cursor: pointer; transition: all .15s; letter-spacing: -.01em; }
-        .mode-btn-active { background: #1a1a1a; color: #ffffff; }
-        .mode-btn-inactive { background: transparent; color: #a3a3a3; }
-        .mode-btn-inactive:hover { color: #525252; background: #ebebea; }
+/* ── CHART CARD ── */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+.chart-title { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
+.chart-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; margin-bottom: 14px; }
 
-        /* PUMP ROW */
-        .pump-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #fafafa; border: 1px solid #f0f0ef; border-radius: 8px; gap: 10px; }
-        .pump-label { font-size: 12.5px; font-weight: 500; color: #525252; display: flex; align-items: center; gap: 7px; }
-        .pump-switch { display: flex; background: #ebebea; border: 1px solid #e0e0dd; border-radius: 6px; padding: 2px; gap: 2px; }
-        .btn-pump { padding: 4px 12px; font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 600; border-radius: 5px; border: none; cursor: pointer; transition: all .15s; }
+/* ── SECTION ── */
+.section-hd { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; }
+.section-hd::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-        /* RECAP */
-        .recap-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: #fafafa; border: 1px solid #f0f0ef; border-radius: 8px; }
-        .recap-label { font-size: 12px; font-weight: 500; color: #737373; display: flex; align-items: center; gap: 6px; }
-        .recap-val { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 5px; background: #ffffff; border: 1px solid #e8e8e5; }
+/* ── CONTROL CARD ── */
+.ctrl-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.ctrl-title { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
+.ctrl-sub { font-size: 12px; color: var(--text-muted); }
 
-        /* DOWNLOAD BTN */
-        .btn-download { width: 100%; padding: 9px; background: #1a1a1a; color: #ffffff; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: background .15s; letter-spacing: -.01em; margin-bottom: 12px; }
-        .btn-download:hover { background: #333; }
-        .btn-download:active { transform: scale(.99); }
+/* ── MODE TOGGLE ── */
+.mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 3px; }
+.mode-btn { padding: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; border-radius: 7px; border: none; cursor: pointer; transition: all .2s; letter-spacing: -.01em; }
+.mode-btn.active { background: var(--text-primary); color: #fff; }
+.mode-btn.inactive { background: transparent; color: var(--text-muted); }
+.mode-btn.inactive:hover { color: var(--text-primary); background: #ebebea; }
 
-        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+/* ── PUMP ROW ── */
+.pump-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-sm); gap: 8px; }
+.pump-label { font-size: 12.5px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+.pump-switch { display: flex; background: #ebebea; border: 1px solid var(--border); border-radius: 6px; padding: 2px; gap: 2px; }
+.btn-pump { padding: 4px 12px; font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 600; border-radius: 5px; border: none; cursor: pointer; transition: all .15s; background: transparent; color: var(--text-muted); }
+.btn-pump.pump-on { background: var(--text-primary); color: #fff; }
+.btn-pump.pump-off-active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.btn-pump:disabled { cursor: not-allowed; }
 
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .nav-links, .nav-status, .nav-signout { display: none; }
-            .nav-hamburger { display: flex; }
-            .page-wrap { padding: 20px 16px 40px; }
-        }
-        @media (min-width: 769px) { .mobile-nav { display: none !important; } }
-    </style>
+/* ── RECAP ── */
+.recap-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: var(--radius-sm); }
+.recap-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+.recap-val { font-family: var(--font-mono); font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); }
+
+/* ── DOWNLOAD BTN ── */
+.btn-download { width: 100%; padding: 9px; background: var(--text-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: all .15s; letter-spacing: -.01em; }
+.btn-download:hover { background: #333; }
+.btn-download:active { transform: scale(.99); }
+
+/* ── UPTIME BAR ── */
+.uptime-bar { display: flex; gap: 3px; }
+.uptime-segment { flex: 1; height: 6px; border-radius: 2px; background: var(--green); opacity: .85; transition: opacity .2s; }
+.uptime-segment.gap { background: var(--border); }
+.uptime-segment.warn { background: var(--amber); }
+
+/* ── ANIMATIONS ── */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.pulse-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; animation: blink 2s ease infinite; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .nav-links, .nav-time, .btn-ghost { display: none; }
+  .nav-hamburger { display: flex; }
+  .page { padding: 18px 16px 48px; gap: 18px; }
+}
+</style>
 </head>
 <body>
 
+<!-- ── TOAST CONTAINER ── -->
+<div id="toast-container"></div>
+
 <!-- ── NAVBAR ── -->
 <nav class="nav-root">
-    <div class="nav-inner">
-        <a href="index.html" class="nav-brand">
-            <div class="nav-brand-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 3C9.8 3 8 5.2 8 8.5C8 11 9.4 13.1 11.5 14.2L11 17H13L12.5 14.2C14.6 13.1 16 11 16 8.5C16 5.2 14.2 3 12 3Z" fill="white"/>
-                    <rect x="10" y="17" width="4" height="2.5" rx="1" fill="white" opacity=".5"/>
-                </svg>
-            </div>
-            <span class="nav-brand-name">WQ System</span>
-        </a>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand">
+      <div class="nav-brand-icon">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C9.8 3 8 5.2 8 8.5C8 11 9.4 13.1 11.5 14.2L11 17H13L12.5 14.2C14.6 13.1 16 11 16 8.5C16 5.2 14.2 3 12 3Z" fill="white"/><rect x="10" y="17" width="4" height="2.5" rx="1" fill="white" opacity=".5"/></svg>
+      </div>
+      <span class="nav-brand-name">WQ System</span>
+    </a>
 
-        <div class="nav-links">
-            <a href="index.html" class="nav-link active">Overview</a>
-            <a href="grafik.html" class="nav-link">Analytics</a>
-            <a href="history.html" class="nav-link">Data Log</a>
-        </div>
-
-        <div class="nav-right">
-            <div class="nav-status">
-                <div class="nav-status-dot"></div>
-                <span>Live</span>
-            </div>
-            <button onclick="logout()" class="nav-signout">
-                <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i>
-                Sign out
-            </button>
-        </div>
-
-        <button class="nav-hamburger" id="hamburger-btn" aria-label="Menu">
-            <i id="hamburger-icon" class="fa-solid fa-bars" style="font-size:13px;"></i>
-        </button>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active">Overview</a>
+      <a href="grafik.html" class="nav-link">Analytics</a>
+      <a href="history.html" class="nav-link">Data Log</a>
     </div>
 
-    <!-- Mobile nav -->
-    <div class="mobile-nav" id="mobile-menu">
-        <a href="index.html" class="mobile-nav-link active">
-            <i class="fa-solid fa-chart-pie" style="font-size:13px;width:16px;color:#a3a3a3;"></i> Overview
-        </a>
-        <a href="grafik.html" class="mobile-nav-link">
-            <i class="fa-solid fa-chart-area" style="font-size:13px;width:16px;color:#a3a3a3;"></i> Analytics
-        </a>
-        <a href="history.html" class="mobile-nav-link">
-            <i class="fa-solid fa-database" style="font-size:13px;width:16px;color:#a3a3a3;"></i> Data Log
-        </a>
-        <div class="mobile-divider"></div>
-        <button onclick="logout()" style="width:100%;padding:9px 12px;background:#fafafa;border:1px solid #e8e8e5;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:#737373;cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;">
-            <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:12px;"></i> Sign out
-        </button>
+    <div class="nav-right">
+      <span class="nav-time" id="nav-clock">--:--:--</span>
+      <button onclick="toggleTheme()" class="btn-ghost" id="theme-btn" title="Toggle theme">
+        <i class="fa-regular fa-moon" style="font-size:12px;"></i>
+      </button>
+      <button onclick="logout()" class="btn-ghost">
+        <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i> Sign out
+      </button>
     </div>
+
+    <button class="nav-hamburger" id="hamburger-btn"><i id="hamburger-icon" class="fa-solid fa-bars" style="font-size:13px;"></i></button>
+  </div>
+  <div class="mobile-nav" id="mobile-menu">
+    <a href="index.html" class="mobile-nav-link active"><i class="fa-solid fa-chart-pie" style="font-size:12px;width:16px;color:var(--text-muted);"></i> Overview</a>
+    <a href="grafik.html" class="mobile-nav-link"><i class="fa-solid fa-chart-area" style="font-size:12px;width:16px;color:var(--text-muted);"></i> Analytics</a>
+    <a href="history.html" class="mobile-nav-link"><i class="fa-solid fa-database" style="font-size:12px;width:16px;color:var(--text-muted);"></i> Data Log</a>
+    <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+    <button onclick="logout()" style="width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:center;">
+      <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i> Sign out
+    </button>
+  </div>
 </nav>
 
 <!-- ── MAIN ── -->
-<main class="page-wrap">
+<main class="page">
 
-    <!-- Page header -->
-    <div class="page-header">
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">System Overview</div>
+      <div class="page-sub">Telemetri sensor kualitas air secara real-time.</div>
+    </div>
+    <div id="koneksi-status"><span style="width:6px;height:6px;border-radius:50%;background:var(--text-muted);display:inline-block;"></span> SYNCING</div>
+  </div>
+
+  <!-- ── METRIC CARDS ── -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+
+    <!-- pH -->
+    <div class="metric-card" id="card-ph">
+      <div class="stale-overlay" id="stale-ph"><div class="stale-badge"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i> DATA STALE</div></div>
+      <div class="metric-top">
+        <span class="metric-label">pH Level</span>
+        <div class="metric-icon" style="background:var(--green-bg);color:var(--green);"><i class="fa-solid fa-flask" style="font-size:11px;"></i></div>
+      </div>
+      <div>
+        <div id="val-ph-wrap">
+          <div class="skeleton sk-val" id="sk-ph-val"></div>
+          <div class="skeleton sk-badge" id="sk-ph-badge"></div>
+        </div>
+        <div id="val-ph-real" style="display:none;">
+          <div class="metric-value" id="val-ph">—</div>
+          <div class="metric-badge" id="status-ph"></div>
+        </div>
+      </div>
+      <div class="metric-chart" id="sk-ph-chart"><div class="skeleton" style="height:44px;"></div></div>
+      <canvas id="chart-ph" style="display:none;height:44px;"></canvas>
+      <div class="metric-footer" id="time-ph"><i class="fa-regular fa-clock"></i> Menunggu data...</div>
+    </div>
+
+    <!-- Turbidity -->
+    <div class="metric-card" id="card-tb">
+      <div class="stale-overlay" id="stale-tb"><div class="stale-badge"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i> DATA STALE</div></div>
+      <div class="metric-top">
+        <span class="metric-label">Kekeruhan Air</span>
+        <div class="metric-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="fa-solid fa-droplet" style="font-size:11px;"></i></div>
+      </div>
+      <div>
+        <div id="val-tb-wrap">
+          <div class="skeleton sk-val" id="sk-tb-val"></div>
+          <div class="skeleton sk-badge" id="sk-tb-badge"></div>
+        </div>
+        <div id="val-tb-real" style="display:none;">
+          <div class="metric-value" id="val-turbidity">—</div>
+          <div class="metric-badge" id="status-turbidity"></div>
+        </div>
+      </div>
+      <div class="metric-chart" id="sk-tb-chart"><div class="skeleton" style="height:44px;"></div></div>
+      <canvas id="chart-turbidity" style="display:none;height:44px;"></canvas>
+      <div class="metric-footer" id="time-tb"><i class="fa-regular fa-clock"></i> Menunggu data...</div>
+    </div>
+
+    <!-- Level -->
+    <div class="metric-card" id="card-lv">
+      <div class="stale-overlay" id="stale-lv"><div class="stale-badge"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;"></i> DATA STALE</div></div>
+      <div class="metric-top">
+        <span class="metric-label">Ketinggian Air</span>
+        <div class="metric-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fa-solid fa-water" style="font-size:11px;"></i></div>
+      </div>
+      <div>
+        <div id="val-lv-wrap">
+          <div class="skeleton sk-val" id="sk-lv-val"></div>
+          <div class="skeleton sk-badge" id="sk-lv-badge"></div>
+        </div>
+        <div id="val-lv-real" style="display:none;">
+          <div class="metric-value" id="val-level">—</div>
+          <div class="metric-badge" id="status-level"></div>
+        </div>
+      </div>
+      <div class="metric-chart" id="sk-lv-chart"><div class="skeleton" style="height:44px;"></div></div>
+      <canvas id="chart-level" style="display:none;height:44px;"></canvas>
+      <div class="metric-footer" id="time-lv"><i class="fa-regular fa-clock"></i> Menunggu data...</div>
+    </div>
+
+  </div>
+
+  <!-- ── SYSTEM HEALTH BAR ── -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div style="font-size:12.5px;font-weight:600;color:var(--text-primary);">System Uptime</div>
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="uptime-label">Last 20 readings</div>
+    </div>
+    <div class="uptime-bar" id="uptime-bar">
+      <!-- filled by JS -->
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;">
+      <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);">Oldest</span>
+      <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);">Now</span>
+    </div>
+  </div>
+
+  <!-- ── PUMP CHARTS ── -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
+    <div class="chart-card">
+      <div class="chart-title">Pompa Drainage</div>
+      <div class="chart-sub">Status ON/OFF pompa kuras real-time</div>
+      <div style="position:relative;height:148px;"><canvas id="chart-pompa-kuras"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Pompa Inflow</div>
+      <div class="chart-sub">Status ON/OFF pompa isi real-time</div>
+      <div style="position:relative;height:148px;"><canvas id="chart-pompa-isi"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ── CONTROLS ── -->
+  <div class="section-hd">Actuator Controls</div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+
+    <!-- Mode -->
+    <div class="ctrl-card">
+      <div>
+        <div class="ctrl-title">Automation Mode</div>
+        <div class="ctrl-sub">Mode otomatis mengeksekusi kuras-isi berdasarkan batas ambang sensor.</div>
+      </div>
+      <div class="mode-toggle">
+        <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="mode-btn active">Automated</button>
+        <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="mode-btn inactive">Manual Override</button>
+      </div>
+      <!-- mode indicator -->
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:var(--radius-sm);">
+        <span class="pulse-dot" id="mode-dot" style="background:var(--green);"></span>
+        <span style="font-size:12px;font-weight:500;color:var(--text-secondary);" id="mode-desc">Sistem berjalan otomatis</span>
+      </div>
+    </div>
+
+    <!-- Pump switch -->
+    <div class="ctrl-card">
+      <div>
+        <div class="ctrl-title">Pump Switch</div>
+        <div class="ctrl-sub">Kontrol manual aktif saat mode Manual Override.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="pump-row">
+          <span class="pump-label">
+            <i class="fa-solid fa-circle-nodes" id="icon-p1" style="font-size:11px;color:var(--text-muted);transition:color .3s;"></i>
+            Pompa 1 — Drainage
+          </span>
+          <div class="pump-switch">
+            <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump">ON</button>
+            <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
+          </div>
+        </div>
+        <div class="pump-row">
+          <span class="pump-label">
+            <i class="fa-solid fa-circle-nodes" id="icon-p2" style="font-size:11px;color:var(--text-muted);transition:color .3s;"></i>
+            Pompa 2 — Inflow
+          </span>
+          <div class="pump-switch">
+            <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump">ON</button>
+            <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily recap -->
+    <div class="ctrl-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
         <div>
-            <div class="page-title">System Overview</div>
-            <div class="page-sub">Telemetri sensor kualitas air secara real-time.</div>
+          <div class="ctrl-title">Rekap Sensor Harian</div>
+          <div class="ctrl-sub" id="label-keterangan-rekap">Data real-time dari riwayat log hari ini.</div>
         </div>
-        <div id="koneksi-status">
-            <i class="fa-solid fa-rotate fa-spin" style="font-size:10px;"></i> SYNCING
+        <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)"
+          style="font-family:var(--font-mono);font-size:11px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius-sm);padding:5px 8px;outline:none;cursor:pointer;flex-shrink:0;">
+      </div>
+
+      <button onclick="downloadHarianCSV()" class="btn-download">
+        <i class="fa-solid fa-arrow-down" style="font-size:11px;"></i>
+        <span id="text-download-btn">Unduh CSV</span>
+      </button>
+
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="recap-row">
+          <span class="recap-label"><i class="fa-solid fa-flask" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Rata-rata pH</span>
+          <span class="recap-val" id="rata-ph" style="color:var(--green);">—</span>
         </div>
+        <div class="recap-row">
+          <span class="recap-label"><i class="fa-solid fa-droplet" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Rata-rata Turbidity</span>
+          <span class="recap-val" id="rata-tb" style="color:var(--amber);">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-label"><i class="fa-solid fa-water" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Rata-rata Tinggi Air</span>
+          <span class="recap-val" id="rata-lv" style="color:var(--blue);">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-label"><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;width:14px;color:var(--text-muted);"></i> pH Max / Min</span>
+          <span class="recap-val" id="maxmin-ph" style="color:var(--red);">—</span>
+        </div>
+        <div class="recap-row">
+          <span class="recap-label"><i class="fa-solid fa-database" style="font-size:10px;width:14px;color:var(--text-muted);"></i> Total Sampel</span>
+          <span class="recap-val" id="total-sampel">—</span>
+        </div>
+      </div>
     </div>
 
-    <!-- ── METRIC CARDS ── -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:14px;">
-
-        <div class="metric-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <span class="metric-label">pH / Potensial Hidrogen</span>
-                <div class="metric-icon" style="background:#f0fdf4;color:#16a34a;"><i class="fa-solid fa-flask" style="font-size:11px;"></i></div>
-            </div>
-            <div>
-                <div class="metric-value" id="val-ph">0.00</div>
-                <div id="status-ph" class="metric-badge" style="background:#f5f5f4;color:#a3a3a3;">Menunggu data...</div>
-            </div>
-            <div style="height:40px;"><canvas id="chart-ph"></canvas></div>
-            <div class="metric-footer" id="time-ph"><i class="fa-regular fa-clock"></i> --:--:--</div>
-        </div>
-
-        <div class="metric-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <span class="metric-label">Kekeruhan Air</span>
-                <div class="metric-icon" style="background:#fffbeb;color:#d97706;"><i class="fa-solid fa-virus" style="font-size:11px;"></i></div>
-            </div>
-            <div>
-                <div class="metric-value" id="val-turbidity">0 <span class="metric-unit">NTU</span></div>
-                <div id="status-turbidity" class="metric-badge" style="background:#f5f5f4;color:#a3a3a3;">Menunggu data...</div>
-            </div>
-            <div style="height:40px;"><canvas id="chart-turbidity"></canvas></div>
-            <div class="metric-footer" id="time-tb"><i class="fa-regular fa-clock"></i> --:--:--</div>
-        </div>
-
-        <div class="metric-card" style="grid-column: span 1;">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-                <span class="metric-label">Volume / Ketinggian Air</span>
-                <div class="metric-icon" style="background:#eff6ff;color:#2563eb;"><i class="fa-solid fa-water" style="font-size:11px;"></i></div>
-            </div>
-            <div>
-                <div class="metric-value" id="val-level">0 <span class="metric-unit">cm</span></div>
-                <div id="status-level" class="metric-badge" style="background:#f5f5f4;color:#a3a3a3;">Menunggu data...</div>
-            </div>
-            <div style="height:40px;"><canvas id="chart-level"></canvas></div>
-            <div class="metric-footer" id="time-lv"><i class="fa-regular fa-clock"></i> --:--:--</div>
-        </div>
-
-    </div>
-
-    <!-- ── PUMP CHARTS ── -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:28px;">
-        <div class="chart-card">
-            <div class="chart-card-title">Pompa Drainage (Kuras)</div>
-            <div class="chart-card-sub" style="margin-bottom:14px;">Status ON/OFF pompa pengurasan real-time</div>
-            <div style="position:relative;height:160px;"><canvas id="chart-pompa-kuras"></canvas></div>
-        </div>
-        <div class="chart-card">
-            <div class="chart-card-title">Pompa Inflow (Isi)</div>
-            <div class="chart-card-sub" style="margin-bottom:14px;">Status ON/OFF pompa pengisian real-time</div>
-            <div style="position:relative;height:160px;"><canvas id="chart-pompa-isi"></canvas></div>
-        </div>
-    </div>
-
-    <!-- ── CONTROLS ── -->
-    <div class="section-label">Actuator Controls</div>
-
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;">
-
-        <!-- Mode -->
-        <div class="control-card">
-            <div class="control-card-title">Automation Mode</div>
-            <div class="control-card-sub">Sistem otomatis mengeksekusi kuras-isi berdasarkan batas ambang sensor secara otomatis.</div>
-            <div class="mode-toggle">
-                <button id="btn-mode-auto" onclick="ubahMode('AUTO')" class="mode-btn mode-btn-active">Automated</button>
-                <button id="btn-mode-manual" onclick="ubahMode('MANUAL')" class="mode-btn mode-btn-inactive">Manual Override</button>
-            </div>
-        </div>
-
-        <!-- Pump switch -->
-        <div class="control-card">
-            <div class="control-card-title">Pump Switch</div>
-            <div class="control-card-sub" style="margin-bottom:14px;">Kontrol pompa manual (aktif saat mode Manual Override).</div>
-            <div style="display:flex;flex-direction:column;gap:8px;">
-                <div class="pump-row">
-                    <span class="pump-label">
-                        <i class="fa-solid fa-circle-nodes" id="icon-p1" style="font-size:11px;color:#c4c4c0;"></i>
-                        Pompa 1 — Drainage
-                    </span>
-                    <div class="pump-switch">
-                        <button id="btn-p1-on" onclick="ubahPompa('KURAS')" class="btn-pump">ON</button>
-                        <button id="btn-p1-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
-                    </div>
-                </div>
-                <div class="pump-row">
-                    <span class="pump-label">
-                        <i class="fa-solid fa-circle-nodes" id="icon-p2" style="font-size:11px;color:#c4c4c0;"></i>
-                        Pompa 2 — Inflow
-                    </span>
-                    <div class="pump-switch">
-                        <button id="btn-p2-on" onclick="ubahPompa('ISI')" class="btn-pump">ON</button>
-                        <button id="btn-p2-off" onclick="ubahPompa('OFF')" class="btn-pump">OFF</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Daily recap -->
-        <div class="control-card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                <div class="control-card-title">Rekap Sensor Harian</div>
-                <input type="date" id="input-tanggal-rekap" onchange="muatDataHarian(this.value)"
-                    style="font-family:'DM Mono',monospace;font-size:11px;background:#f5f5f4;border:1px solid #e8e8e5;color:#525252;border-radius:6px;padding:4px 8px;outline:none;cursor:pointer;">
-            </div>
-            <p id="label-keterangan-rekap" style="font-size:11.5px;color:#a3a3a3;margin-bottom:14px;">Data real-time dari riwayat log hari ini.</p>
-
-            <button onclick="downloadHarianCSV()" class="btn-download">
-                <i class="fa-solid fa-arrow-down" style="font-size:11px;"></i>
-                <span id="text-download-btn">Unduh CSV</span>
-            </button>
-
-            <div style="display:flex;flex-direction:column;gap:6px;">
-                <div class="recap-row">
-                    <span class="recap-label"><i class="fa-solid fa-flask" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Rata-rata pH</span>
-                    <span class="recap-val" id="rata-ph" style="color:#16a34a;">0.00</span>
-                </div>
-                <div class="recap-row">
-                    <span class="recap-label"><i class="fa-solid fa-virus" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Rata-rata Turbidity</span>
-                    <span class="recap-val" id="rata-tb" style="color:#d97706;">0 NTU</span>
-                </div>
-                <div class="recap-row">
-                    <span class="recap-label"><i class="fa-solid fa-water" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Rata-rata Tinggi Air</span>
-                    <span class="recap-val" id="rata-lv" style="color:#2563eb;">0 cm</span>
-                </div>
-                <div class="recap-row">
-                    <span class="recap-label"><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;color:#c4c4c0;width:14px;"></i> pH Max / Min</span>
-                    <span class="recap-val" id="maxmin-ph" style="color:#dc2626;">0.0 / 0.0</span>
-                </div>
-                <div class="recap-row">
-                    <span class="recap-label"><i class="fa-solid fa-database" style="font-size:11px;color:#c4c4c0;width:14px;"></i> Total Sampel</span>
-                    <span class="recap-val" id="total-sampel">0 Data</span>
-                </div>
-            </div>
-        </div>
-
-    </div>
+  </div>
 </main>
 
-<footer style="border-top:1px solid #e8e8e5;background:#ffffff;padding:16px 24px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:#c4c4c0;">
-    &copy; 2026 WQ-SYSTEM &middot; Roykhan Muhammad
+<footer style="border-top:1px solid var(--border);background:var(--surface);padding:14px 24px;text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-top:auto;">
+  &copy; 2026 WQ-SYSTEM &middot; Roykhan Muhammad &middot; <span id="footer-session">Session aktif</span>
 </footer>
 
+<!-- ── DARK MODE STYLE OVERRIDE ── -->
+<style id="dark-style"></style>
+
 <script>
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const hamburgerIcon = document.getElementById('hamburger-icon');
-    hamburgerBtn.addEventListener('click', () => {
-        mobileMenu.classList.toggle('open');
-        hamburgerIcon.className = mobileMenu.classList.contains('open')
-            ? "fa-solid fa-xmark" : "fa-solid fa-bars";
-        hamburgerIcon.style.fontSize = '13px';
-    });
-    function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+/* ── CLOCK ── */
+function tickClock() {
+  const el = document.getElementById('nav-clock');
+  if (el) el.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false });
+}
+setInterval(tickClock, 1000); tickClock();
+
+/* ── SESSION TIMER ── */
+const sessionStart = Date.now();
+setInterval(() => {
+  const mins = Math.floor((Date.now() - sessionStart) / 60000);
+  const el = document.getElementById('footer-session');
+  if (el) el.textContent = `Session: ${mins}m`;
+}, 60000);
+
+/* ── TOAST ── */
+function showToast(msg, type = 'default') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-circle-xmark' : type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-info';
+  t.innerHTML = `<i class="fa-solid ${icon}" style="font-size:13px;flex-shrink:0;"></i> ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+/* ── DARK MODE ── */
+let darkMode = localStorage.getItem('wq-dark') === '1';
+function applyTheme() {
+  const ds = document.getElementById('dark-style');
+  const btn = document.getElementById('theme-btn');
+  if (darkMode) {
+    ds.textContent = `:root{--bg:#111110;--surface:#1a1a18;--surface-2:#1f1f1d;--border:#2a2a27;--border-2:#242422;--text-primary:#f0f0ee;--text-secondary:#a3a39e;--text-muted:#6b6b68;}body{color-scheme:dark;}`;
+    if (btn) btn.innerHTML = '<i class="fa-regular fa-sun" style="font-size:12px;"></i>';
+  } else {
+    ds.textContent = '';
+    if (btn) btn.innerHTML = '<i class="fa-regular fa-moon" style="font-size:12px;"></i>';
+  }
+}
+function toggleTheme() {
+  darkMode = !darkMode;
+  localStorage.setItem('wq-dark', darkMode ? '1' : '0');
+  applyTheme();
+  showToast(darkMode ? 'Dark mode aktif' : 'Light mode aktif');
+}
+applyTheme();
+
+/* ── NAV MOBILE ── */
+const hBtn = document.getElementById('hamburger-btn');
+const mMenu = document.getElementById('mobile-menu');
+const hIcon = document.getElementById('hamburger-icon');
+hBtn.addEventListener('click', () => {
+  mMenu.classList.toggle('open');
+  hIcon.className = mMenu.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+  hIcon.style.fontSize = '13px';
+});
+
+function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
+
+/* ── UPTIME BAR ── */
+function updateUptimeBar(dataHistory) {
+  const bar = document.getElementById('uptime-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  const total = 20;
+  const filled = Math.min(dataHistory.length, total);
+  for (let i = 0; i < total; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'uptime-segment';
+    if (i >= filled) {
+      seg.classList.add('gap');
+    } else {
+      const idx = i;
+      const val = dataHistory[idx];
+      if (val && (val.ph < 6.5 || val.ph > 8.5 || val.tb > 100)) seg.classList.add('warn');
+    }
+    bar.appendChild(seg);
+  }
+}
+
+/* ── REVEAL SKELETON → REAL ── */
+function revealCard(prefix) {
+  const wrap = document.getElementById(`val-${prefix}-wrap`);
+  const real = document.getElementById(`val-${prefix}-real`);
+  const skChart = document.getElementById(`sk-${prefix}-chart`);
+  const realChart = document.getElementById(`chart-${prefix === 'lv' ? 'level' : prefix === 'tb' ? 'turbidity' : 'ph'}`);
+  if (wrap) wrap.style.display = 'none';
+  if (real) real.style.display = 'block';
+  if (skChart) skChart.style.display = 'none';
+  if (realChart) realChart.style.display = 'block';
+}
 </script>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import { getDatabase, ref, onValue, set, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-    const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
-    const db = getDatabase(app);
-    const statusBadge = document.getElementById('koneksi-status');
-    let timerSensor;
+const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
+const db = getDatabase(app);
+const statusBadge = document.getElementById('koneksi-status');
+let timerSensor;
+let dataFirstReceived = false;
+let dataHistory = [];
 
-    const now = new Date();
-    const tahun = now.getFullYear();
-    const bulan = String(now.getMonth() + 1).padStart(2, '0');
-    const tanggal = String(now.getDate()).padStart(2, '0');
-    const hariIni = `${tahun}-${bulan}-${tanggal}`;
+const now = new Date();
+const hariIni = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-    function createMiniChart(canvasId, color) {
-        return new Chart(document.getElementById(canvasId), {
-            type: 'line',
-            data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.4 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-        });
+/* ── MINI CHARTS ── */
+function createMiniChart(id, color) {
+  return new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 1.5, pointRadius: 0, fill: false, tension: 0.4 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: { duration: 300 }, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+  });
+}
+const chartPh  = createMiniChart('chart-ph',        '#16a34a');
+const chartTb  = createMiniChart('chart-turbidity', '#d97706');
+const chartLv  = createMiniChart('chart-level',     '#2563eb');
+
+const pumpOpts = {
+  responsive: true, maintainAspectRatio: false,
+  animation: { duration: 200 },
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { size: 9, family: "'DM Mono',monospace" }, color: '#b5b5b0' } },
+    y: { min: -0.1, max: 1.1, ticks: { stepSize: 1, font: { size: 10, weight: '500' }, color: '#a3a39e', callback: v => v===1?'ON':v===0?'OFF':'' }, grid: { color: '#f0f0ef' } }
+  }
+};
+const chartPompaKuras = new Chart(document.getElementById('chart-pompa-kuras').getContext('2d'), {
+  type: 'line',
+  data: { labels: Array(20).fill(''), datasets: [{ data: Array(20).fill(0), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
+  options: pumpOpts
+});
+const chartPompaIsi = new Chart(document.getElementById('chart-pompa-isi').getContext('2d'), {
+  type: 'line',
+  data: { labels: Array(20).fill(''), datasets: [{ data: Array(20).fill(0), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
+  options: pumpOpts
+});
+
+/* ── LOAD HISTORY ── */
+get(query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20))).then(snap => {
+  if (!snap.exists()) return;
+  let lph=[], dph=[], ltb=[], dtb=[], llv=[], dlv=[], lk=[], dk=[], li=[], di=[];
+  snap.forEach(child => {
+    const d = child.val();
+    lph.push(''); dph.push(d.pH||0);
+    ltb.push(''); dtb.push(d.turbidity||0);
+    llv.push(''); dlv.push(d.tinggiAir||0);
+    const t = new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
+    const ps = d.pompaStatus||"OFF";
+    lk.push(t); dk.push(ps==="KURAS"?1:0);
+    li.push(t); di.push(ps==="ISI"?1:0);
+    dataHistory.push({ ph: d.pH||0, tb: d.turbidity||0 });
+  });
+  while(lph.length < 20){ lph.unshift(''); dph.unshift(0); ltb.unshift(''); dtb.unshift(0); llv.unshift(''); dlv.unshift(0); lk.unshift(''); dk.unshift(0); li.unshift(''); di.unshift(0); }
+  chartPh.data.labels=lph; chartPh.data.datasets[0].data=dph;
+  chartTb.data.labels=ltb; chartTb.data.datasets[0].data=dtb;
+  chartLv.data.labels=llv; chartLv.data.datasets[0].data=dlv;
+  chartPompaKuras.data.labels=lk; chartPompaKuras.data.datasets[0].data=dk;
+  chartPompaIsi.data.labels=li;   chartPompaIsi.data.datasets[0].data=di;
+  [chartPh,chartTb,chartLv,chartPompaKuras,chartPompaIsi].forEach(c=>c.update());
+  updateUptimeBar(dataHistory);
+});
+
+function pushChart(chart, val, label='') {
+  chart.data.labels.push(label);
+  chart.data.datasets[0].data.push(val);
+  if(chart.data.datasets[0].data.length > 20){ chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
+  chart.update();
+}
+
+/* ── STATUS UI ── */
+function setOnlineUI() {
+  statusBadge.innerHTML = `<span class="pulse-dot" style="background:#22c55e;"></span> LIVE`;
+  statusBadge.style.cssText = 'background:#f0fdf4;border-color:#bbf7d0;color:#16a34a;';
+  ['ph','tb','lv'].forEach(p => { const o = document.getElementById('stale-'+p); if(o) o.classList.remove('show'); });
+}
+function setOfflineUI(msg) {
+  statusBadge.innerHTML = `<span class="pulse-dot" style="background:#ef4444;"></span> ${msg}`;
+  statusBadge.style.cssText = 'background:#fff5f5;border-color:#fecaca;color:#dc2626;';
+  if (dataFirstReceived) {
+    ['ph','tb','lv'].forEach(p => { const o = document.getElementById('stale-'+p); if(o) o.classList.add('show'); });
+    showToast('Koneksi hardware terputus. Data mungkin tidak akurat.', 'error');
+  }
+}
+
+onValue(ref(db, ".info/connected"), snap => { if(snap.val()!==true) setOfflineUI("OFFLINE"); });
+
+/* ── PREV VALUES for delta ── */
+let prevPh = null, prevTb = null, prevLv = null;
+
+onValue(ref(db, 'SistemAir'), snap => {
+  if (!snap.exists()) return;
+  const d = snap.val();
+  const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
+
+  setOnlineUI();
+  clearTimeout(timerSensor);
+  timerSensor = setTimeout(() => setOfflineUI("HW OFFLINE"), 35000);
+
+  /* ── first-data reveal ── */
+  if (!dataFirstReceived) {
+    dataFirstReceived = true;
+    revealCard('ph'); revealCard('tb'); revealCard('lv');
+  }
+
+  /* ── pH ── */
+  let ph = d.pH || 0;
+  document.getElementById('val-ph').textContent = ph.toFixed(2);
+  const sph = document.getElementById('status-ph');
+  if(ph < 6.5 || ph > 8.5){
+    sph.textContent = '⚠ CRITICAL'; sph.style.cssText = 'background:var(--red-bg);color:var(--red);border-color:var(--red-border);';
+    if(prevPh !== null && (prevPh >= 6.5 && prevPh <= 8.5)) showToast(`pH keluar batas: ${ph.toFixed(2)}`, 'error');
+  } else {
+    sph.textContent = '✓ OPTIMAL'; sph.style.cssText = 'background:var(--green-bg);color:var(--green);border-color:var(--green-border);';
+  }
+  pushChart(chartPh, ph);
+  document.getElementById('time-ph').innerHTML = `<i class="fa-regular fa-clock"></i> ${waktu}`;
+  prevPh = ph;
+
+  /* ── Turbidity ── */
+  let tb = d.turbidity || 0;
+  document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="metric-unit">NTU</span>`;
+  const stb = document.getElementById('status-turbidity');
+  if(tb < 25){
+    stb.textContent = '✓ CLEAR'; stb.style.cssText = 'background:var(--green-bg);color:var(--green);border-color:var(--green-border);';
+  } else if(tb < 100){
+    stb.textContent = '⚡ WARNING'; stb.style.cssText = 'background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border);';
+    if(prevTb !== null && prevTb < 25) showToast(`Turbidity meningkat: ${Math.round(tb)} NTU`, 'warning');
+  } else {
+    stb.textContent = '⚠ HAZARD'; stb.style.cssText = 'background:var(--red-bg);color:var(--red);border-color:var(--red-border);';
+    if(prevTb !== null && prevTb < 100) showToast(`Turbidity kritis: ${Math.round(tb)} NTU`, 'error');
+  }
+  pushChart(chartTb, tb);
+  document.getElementById('time-tb').innerHTML = `<i class="fa-regular fa-clock"></i> ${waktu}`;
+  prevTb = tb;
+
+  /* ── Level ── */
+  let lv = d.tinggiAir || 0;
+  document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="metric-unit">cm</span>`;
+  const slv = document.getElementById('status-level');
+  if(lv < 20){
+    slv.textContent = '⚠ LOW'; slv.style.cssText = 'background:var(--red-bg);color:var(--red);border-color:var(--red-border);';
+    if(prevLv !== null && prevLv >= 20) showToast(`Level air rendah: ${Math.round(lv)} cm`, 'warning');
+  } else {
+    slv.textContent = '✓ NORMAL'; slv.style.cssText = 'background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border);';
+  }
+  pushChart(chartLv, lv);
+  document.getElementById('time-lv').innerHTML = `<i class="fa-regular fa-clock"></i> ${waktu}`;
+  prevLv = lv;
+
+  /* ── uptime history ── */
+  dataHistory.push({ ph, tb });
+  if (dataHistory.length > 20) dataHistory.shift();
+  updateUptimeBar(dataHistory);
+
+  /* ── pump charts ── */
+  let pStat = d.pompaStatus || "OFF";
+  pushChart(chartPompaKuras, pStat==="KURAS"?1:0, waktu);
+  pushChart(chartPompaIsi,   pStat==="ISI"?1:0,   waktu);
+
+  /* ── mode & pump buttons ── */
+  let modeSistem = d.modeSistem || "AUTO";
+
+  const bAuto   = document.getElementById('btn-mode-auto');
+  const bManual = document.getElementById('btn-mode-manual');
+  const mDesc   = document.getElementById('mode-desc');
+  const mDot    = document.getElementById('mode-dot');
+
+  const p1on  = document.getElementById('btn-p1-on');
+  const p1off = document.getElementById('btn-p1-off');
+  const p2on  = document.getElementById('btn-p2-on');
+  const p2off = document.getElementById('btn-p2-off');
+  const pumps = [p1on, p1off, p2on, p2off];
+
+  if (modeSistem === "AUTO") {
+    bAuto.className = 'mode-btn active'; bManual.className = 'mode-btn inactive';
+    mDesc.textContent = 'Sistem berjalan otomatis'; mDot.style.background = 'var(--green)';
+    pumps.forEach(b => { b.disabled = true; b.style.opacity = '.45'; b.style.cursor = 'not-allowed'; });
+  } else {
+    bAuto.className = 'mode-btn inactive'; bManual.className = 'mode-btn active';
+    mDesc.textContent = 'Manual override aktif'; mDot.style.background = 'var(--amber)';
+    pumps.forEach(b => { b.disabled = false; b.style.opacity = '1'; b.style.cursor = 'pointer'; });
+  }
+
+  p1on.className  = `btn-pump ${pStat==="KURAS" ? 'pump-on' : ''}`;
+  p1off.className = `btn-pump ${pStat!=="KURAS" ? 'pump-off-active' : ''}`;
+  p2on.className  = `btn-pump ${pStat==="ISI"   ? 'pump-on' : ''}`;
+  p2off.className = `btn-pump ${pStat!=="ISI"   ? 'pump-off-active' : ''}`;
+
+  document.getElementById('icon-p1').style.color = pStat==="KURAS" ? 'var(--red)'  : 'var(--text-muted)';
+  document.getElementById('icon-p2').style.color = pStat==="ISI"   ? 'var(--blue)' : 'var(--text-muted)';
+});
+
+/* ── CONTROLS ── */
+window.ubahMode = function(mode) {
+  set(ref(db, 'SistemAir/modeSistem'), mode);
+  showToast(`Mode diubah ke ${mode === 'AUTO' ? 'Automated' : 'Manual Override'}`);
+};
+window.ubahPompa = function(perintah) {
+  set(ref(db, 'SistemAir/pompaStatus'), perintah);
+  const label = perintah === 'KURAS' ? 'Pompa Drainage ON' : perintah === 'ISI' ? 'Pompa Inflow ON' : 'Pompa dimatikan';
+  showToast(label, perintah === 'OFF' ? 'default' : 'success');
+};
+
+/* ── RECAP ── */
+const inputTgl = document.getElementById('input-tanggal-rekap');
+if (inputTgl) { inputTgl.max = hariIni; inputTgl.value = hariIni; }
+let rekapUnsub = null;
+
+window.muatDataHarian = function(tgl) {
+  const lbl = document.getElementById('label-keterangan-rekap');
+  if (lbl) lbl.textContent = tgl === hariIni ? 'Data real-time dari riwayat log hari ini.' : `Data rata-rata tanggal ${tgl}`;
+  if (rekapUnsub) rekapUnsub();
+  rekapUnsub = onValue(ref(db, 'SistemAir_Log/' + tgl), snap => {
+    let tph=0, ttb=0, tlv=0, maxPh=-999, minPh=999, n=0;
+    if (snap.exists()) {
+      snap.forEach(child => {
+        const d = child.val(); n++;
+        const ph = parseFloat(d.pH)||0, tb = parseFloat(d.turbidity)||0, lv = parseFloat(d.tinggiAir)||0;
+        tph += ph; ttb += tb; tlv += lv;
+        if(ph > maxPh) maxPh = ph; if(ph < minPh) minPh = ph;
+      });
     }
+    document.getElementById('rata-ph').textContent    = n > 0 ? (tph/n).toFixed(2) : '—';
+    document.getElementById('rata-tb').textContent    = n > 0 ? Math.round(ttb/n) + ' NTU' : '—';
+    document.getElementById('rata-lv').textContent    = n > 0 ? Math.round(tlv/n) + ' cm' : '—';
+    document.getElementById('maxmin-ph').textContent  = n > 0 ? `${maxPh.toFixed(1)} / ${minPh.toFixed(1)}` : '—';
+    document.getElementById('total-sampel').textContent = n > 0 ? `${n} data` : '0 data';
+  });
+};
+window.muatDataHarian(hariIni);
 
-    const chartPh = createMiniChart('chart-ph', '#16a34a');
-    const chartTb = createMiniChart('chart-turbidity', '#d97706');
-    const chartLv = createMiniChart('chart-level', '#2563eb');
-
-    const pumpChartOptions = {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            x: { grid: { display: false }, ticks: { font: { size: 9, family: "'DM Mono', monospace" }, color: '#c4c4c0' } },
-            y: {
-                min: -0.1, max: 1.1,
-                ticks: { stepSize: 1, font: { size: 10, weight: '500' }, color: '#a3a3a3', callback: v => v === 1 ? 'ON' : v === 0 ? 'OFF' : '' },
-                grid: { color: '#f5f5f4' }
-            }
-        }
-    };
-
-    const ctxKuras = document.getElementById('chart-pompa-kuras').getContext('2d');
-    const chartPompaKuras = new Chart(ctxKuras, {
-        type: 'line',
-        data: { labels: Array(20).fill('--:--'), datasets: [{ data: Array(20).fill(0), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
-        options: pumpChartOptions
-    });
-
-    const ctxIsi = document.getElementById('chart-pompa-isi').getContext('2d');
-    const chartPompaIsi = new Chart(ctxIsi, {
-        type: 'line',
-        data: { labels: Array(20).fill('--:--'), datasets: [{ data: Array(20).fill(0), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.04)', fill: true, stepped: true, pointRadius: 0, borderWidth: 1.5 }] },
-        options: pumpChartOptions
-    });
-
-    const logRefLast20 = query(ref(db, 'SistemAir_Log/' + hariIni), limitToLast(20));
-    get(logRefLast20).then((snapshot) => {
-        if (snapshot.exists()) {
-            let labelsKuras = [], dataKuras = [], labelsIsi = [], dataIsi = [];
-            let labelsPh = [], dataPh = [], labelsTb = [], dataTb = [], labelsLv = [], dataLv = [];
-            snapshot.forEach((child) => {
-                const d = child.val();
-                labelsPh.push(''); dataPh.push(d.pH || 0);
-                labelsTb.push(''); dataTb.push(d.turbidity || 0);
-                labelsLv.push(''); dataLv.push(d.tinggiAir || 0);
-                const waktu = new Date((d.timestamp ? d.timestamp * 1000 : Date.now())).toLocaleTimeString('id-ID', { hour12: false });
-                let pStat = d.pompaStatus || "OFF";
-                labelsKuras.push(waktu); dataKuras.push(pStat === "KURAS" ? 1 : 0);
-                labelsIsi.push(waktu); dataIsi.push(pStat === "ISI" ? 1 : 0);
-            });
-            while (labelsPh.length < 20) {
-                labelsPh.unshift(''); dataPh.unshift(0);
-                labelsTb.unshift(''); dataTb.unshift(0);
-                labelsLv.unshift(''); dataLv.unshift(0);
-                labelsKuras.unshift('--:--'); dataKuras.unshift(0);
-                labelsIsi.unshift('--:--'); dataIsi.unshift(0);
-            }
-            chartPh.data.labels = labelsPh; chartPh.data.datasets[0].data = dataPh;
-            chartTb.data.labels = labelsTb; chartTb.data.datasets[0].data = dataTb;
-            chartLv.data.labels = labelsLv; chartLv.data.datasets[0].data = dataLv;
-            chartPompaKuras.data.labels = labelsKuras; chartPompaKuras.data.datasets[0].data = dataKuras;
-            chartPompaIsi.data.labels = labelsIsi; chartPompaIsi.data.datasets[0].data = dataIsi;
-            chartPh.update(); chartTb.update(); chartLv.update();
-            chartPompaKuras.update(); chartPompaIsi.update();
-        }
-    });
-
-    function updateChartData(chart, newValue) {
-        chart.data.labels.push('');
-        chart.data.datasets[0].data.push(newValue);
-        if (chart.data.datasets[0].data.length > 20) { chart.data.labels.shift(); chart.data.datasets[0].data.shift(); }
-        chart.update();
+/* ── DOWNLOAD CSV ── */
+window.downloadHarianCSV = async function() {
+  const tgl = document.getElementById('input-tanggal-rekap').value || hariIni;
+  const btn = document.getElementById('text-download-btn');
+  if (btn) btn.textContent = 'Memproses...';
+  try {
+    const snap = await get(ref(db, 'SistemAir_Log/' + tgl));
+    if (snap.exists()) {
+      let csv = 'Waktu,pH,Kekeruhan_NTU,Tinggi_Air_CM\n'; let count = 0;
+      snap.forEach(child => {
+        const r = child.val();
+        const t = r.timestamp ? new Date(r.timestamp*1000).toLocaleTimeString('id-ID') : new Date().toLocaleTimeString('id-ID');
+        csv += `${t},${r.pH},${r.turbidity},${r.tinggiAir}\n`; count++;
+      });
+      if (count > 0) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        a.download = `WQ_Data_${tgl}.csv`; a.click();
+        showToast(`${count} baris data berhasil diunduh`, 'success');
+      } else {
+        showToast(`Tidak ada data untuk tanggal ${tgl}`, 'warning');
+      }
+    } else {
+      showToast(`Database kosong untuk tanggal ${tgl}`, 'warning');
     }
-
-    function updatePompaChart(waktu, valKuras, valIsi) {
-        chartPompaKuras.data.labels.push(waktu); chartPompaKuras.data.datasets[0].data.push(valKuras);
-        if (chartPompaKuras.data.labels.length > 20) { chartPompaKuras.data.labels.shift(); chartPompaKuras.data.datasets[0].data.shift(); }
-        chartPompaKuras.update();
-        chartPompaIsi.data.labels.push(waktu); chartPompaIsi.data.datasets[0].data.push(valIsi);
-        if (chartPompaIsi.data.labels.length > 20) { chartPompaIsi.data.labels.shift(); chartPompaIsi.data.datasets[0].data.shift(); }
-        chartPompaIsi.update();
-    }
-
-    window.ubahMode = function(mode) { set(ref(db, 'SistemAir/modeSistem'), mode); }
-    window.ubahPompa = function(perintah) { set(ref(db, 'SistemAir/pompaStatus'), perintah); }
-
-    function setOfflineUI(msg) {
-        statusBadge.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block;"></span> ${msg}`;
-        statusBadge.style.background = '#fff5f5'; statusBadge.style.borderColor = '#fecaca'; statusBadge.style.color = '#dc2626';
-    }
-    function setOnlineUI() {
-        statusBadge.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;animation:blink 2s ease infinite;"></span> LIVE`;
-        statusBadge.style.background = '#f0fdf4'; statusBadge.style.borderColor = '#bbf7d0'; statusBadge.style.color = '#16a34a';
-    }
-
-    onValue(ref(db, ".info/connected"), (snap) => { if (snap.val() !== true) setOfflineUI("OFFLINE"); });
-
-    onValue(ref(db, 'SistemAir'), (snapshot) => {
-        if (snapshot.exists()) {
-            const d = snapshot.val();
-            const waktu = new Date().toLocaleTimeString('id-ID', { hour12: false });
-            setOnlineUI();
-            clearTimeout(timerSensor);
-            timerSensor = setTimeout(() => setOfflineUI("HW OFFLINE"), 35000);
-
-            const timeHtml = (t) => `<i class="fa-regular fa-clock"></i> ${t}`;
-            document.getElementById('time-ph').innerHTML = timeHtml(waktu);
-            document.getElementById('time-tb').innerHTML = timeHtml(waktu);
-            document.getElementById('time-lv').innerHTML = timeHtml(waktu);
-
-            // pH
-            let ph = d.pH || 0;
-            document.getElementById('val-ph').innerText = ph.toFixed(2);
-            updateChartData(chartPh, ph);
-            const sph = document.getElementById('status-ph');
-            if (ph < 6.5 || ph > 8.5) {
-                sph.innerText = "CRITICAL LIMIT";
-                sph.style.cssText = "background:#fff5f5;color:#dc2626;border:1px solid #fecaca;";
-            } else {
-                sph.innerText = "OPTIMAL STABLE";
-                sph.style.cssText = "background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;";
-            }
-
-            // Turbidity
-            let tb = d.turbidity || 0;
-            document.getElementById('val-turbidity').innerHTML = `${Math.round(tb)} <span class="metric-unit">NTU</span>`;
-            updateChartData(chartTb, tb);
-            const stb = document.getElementById('status-turbidity');
-            if (tb < 25) { stb.innerText = "CLEAR WATER"; stb.style.cssText = "background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;"; }
-            else if (tb < 100) { stb.innerText = "WARNING HIGH"; stb.style.cssText = "background:#fffbeb;color:#d97706;border:1px solid #fde68a;"; }
-            else { stb.innerText = "HAZARD CRITICAL"; stb.style.cssText = "background:#fff5f5;color:#dc2626;border:1px solid #fecaca;"; }
-
-            // Level
-            let lv = d.tinggiAir || 0;
-            document.getElementById('val-level').innerHTML = `${Math.round(lv)} <span class="metric-unit">cm</span>`;
-            updateChartData(chartLv, lv);
-            const slv = document.getElementById('status-level');
-            if (lv < 20) { slv.innerText = "LOW RESERVOIR"; slv.style.cssText = "background:#fff5f5;color:#dc2626;border:1px solid #fecaca;"; }
-            else { slv.innerText = "SAFE STORAGE"; slv.style.cssText = "background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;"; }
-
-            // Mode & pump
-            let modeSistem = d.modeSistem || "AUTO";
-            let pStat = d.pompaStatus || "OFF";
-
-            const bAuto = document.getElementById('btn-mode-auto');
-            const bManual = document.getElementById('btn-mode-manual');
-            const pButtons = document.querySelectorAll('.btn-pump');
-
-            const pump_active = "background:#1a1a1a;color:#ffffff;";
-            const pump_inactive = "background:transparent;color:#a3a3a3;cursor:pointer;";
-            const pump_auto_active = "background:#f0f0ef;color:#737373;cursor:not-allowed;opacity:.8;";
-            const pump_auto_inactive = "background:transparent;color:#d4d4d4;cursor:not-allowed;opacity:.5;";
-
-            if (modeSistem === "AUTO") {
-                bAuto.className = "mode-btn mode-btn-active";
-                bManual.className = "mode-btn mode-btn-inactive";
-                pButtons.forEach(b => { b.disabled = true; });
-                document.getElementById('btn-p1-on').style.cssText = (pStat === "KURAS") ? pump_auto_active : pump_auto_inactive;
-                document.getElementById('btn-p1-off').style.cssText = (pStat !== "KURAS") ? pump_auto_active : pump_auto_inactive;
-                document.getElementById('btn-p2-on').style.cssText = (pStat === "ISI") ? pump_auto_active : pump_auto_inactive;
-                document.getElementById('btn-p2-off').style.cssText = (pStat !== "ISI") ? pump_auto_active : pump_auto_inactive;
-            } else {
-                bAuto.className = "mode-btn mode-btn-inactive";
-                bManual.className = "mode-btn mode-btn-active";
-                pButtons.forEach(b => { b.disabled = false; });
-                document.getElementById('btn-p1-on').style.cssText = (pStat === "KURAS") ? pump_active : pump_inactive;
-                document.getElementById('btn-p1-off').style.cssText = (pStat !== "KURAS") ? pump_active : pump_inactive;
-                document.getElementById('btn-p2-on').style.cssText = (pStat === "ISI") ? pump_active : pump_inactive;
-                document.getElementById('btn-p2-off').style.cssText = (pStat !== "ISI") ? pump_active : pump_inactive;
-            }
-
-            let valKuras = (pStat === "KURAS") ? 1 : 0;
-            let valIsi = (pStat === "ISI") ? 1 : 0;
-            document.getElementById('icon-p1').style.color = valKuras ? '#ef4444' : '#c4c4c0';
-            document.getElementById('icon-p2').style.color = valIsi ? '#2563eb' : '#c4c4c0';
-            updatePompaChart(waktu, valKuras, valIsi);
-        }
-    });
-
-    const inputTanggalRekap = document.getElementById('input-tanggal-rekap');
-    if (inputTanggalRekap) { inputTanggalRekap.max = hariIni; inputTanggalRekap.value = hariIni; }
-
-    let rekapUnsubscribe = null;
-
-    window.muatDataHarian = function(tanggalPilihan) {
-        const lbl = document.getElementById('label-keterangan-rekap');
-        if (lbl) lbl.innerText = (tanggalPilihan === hariIni) ? "Data real-time dari riwayat log hari ini." : `Data rata-rata tanggal: ${tanggalPilihan}`;
-        if (rekapUnsubscribe) rekapUnsubscribe();
-        rekapUnsubscribe = onValue(ref(db, 'SistemAir_Log/' + tanggalPilihan), (snapshot) => {
-            let totalPh = 0, totalTb = 0, totalLv = 0, maxPh = -999, minPh = 999, jumlahData = 0;
-            if (snapshot.exists()) {
-                snapshot.forEach((child) => {
-                    const d = child.val(); jumlahData++;
-                    let ph = parseFloat(d.pH) || 0, tb = parseFloat(d.turbidity) || 0, lv = parseFloat(d.tinggiAir) || 0;
-                    totalPh += ph; totalTb += tb; totalLv += lv;
-                    if (ph > maxPh) maxPh = ph; if (ph < minPh) minPh = ph;
-                });
-            }
-            if (jumlahData > 0) {
-                document.getElementById('rata-ph').innerText = (totalPh / jumlahData).toFixed(2);
-                document.getElementById('rata-tb').innerText = Math.round(totalTb / jumlahData) + " NTU";
-                document.getElementById('rata-lv').innerText = Math.round(totalLv / jumlahData) + " cm";
-                document.getElementById('maxmin-ph').innerText = maxPh.toFixed(1) + " / " + minPh.toFixed(1);
-                document.getElementById('total-sampel').innerText = jumlahData + " Data";
-            } else {
-                document.getElementById('rata-ph').innerText = "0.00";
-                document.getElementById('rata-tb').innerText = "0 NTU";
-                document.getElementById('rata-lv').innerText = "0 cm";
-                document.getElementById('maxmin-ph').innerText = "0.0 / 0.0";
-                document.getElementById('total-sampel').innerText = "0 Data";
-            }
-        });
-    };
-    window.muatDataHarian(hariIni);
-
-    window.downloadHarianCSV = async function() {
-        const tgl = document.getElementById('input-tanggal-rekap').value || hariIni;
-        const btnTeks = document.getElementById('text-download-btn');
-        if (btnTeks) btnTeks.innerText = "Memproses...";
-        try {
-            const snap = await get(ref(db, 'SistemAir_Log/' + tgl));
-            if (snap.exists()) {
-                let csv = "Waktu,pH,Kekeruhan_NTU,Tinggi_Air_CM\n"; let count = 0;
-                snap.forEach(child => {
-                    const r = child.val();
-                    const t = r.timestamp ? new Date(r.timestamp * 1000).toLocaleTimeString('id-ID') : new Date().toLocaleTimeString('id-ID');
-                    csv += `${t},${r.pH},${r.turbidity},${r.tinggiAir}\n`; count++;
-                });
-                if (count > 0) {
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-                    a.download = `WQ_Data_${tgl}.csv`; a.click();
-                } else { alert(`Tidak ada data log untuk tanggal ${tgl}.`); }
-            } else { alert(`Database kosong untuk tanggal ${tgl}.`); }
-        } catch (err) { console.error(err); alert("Gagal mengunduh CSV."); }
-        if (btnTeks) btnTeks.innerText = "Unduh CSV";
-    };
+  } catch(err) {
+    console.error(err);
+    showToast('Gagal mengunduh CSV', 'error');
+  }
+  if (btn) btn.textContent = 'Unduh CSV';
+};
 </script>
 </body>
 </html>
