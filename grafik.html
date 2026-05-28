@@ -1,472 +1,526 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <script>if (sessionStorage.getItem("statusLogin") !== "sukses") { window.location.href = "login.html"; }</script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Realtime Telemetry Analytics - WQ System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
-    
-    <style>body { font-family: 'Inter', sans-serif; }</style>
+<meta charset="UTF-8">
+<script>if(sessionStorage.getItem("statusLogin")!=="sukses"){window.location.href="login.html";}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics — WQ System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+:root{
+  --bg:#f6f6f5;
+  --surface:#ffffff;
+  --surface-2:#fafaf9;
+  --border:#e5e5e2;
+  --border-2:#efefed;
+  --text-1:#111110;
+  --text-2:#737370;
+  --text-3:#b0b0ac;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --r-s:6px;--r-m:10px;--r-l:14px;
+  --shadow:0 1px 4px rgba(0,0,0,.06);
+  --green:#15803d;--green-bg:#f0fdf4;--green-bd:#bbf7d0;
+  --amber:#b45309;--amber-bg:#fffbeb;--amber-bd:#fde68a;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
+}
+[data-theme="dark"]{
+  --bg:#111110;--surface:#1a1a18;--surface-2:#202020;
+  --border:#2c2c2a;--border-2:#242422;
+  --text-1:#f0f0ee;--text-2:#9a9a96;--text-3:#585854;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text-1);display:flex;flex-direction:column;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+[data-theme="dark"] nav{background:rgba(26,26,24,.88);}
+.nav-inner{max-width:1280px;margin:0 auto;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.brand-mark{width:28px;height:28px;border-radius:7px;background:var(--text-1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-mark svg{width:13px;height:13px;}
+.brand-name{font-size:14px;font-weight:600;letter-spacing:-.02em;color:var(--text-1);}
+.nav-tabs{display:flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-m);padding:3px;}
+.nav-tab{padding:5px 14px;border-radius:7px;font-size:13px;font-weight:500;text-decoration:none;color:var(--text-2);transition:color .14s,background .14s;}
+.nav-tab:hover{color:var(--text-1);background:var(--border-2);}
+.nav-tab.on{background:var(--surface);color:var(--text-1);box-shadow:var(--shadow);}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.nav-clock{font-family:var(--mono);font-size:12px;color:var(--text-3);}
+.icon-btn{width:32px;height:32px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;}
+.icon-btn:hover{background:var(--surface-2);color:var(--text-1);}
+.ghost-btn{height:32px;padding:0 12px;border-radius:var(--r-s);border:1px solid var(--border);background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .14s;}
+.ghost-btn:hover{background:var(--surface-2);color:var(--text-1);}
+.hbtn{display:none;width:32px;height:32px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-2);cursor:pointer;align-items:center;justify-content:center;}
+.mob-menu{display:none;flex-direction:column;gap:3px;padding:10px 16px 14px;border-top:1px solid var(--border);background:var(--surface);}
+.mob-menu.open{display:flex;}
+.mob-link{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--r-s);font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;transition:all .14s;}
+.mob-link:hover,.mob-link.on{background:var(--bg);color:var(--text-1);}
+.mob-divider{height:1px;background:var(--border);margin:4px 0;}
+
+/* PAGE */
+.page{max-width:1280px;margin:0 auto;padding:28px 24px 56px;display:flex;flex-direction:column;gap:20px;}
+
+/* PAGE HEADER */
+.pg-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.pg-title{font-size:16px;font-weight:600;letter-spacing:-.022em;}
+.pg-sub{font-size:13px;color:var(--text-3);margin-top:3px;}
+
+/* TOOLBAR */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+
+/* DATE TIME FILTER */
+.filter-bar{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);overflow:hidden;height:34px;}
+.filter-seg{display:flex;align-items:center;gap:6px;padding:0 12px;height:100%;font-size:12px;color:var(--text-2);}
+.filter-seg+.filter-seg{border-left:1px solid var(--border);}
+.filter-seg input[type="date"],
+.filter-seg input[type="time"]{background:none;border:none;outline:none;font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--text-1);cursor:pointer;}
+.filter-seg input[type="date"]::-webkit-calendar-picker-indicator,
+.filter-seg input[type="time"]::-webkit-calendar-picker-indicator{opacity:.4;cursor:pointer;}
+.filter-divider{font-family:var(--mono);font-size:11px;color:var(--text-3);}
+.filter-apply{height:26px;padding:0 10px;background:var(--text-1);color:#fff;border:none;border-radius:5px;font-family:var(--sans);font-size:11.5px;font-weight:600;cursor:pointer;transition:opacity .14s;margin-right:6px;}
+.filter-apply:hover{opacity:.82;}
+
+/* TIMEFRAME TABS */
+.tf-tabs{display:flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-m);padding:3px;}
+.tf-tab{padding:4px 12px;border-radius:7px;font-size:12px;font-weight:500;border:none;background:transparent;color:var(--text-2);cursor:pointer;transition:all .14s;font-family:var(--sans);}
+.tf-tab:hover{color:var(--text-1);background:var(--border-2);}
+.tf-tab.on{background:var(--surface);color:var(--text-1);box-shadow:var(--shadow);}
+
+/* ACTION BTNS */
+.action-btns{display:flex;gap:6px;}
+.act-btn{height:32px;padding:0 12px;border-radius:var(--r-s);border:1px solid var(--border);background:var(--surface);font-family:var(--sans);font-size:12px;font-weight:500;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .14s;}
+.act-btn:hover{background:var(--surface-2);color:var(--text-1);border-color:#d4d4d0;}
+.act-btn.primary{background:var(--text-1);color:#fff;border-color:var(--text-1);}
+.act-btn.primary:hover{opacity:.85;}
+
+/* CHART CARD */
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:20px 22px;}
+.chart-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border-2);}
+.chart-card-title{font-size:13px;font-weight:600;letter-spacing:-.01em;color:var(--text-1);}
+.chart-card-sub{font-size:12px;color:var(--text-3);margin-top:2px;}
+.legend{display:flex;align-items:center;gap:14px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;color:var(--text-2);}
+.legend-dot{width:7px;height:7px;border-radius:50%;}
+.chart-body{position:relative;height:340px;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m);padding:14px 16px;}
+.stat-label{font-size:11px;font-weight:500;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;}
+.stat-val{font-size:22px;font-weight:600;letter-spacing:-.04em;color:var(--text-1);line-height:1;}
+.stat-unit{font-size:12px;font-weight:400;color:var(--text-3);margin-left:2px;}
+.stat-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid;margin-top:6px;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);background:var(--surface);padding:14px 24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:auto;}
+
+/* DOT */
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.dot.pulse{animation:blink 2s ease infinite;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .nav-tabs,.nav-clock,.ghost-btn{display:none!important;}
+  .hbtn{display:flex;}
+  .page{padding:16px 16px 48px;gap:16px;}
+  .stats-row{grid-template-columns:1fr;}
+  .chart-body{height:240px;}
+  .pg-header{flex-direction:column;}
+}
+@media(max-width:600px){
+  .filter-bar{flex-wrap:wrap;height:auto;padding:6px;}
+  .filter-seg{height:auto;padding:4px 8px;}
+  .filter-seg+.filter-seg{border-left:none;border-top:1px solid var(--border);}
+}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
 
-    <nav class="bg-slate-900/95 text-white sticky top-0 z-50 backdrop-blur-md border-b border-slate-800 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-blue-500/10 p-2 rounded-xl text-blue-400 border border-blue-500/30 shadow-inner">
-                        <i class="fa-solid fa-droplet text-lg"></i>
-                    </div>
-                    <span class="text-sm font-black tracking-widest text-white uppercase bg-gradient-to-r from-blue-400 to-indigo-200 bg-clip-text text-transparent">WQ-SYSTEM</span>
-                </div>
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C9.8 3 8 5.2 8 8.5C8 11 9.4 13.1 11.5 14.2L11 17H13L12.5 14.2C14.6 13.1 16 11 16 8.5C16 5.2 14.2 3 12 3Z" fill="white"/><rect x="10" y="17" width="4" height="2.5" rx="1" fill="white" opacity=".5"/></svg>
+      </div>
+      <span class="brand-name">WQ System</span>
+    </a>
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab">Overview</a>
+      <a href="grafik.html" class="nav-tab on">Analytics</a>
+      <a href="history.html" class="nav-tab">Data Log</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-clock" id="nav-clock">--:--:--</span>
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme"><i class="fa-regular fa-moon" style="font-size:12px;"></i></button>
+      <button class="ghost-btn" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i>Sign out</button>
+      <button class="hbtn" id="hbtn"><i class="fa-solid fa-bars" id="hicon" style="font-size:13px;"></i></button>
+    </div>
+  </div>
+  <div class="mob-menu" id="mob-menu">
+    <a href="index.html" class="mob-link"><i class="fa-solid fa-chart-pie" style="font-size:12px;color:var(--text-3);width:16px;"></i>Overview</a>
+    <a href="grafik.html" class="mob-link on"><i class="fa-solid fa-chart-area" style="font-size:12px;color:var(--text-3);width:16px;"></i>Analytics</a>
+    <a href="history.html" class="mob-link"><i class="fa-solid fa-database" style="font-size:12px;color:var(--text-3);width:16px;"></i>Data Log</a>
+    <div class="mob-divider"></div>
+    <button onclick="logout()" style="width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-s);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
+      <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i>Sign out
+    </button>
+  </div>
+</nav>
 
-                <div class="hidden md:flex items-center space-x-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800/60">
-                    <a href="index.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Overview</a>
-                    <a href="grafik.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md transition-all duration-200">Analytics</a>
-                    <a href="history.html" class="text-slate-400 hover:text-white hover:bg-slate-800/40 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200">Data Log</a>
-                </div>
+<!-- MAIN -->
+<main class="page">
 
-                <div class="hidden md:flex items-center space-x-4">
-                    <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <button onclick="logout()" class="h-9 px-4 bg-slate-800/80 hover:bg-rose-950/30 border border-slate-700/60 hover:border-rose-500/40 text-slate-300 hover:text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-all duration-200 active:scale-95">
-                        <i class="fa-solid fa-power-off"></i> Sign Out
-                    </button>
-                </div>
+  <!-- Header -->
+  <div class="pg-header">
+    <div>
+      <div class="pg-title">Analytics</div>
+      <div class="pg-sub">Gunakan kombinasi kalender dan timeframe untuk analisa tingkat lanjut.</div>
+    </div>
 
-                <div class="flex md:hidden">
-                    <button id="hamburger-btn" class="inline-flex items-center justify-center p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none transition-all">
-                        <i id="hamburger-icon" class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <!-- Date + time filter -->
+      <div class="filter-bar">
+        <div class="filter-seg">
+          <i class="fa-regular fa-calendar" style="font-size:11px;color:var(--text-3);"></i>
+          <input type="date" id="filter-tanggal-grafik" onchange="gantiTanggalGrafik()">
         </div>
-
-        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2 shadow-xl">
-            <a href="index.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-chart-pie mr-2 text-slate-500"></i> Overview
-            </a>
-            <a href="grafik.html" class="bg-blue-600 text-white block px-4 py-2.5 rounded-xl text-xs font-bold shadow-md">
-                <i class="fa-solid fa-chart-area mr-2 text-blue-200"></i> Analytics
-            </a>
-            <a href="history.html" class="text-slate-300 hover:bg-slate-800/50 hover:text-white block px-4 py-2.5 rounded-xl text-xs font-semibold transition">
-                <i class="fa-solid fa-database mr-2 text-slate-500"></i> Data Log
-            </a>
-            <div class="border-t border-slate-800/80 my-2 pt-2"></div>
-            <button onclick="logout()" class="w-full px-4 py-2.5 bg-rose-950/20 hover:bg-rose-900/30 border border-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition">
-                <i class="fa-solid fa-power-off"></i> Keluar Aplikasi
-            </button>
+        <div class="filter-seg">
+          <i class="fa-regular fa-clock" style="font-size:11px;color:var(--text-3);"></i>
+          <input type="time" id="filter-jam-mulai" title="Jam Mulai">
+          <span class="filter-divider">—</span>
+          <input type="time" id="filter-jam-selesai" title="Jam Selesai">
+          <button onclick="terapkanFilterJam()" class="filter-apply">Cari</button>
         </div>
-    </nav>
+      </div>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        <div class="border-b border-slate-200 pb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-                <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Advanced Graphical History</h1>
-                <p class="text-[11px] sm:text-xs text-slate-500 mt-1">Gunakan kombinasi kalender dan timeframe untuk analisa tingkat lanjut.</p>
-            </div>
-            
-            <div class="flex flex-wrap items-center gap-3 self-start lg:self-center">
-                <div class="flex items-center gap-2 bg-white border border-slate-200 p-1.5 rounded-xl shadow-sm">
-                    <div class="flex items-center space-x-2 px-1.5 py-0.5 border-r border-slate-200">
-                        <i class="fa-regular fa-calendar text-slate-400 text-xs"></i>
-                        <input type="date" id="filter-tanggal-grafik" onchange="gantiTanggalGrafik()" class="bg-transparent text-xs font-semibold text-slate-700 outline-none cursor-pointer">
-                    </div>
+      <!-- Timeframe -->
+      <div class="tf-tabs">
+        <button onclick="ubahTimeframe('15p')" id="tf-15p" class="tf-tab on">Live</button>
+        <button onclick="ubahTimeframe('1h')"  id="tf-1h"  class="tf-tab">1h</button>
+        <button onclick="ubahTimeframe('6h')"  id="tf-6h"  class="tf-tab">6h</button>
+        <button onclick="ubahTimeframe('all')" id="tf-all" class="tf-tab">All</button>
+      </div>
 
-                    <div class="flex items-center space-x-1 px-1">
-                        <i class="fa-regular fa-clock text-slate-400 text-xs mr-1"></i>
-                        <input type="time" id="filter-jam-mulai" class="bg-transparent text-xs font-semibold text-slate-600 outline-none cursor-pointer" title="Jam Mulai">
-                        <span class="text-slate-400 text-[10px] font-bold px-1">s/d</span>
-                        <input type="time" id="filter-jam-selesai" class="bg-transparent text-xs font-semibold text-slate-600 outline-none cursor-pointer" title="Jam Selesai">
-                        <button onclick="terapkanFilterJam()" class="ml-2 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg transition shadow-sm active:scale-95">
-                            Cari
-                        </button>
-                    </div>
-                </div>
+      <!-- Actions -->
+      <div class="action-btns">
+        <button onclick="resetSkalaGrafik()" class="act-btn" title="Reset zoom">
+          <i class="fa-solid fa-compress" style="font-size:11px;"></i> Reset
+        </button>
+        <button onclick="downloadChartImage()" class="act-btn" title="Unduh PNG">
+          <i class="fa-solid fa-image" style="font-size:11px;"></i> PNG
+        </button>
+        <button onclick="downloadDataCSV()" class="act-btn primary" title="Unduh CSV">
+          <i class="fa-solid fa-arrow-down" style="font-size:11px;"></i> CSV
+        </button>
+      </div>
+    </div>
+  </div>
 
-                <div class="flex items-center bg-slate-200/70 p-1 rounded-xl border border-slate-200 shadow-inner" id="timeframe-container">
-                    <button onclick="ubahTimeframe('15p')" id="tf-15p" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200/50">Live</button>
-                    <button onclick="ubahTimeframe('1h')" id="tf-1h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">1 Jam</button>
-                    <button onclick="ubahTimeframe('6h')" id="tf-6h" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">6 Jam</button>
-                    <button onclick="ubahTimeframe('all')" id="tf-all" class="px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">24 Jam (Semua)</button>
-                </div>
+  <!-- LIVE STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">pH Level</div>
+      <div><span class="stat-val" id="stat-ph">—</span></div>
+      <div class="stat-badge" id="stat-ph-badge" style="background:var(--green-bg);color:var(--green);border-color:var(--green-bd);">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Kekeruhan</div>
+      <div><span class="stat-val" id="stat-tb">—</span><span class="stat-unit">NTU</span></div>
+      <div class="stat-badge" id="stat-tb-badge" style="background:var(--amber-bg);color:var(--amber);border-color:var(--amber-bd);">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ketinggian Air</div>
+      <div><span class="stat-val" id="stat-lv">—</span><span class="stat-unit">cm</span></div>
+      <div class="stat-badge" id="stat-lv-badge" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd);">—</div>
+    </div>
+  </div>
 
-                <div class="flex gap-1.5">
-                    <button onclick="resetSkalaGrafik()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1" title="Reset Posisi Grafik">
-                        <i class="fa-solid fa-compress text-[10px]"></i>
-                    </button>
-                    <button onclick="downloadChartImage()" class="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1.5" title="Unduh Gambar Grafik (PNG)">
-                        <i class="fa-solid fa-image text-[11px]"></i> <span class="hidden sm:inline">PNG</span>
-                    </button>
-                    <button onclick="downloadDataCSV()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-xl transition active:scale-95 shadow-md flex items-center gap-1.5" title="Unduh Data Excel (CSV)">
-                        <i class="fa-solid fa-file-csv text-[11px]"></i> <span class="hidden sm:inline">CSV</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+  <!-- CHART -->
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <div>
+        <div class="chart-card-title">Sensor Analytics</div>
+        <div class="chart-card-sub">Scroll / pinch untuk zoom · drag untuk pan</div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#15803d;"></div>pH</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#b45309;"></div>Turbidity</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1d4ed8;"></div>Water Level</div>
+      </div>
+    </div>
+    <div class="chart-body">
+      <canvas id="chart-multi-parameter"></canvas>
+    </div>
+  </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                <span class="text-xs font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-line text-blue-500"></i> Analytics Sensor <span class="text-[10px] text-slate-400 font-normal hidden sm:inline">Geser untuk membaca data</span>
-                </span>
-                <div class="flex gap-3 text-[10px] sm:text-[11px] font-bold">
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 inline-block"></span> pH </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-amber-500 inline-block"></span> Turbidity </div>
-                    <div class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-blue-500 inline-block"></span> Water Level </div>
-                </div>
-            </div>
-            
-            <div class="w-full">
-                <div class="relative h-64 sm:h-80 md:h-96 w-full bg-white rounded-xl" id="canvas-container">
-                    <canvas id="chart-multi-parameter"></canvas>
-                </div>
-            </div>
-        </div>
-    </main>
+</main>
 
-    <footer class="bg-white border-t border-slate-200 py-4 text-center text-[10px] sm:text-[11px] text-slate-400 font-medium mt-auto">
-        &copy; 2026 WQ-SYSTEM Project by Roykhan Muhammad. All Right Reserved.
-    </footer>
+<footer>&copy; 2026 WQ-SYSTEM &middot; Roykhan Muhammad</footer>
 
-    <script>
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const hamburgerIcon = document.getElementById('hamburger-icon');
-        hamburgerBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-            hamburgerIcon.className = mobileMenu.classList.contains('hidden') ? "fa-solid fa-bars text-xl" : "fa-solid fa-xmark text-xl";
-        });
-        function logout() { sessionStorage.removeItem("statusLogin"); window.location.href = "login.html"; }
-    </script>
+<script>
+/* CLOCK */
+function tickClock(){const e=document.getElementById('nav-clock');if(e)e.textContent=new Date().toLocaleTimeString('id-ID',{hour12:false});}
+setInterval(tickClock,1000);tickClock();
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-        import { getDatabase, ref, onValue, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
-        
-        const app = initializeApp({ apiKey: "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A", databaseURL: "https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app" });
-        const db = getDatabase(app);
+/* DARK MODE */
+let dark=localStorage.getItem('wq-dark')==='1';
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',dark?'dark':'');
+  const b=document.getElementById('theme-btn');
+  if(b)b.innerHTML=dark?'<i class="fa-regular fa-sun" style="font-size:12px;"></i>':'<i class="fa-regular fa-moon" style="font-size:12px;"></i>';
+}
+function toggleTheme(){dark=!dark;localStorage.setItem('wq-dark',dark?'1':'0');applyTheme();}
+applyTheme();
 
-        let currentTimeframe = '15p'; 
-        let rawTimestamps = []; 
-        let tanggalAktifPilihan = dapatkanTanggalLokal(new Date());
-        let unsubscribeLiveStream = null;
+/* HAMBURGER */
+document.getElementById('hbtn').addEventListener('click',()=>{
+  const m=document.getElementById('mob-menu');
+  const ic=document.getElementById('hicon');
+  m.classList.toggle('open');
+  ic.className=m.classList.contains('open')?'fa-solid fa-xmark':'fa-solid fa-bars';
+  ic.style.fontSize='13px';
+});
 
-        const ctx = document.getElementById('chart-multi-parameter').getContext('2d');
-        const chartMulti = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [
-                    { label: 'pH', data: [], borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Turbidity', data: [], borderColor: '#f59e0b', backgroundColor: '#f59e0b', tension: 0.2, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Water Level', data: [], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.2, pointRadius: 2, borderWidth: 2 }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    zoom: {
-                        pan: { enabled: true, mode: 'x' },
-                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 9 }, color: '#94a3b8' }, min: undefined, max: undefined },
-                    y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, color: '#64748b' } }
-                }
-            }
-        });
+function logout(){sessionStorage.removeItem('statusLogin');window.location.href='login.html';}
+</script>
 
-        window.resetSkalaGrafik = function() { 
-            document.getElementById('filter-jam-mulai').value = "";
-            document.getElementById('filter-jam-selesai').value = "";
-            chartMulti.resetZoom(); 
-        };
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import{getDatabase,ref,onValue,get,query,limitToLast}from"https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        window.ubahTimeframe = function(tf) {
-            currentTimeframe = tf;
-            document.getElementById('filter-jam-mulai').value = "";
-            document.getElementById('filter-jam-selesai').value = "";
+const app=initializeApp({apiKey:"AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",databaseURL:"https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"});
+const db=getDatabase(app);
 
-            const tfs = ['15p', '1h', '6h', 'all'];
-            tfs.forEach(item => {
-                const btn = document.getElementById(`tf-${item}`);
-                if (item === tf) {
-                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 bg-white text-slate-900 shadow-sm border border-slate-200/50";
-                } else {
-                    btn.className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
-                }
-            });
+let currentTimeframe='15p';
+let rawTimestamps=[];
+let tanggalAktif=dapatkanTanggalLokal(new Date());
+let unsubLive=null;
 
-            chartMulti.resetZoom(); 
-            aturBatasTampilanGrafik();
-            chartMulti.update();
-        };
+/* CHART */
+const ctx=document.getElementById('chart-multi-parameter').getContext('2d');
+const chartMulti=new Chart(ctx,{
+  type:'line',
+  data:{
+    labels:[],
+    datasets:[
+      {label:'pH',        data:[],borderColor:'#15803d',backgroundColor:'#15803d',tension:0.2,pointRadius:1.5,borderWidth:1.5},
+      {label:'Turbidity', data:[],borderColor:'#b45309',backgroundColor:'#b45309',tension:0.2,pointRadius:1.5,borderWidth:1.5},
+      {label:'Water Level',data:[],borderColor:'#1d4ed8',backgroundColor:'#1d4ed8',tension:0.2,pointRadius:1.5,borderWidth:1.5}
+    ]
+  },
+  options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    animation:{duration:200},
+    plugins:{
+      legend:{display:false},
+      zoom:{
+        pan:{enabled:true,mode:'x'},
+        zoom:{wheel:{enabled:true},pinch:{enabled:true},mode:'x'}
+      }
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:9,family:"'DM Mono',monospace"},color:'#b0b0ac'},min:undefined,max:undefined},
+      y:{grid:{color:'#efefed'},ticks:{font:{size:10,family:"'DM Mono',monospace"},color:'#737370'}}
+    }
+  }
+});
 
-        window.terapkanFilterJam = function() {
-            const jamMulai = document.getElementById('filter-jam-mulai').value;
-            const jamSelesai = document.getElementById('filter-jam-selesai').value;
+/* STATS UPDATE */
+function updateStats(ph,tb,lv){
+  document.getElementById('stat-ph').textContent=typeof ph==='number'?ph.toFixed(2):'—';
+  document.getElementById('stat-tb').textContent=typeof tb==='number'?Math.round(tb):'—';
+  document.getElementById('stat-lv').textContent=typeof lv==='number'?Math.round(lv):'—';
 
-            if (!jamMulai || !jamSelesai) {
-                alert("Silakan isi Jam Mulai dan Jam Selesai terlebih dahulu!");
-                return;
-            }
+  const sph=document.getElementById('stat-ph-badge');
+  if(ph<6.5||ph>8.5){sph.textContent='⚠ Critical';sph.style.cssText='background:#fff5f5;color:#b91c1c;border-color:#fecaca;';}
+  else{sph.textContent='✓ Optimal';sph.style.cssText='background:#f0fdf4;color:#15803d;border-color:#bbf7d0;';}
 
-            currentTimeframe = 'custom';
-            
-            const tfs = ['15p', '1h', '6h', 'all'];
-            tfs.forEach(item => {
-                document.getElementById(`tf-${item}`).className = "px-3 py-1 rounded-lg text-[11px] font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
-            });
+  const stb=document.getElementById('stat-tb-badge');
+  if(tb<25){stb.textContent='✓ Clear';stb.style.cssText='background:#f0fdf4;color:#15803d;border-color:#bbf7d0;';}
+  else if(tb<100){stb.textContent='⚡ Warning';stb.style.cssText='background:#fffbeb;color:#b45309;border-color:#fde68a;';}
+  else{stb.textContent='⚠ Hazard';stb.style.cssText='background:#fff5f5;color:#b91c1c;border-color:#fecaca;';}
 
-            const labels = chartMulti.data.labels;
-            if (labels.length === 0) return;
+  const slv=document.getElementById('stat-lv-badge');
+  if(lv<20){slv.textContent='⚠ Low';slv.style.cssText='background:#fff5f5;color:#b91c1c;border-color:#fecaca;';}
+  else{slv.textContent='✓ Normal';slv.style.cssText='background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;';}
+}
 
-            let minLabel = undefined;
-            let maxLabel = undefined;
+/* HELPERS */
+function formatWaktu(d){
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+'.'+String(d.getSeconds()).padStart(2,'0');
+}
+function dapatkanTanggalLokal(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
-            for (let i = 0; i < labels.length; i++) {
-                if (labels[i] >= jamMulai) {
-                    minLabel = labels[i];
-                    break;
-                }
-            }
+/* TIMEFRAME */
+function aturBatas(){
+  if(currentTimeframe==='custom')return;
+  const n=chartMulti.data.labels.length;
+  if(n===0)return;
+  if(currentTimeframe==='15p'){
+    const s=Math.max(0,n-15);
+    chartMulti.options.scales.x.min=chartMulti.data.labels[s];
+    chartMulti.options.scales.x.max=chartMulti.data.labels[n-1];
+  }else if(currentTimeframe==='1h'||currentTimeframe==='6h'){
+    const last=rawTimestamps[n-1];
+    const dur=currentTimeframe==='1h'?3600:21600;
+    const batas=last-dur;
+    let idx=0;
+    for(let i=n-1;i>=0;i--){if(rawTimestamps[i]<batas){idx=i+1;break;}}
+    chartMulti.options.scales.x.min=chartMulti.data.labels[idx];
+    chartMulti.options.scales.x.max=chartMulti.data.labels[n-1];
+  }else{
+    chartMulti.options.scales.x.min=undefined;
+    chartMulti.options.scales.x.max=undefined;
+  }
+}
 
-            const maxCompareStr = jamSelesai + ".99";
-            for (let i = labels.length - 1; i >= 0; i--) {
-                if (labels[i] <= maxCompareStr) {
-                    maxLabel = labels[i];
-                    break;
-                }
-            }
+window.ubahTimeframe=function(tf){
+  currentTimeframe=tf;
+  document.getElementById('filter-jam-mulai').value='';
+  document.getElementById('filter-jam-selesai').value='';
+  ['15p','1h','6h','all'].forEach(k=>{
+    const b=document.getElementById('tf-'+k);
+    b.className='tf-tab'+(k===tf?' on':'');
+  });
+  chartMulti.resetZoom();
+  aturBatas();
+  chartMulti.update();
+};
 
-            chartMulti.options.scales.x.min = minLabel;
-            chartMulti.options.scales.x.max = maxLabel;
-            chartMulti.update();
-        };
+window.terapkanFilterJam=function(){
+  const s=document.getElementById('filter-jam-mulai').value;
+  const e=document.getElementById('filter-jam-selesai').value;
+  if(!s||!e){alert('Isi Jam Mulai dan Jam Selesai terlebih dahulu!');return;}
+  currentTimeframe='custom';
+  ['15p','1h','6h','all'].forEach(k=>{document.getElementById('tf-'+k).className='tf-tab';});
+  const labels=chartMulti.data.labels;
+  if(!labels.length)return;
+  let minL,maxL;
+  for(let i=0;i<labels.length;i++){if(labels[i]>=s){minL=labels[i];break;}}
+  for(let i=labels.length-1;i>=0;i--){if(labels[i]<=e+'.99'){maxL=labels[i];break;}}
+  chartMulti.options.scales.x.min=minL;
+  chartMulti.options.scales.x.max=maxL;
+  chartMulti.update();
+};
 
-        function aturBatasTampilanGrafik() {
-            if (currentTimeframe === 'custom') return;
+window.resetSkalaGrafik=function(){
+  document.getElementById('filter-jam-mulai').value='';
+  document.getElementById('filter-jam-selesai').value='';
+  chartMulti.resetZoom();
+};
 
-            const totalData = chartMulti.data.labels.length;
-            if (totalData === 0) return;
+/* LOAD DATA */
+window.muatGrafikPerTanggal=function(tgl){
+  chartMulti.data.labels=[];
+  chartMulti.data.datasets.forEach(ds=>ds.data=[]);
+  rawTimestamps=[];
+  chartMulti.update();
 
-            if (currentTimeframe === '15p') {
-                const jumlahTampil = 15;
-                if (totalData > jumlahTampil) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[totalData - jumlahTampil];
-                    chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
-                } else {
-                    chartMulti.options.scales.x.min = undefined;
-                    chartMulti.options.scales.x.max = undefined;
-                }
-            } 
-            else if (currentTimeframe === '1h' || currentTimeframe === '6h') {
-                const detikTerakhir = rawTimestamps[totalData - 1];
-                const durasiMundur = currentTimeframe === '1h' ? 3600 : 21600; 
-                const batasDetikMin = detikTerakhir - durasiMundur;
-                
-                let indeksTarget = 0;
-                for (let i = totalData - 1; i >= 0; i--) {
-                    if (rawTimestamps[i] < batasDetikMin) {
-                        indeksTarget = i + 1;
-                        break;
-                    }
-                }
-                
-                if (indeksTarget < totalData) {
-                    chartMulti.options.scales.x.min = chartMulti.data.labels[indeksTarget];
-                    chartMulti.options.scales.x.max = chartMulti.data.labels[totalData - 1];
-                } else {
-                    chartMulti.options.scales.x.min = undefined;
-                    chartMulti.options.scales.x.max = undefined;
-                }
-            } 
-            else if (currentTimeframe === 'all') {
-                chartMulti.options.scales.x.min = undefined;
-                chartMulti.options.scales.x.max = undefined;
-            }
-        }
+  get(query(ref(db,'SistemAir_Log/'+tgl),limitToLast(2880))).then(snap=>{
+    if(snap.exists()){
+      snap.forEach(child=>{
+        const d=child.val();
+        const ts=d.timestamp?Number(d.timestamp):Date.now()/1000;
+        rawTimestamps.push(ts);
+        chartMulti.data.labels.push(formatWaktu(new Date(ts*1000)));
+        chartMulti.data.datasets[0].data.push(d.pH||0);
+        chartMulti.data.datasets[1].data.push(d.turbidity||0);
+        chartMulti.data.datasets[2].data.push(d.tinggiAir||0);
+      });
+      const n=chartMulti.data.datasets[0].data.length;
+      if(n>0)updateStats(chartMulti.data.datasets[0].data[n-1],chartMulti.data.datasets[1].data[n-1],chartMulti.data.datasets[2].data[n-1]);
+    }
+    aturBatas();
+    chartMulti.update();
+    setupLive(tgl);
+  });
+};
 
-        function formatWaktu(d) {
-            const h = String(d.getHours()).padStart(2, '0');
-            const m = String(d.getMinutes()).padStart(2, '0');
-            const s = String(d.getSeconds()).padStart(2, '0');
-            return `${h}:${m}.${s}`;
-        }
+function setupLive(tgl){
+  if(unsubLive){unsubLive();unsubLive=null;}
+  if(tgl!==dapatkanTanggalLokal(new Date()))return;
+  unsubLive=onValue(ref(db,'SistemAir'),snap=>{
+    if(!snap.exists())return;
+    const d=snap.val();
+    const ts=d.timestamp?Number(d.timestamp):Date.now()/1000;
+    rawTimestamps.push(ts);
+    chartMulti.data.labels.push(formatWaktu(new Date(ts*1000)));
+    chartMulti.data.datasets[0].data.push(d.pH||0);
+    chartMulti.data.datasets[1].data.push(d.turbidity||0);
+    chartMulti.data.datasets[2].data.push(d.tinggiAir||0);
+    if(chartMulti.data.labels.length>2880){
+      rawTimestamps.shift();
+      chartMulti.data.labels.shift();
+      chartMulti.data.datasets.forEach(ds=>ds.data.shift());
+    }
+    updateStats(d.pH||0,d.turbidity||0,d.tinggiAir||0);
+    aturBatas();
+    chartMulti.update();
+  });
+}
 
-        function dapatkanTanggalLokal(objDate) {
-            const y = objDate.getFullYear();
-            const m = String(objDate.getMonth() + 1).padStart(2, '0');
-            const d = String(objDate.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
+window.gantiTanggalGrafik=function(){
+  const v=document.getElementById('filter-tanggal-grafik').value;
+  if(v){tanggalAktif=v;window.muatGrafikPerTanggal(v);}
+};
 
-        window.muatGrafikPerTanggal = function(tanggalFolder) {
-            chartMulti.data.labels = [];
-            chartMulti.data.datasets[0].data = [];
-            chartMulti.data.datasets[1].data = [];
-            chartMulti.data.datasets[2].data = [];
-            rawTimestamps = [];
-            chartMulti.update();
+/* DOWNLOAD PNG */
+window.downloadChartImage=function(){
+  const canvas=document.getElementById('chart-multi-parameter');
+  const tgl=document.getElementById('filter-tanggal-grafik').value||'chart';
+  const tmp=document.createElement('canvas');
+  tmp.width=canvas.width;tmp.height=canvas.height;
+  const tc=tmp.getContext('2d');
+  tc.fillStyle='#ffffff';tc.fillRect(0,0,tmp.width,tmp.height);
+  tc.drawImage(canvas,0,0);
+  const a=document.createElement('a');
+  a.href=tmp.toDataURL('image/png');
+  a.download=`WQ_Grafik_${tgl}.png`;a.click();
+};
 
-            const logRef = query(ref(db, 'SistemAir_Log/' + tanggalFolder), limitToLast(2880));
-            
-            get(logRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        const dataLog = childSnapshot.val();
-                        let ts = dataLog.timestamp ? Number(dataLog.timestamp) : Date.now() / 1000;
-                        let waktuLabel = formatWaktu(new Date(ts * 1000));
-                        
-                        rawTimestamps.push(ts);
-                        chartMulti.data.labels.push(waktuLabel);
-                        chartMulti.data.datasets[0].data.push(dataLog.pH || 0);
-                        chartMulti.data.datasets[1].data.push(dataLog.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(dataLog.tinggiAir || 0);
-                    });
-                }
-                aturBatasTampilanGrafik();
-                chartMulti.update();
-                aktifkanAtauMatikanLiveStream(tanggalFolder);
-            });
-        };
+/* DOWNLOAD CSV */
+window.downloadDataCSV=async function(){
+  const tgl=document.getElementById('filter-tanggal-grafik').value;
+  if(!tgl){alert('Pilih tanggal terlebih dahulu!');return;}
+  try{
+    const snap=await get(query(ref(db,'SistemAir_Log/'+tgl)));
+    if(snap.exists()){
+      let csv='Waktu,pH,Kekeruhan_NTU,Tinggi_Air_CM\n';let n=0;
+      snap.forEach(child=>{
+        const d=child.val();
+        const ts=d.timestamp?Number(d.timestamp):Date.now()/1000;
+        csv+=`${formatWaktu(new Date(ts*1000))},${d.pH||0},${d.turbidity||0},${d.tinggiAir||0}\n`;n++;
+      });
+      if(n>0){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`WQ_Data_${tgl}.csv`;a.click();}
+      else alert('Tidak ada data untuk tanggal ini.');
+    }else alert('Database kosong untuk tanggal ini.');
+  }catch(e){console.error(e);alert('Gagal mengunduh CSV.');}
+};
 
-        function aktifkanAtauMatikanLiveStream(tanggalFolder) {
-            if (unsubscribeLiveStream) {
-                unsubscribeLiveStream();
-                unsubscribeLiveStream = null;
-            }
+/* INIT */
+const inputKal=document.getElementById('filter-tanggal-grafik');
+inputKal.value=tanggalAktif;
+window.muatGrafikPerTanggal(tanggalAktif);
 
-            const hariIniLokal = dapatkanTanggalLokal(new Date());
-            
-            if (tanggalFolder === hariIniLokal) {
-                unsubscribeLiveStream = onValue(ref(db, 'SistemAir'), (snapshot) => {
-                    if (snapshot.exists()) {
-                        const d = snapshot.val();
-                        let ts = d.timestamp ? Number(d.timestamp) : Date.now() / 1000;
-                        const waktu = formatWaktu(new Date(ts * 1000));
-
-                        rawTimestamps.push(ts);
-                        chartMulti.data.labels.push(waktu);
-                        chartMulti.data.datasets[0].data.push(d.pH || 0);
-                        chartMulti.data.datasets[1].data.push(d.turbidity || 0);
-                        chartMulti.data.datasets[2].data.push(d.tinggiAir || 0);
-
-                        if (chartMulti.data.labels.length > 2880) {
-                            rawTimestamps.shift();
-                            chartMulti.data.labels.shift();
-                            chartMulti.data.datasets[0].data.shift();
-                            chartMulti.data.datasets[1].data.shift();
-                            chartMulti.data.datasets[2].data.shift();
-                        }
-                        aturBatasTampilanGrafik();
-                        chartMulti.update();
-                    }
-                });
-            }
-        }
-
-        window.gantiTanggalGrafik = function() {
-            const tglDipilih = document.getElementById("filter-tanggal-grafik").value;
-            if (tglDipilih) {
-                tanggalAktifPilihan = tglDipilih;
-                window.muatGrafikPerTanggal(tglDipilih);
-            }
-        };
-
-        // --- FUNGSI UNDUH GAMBAR GRAFIK (PNG) ---
-        window.downloadChartImage = function() {
-            const canvas = document.getElementById('chart-multi-parameter');
-            const tglPilihan = document.getElementById("filter-tanggal-grafik").value || "Riwayat";
-            
-            // Buat canvas sementara dengan background putih agar tidak transparan/hitam di galeri
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-            const ctxTemp = tempCanvas.getContext('2d');
-            
-            ctxTemp.fillStyle = '#ffffff';
-            ctxTemp.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            ctxTemp.drawImage(canvas, 0, 0);
-
-            const url = tempCanvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `WQ_Grafik_${tglPilihan}.png`;
-            link.click();
-        };
-
-        // --- FUNGSI UNDUH DATA (CSV) ---
-        window.downloadDataCSV = async function() {
-            const tglPilihan = document.getElementById("filter-tanggal-grafik").value;
-            if (!tglPilihan) {
-                alert("Silakan pilih tanggal pada kalender terlebih dahulu!");
-                return;
-            }
-
-            try {
-                const logRefNode = query(ref(db, 'SistemAir_Log/' + tglPilihan));
-                const snap = await get(logRefNode);
-                
-                if (snap.exists()) {
-                    let csvText = "Waktu_Data_Masuk,pH_Level,Kekeruhan_NTU,Tinggi_Air_CM\n";
-                    let rowCount = 0;
-
-                    snap.forEach(child => {
-                        const d = child.val();
-                        let ts = d.timestamp ? Number(d.timestamp) : Date.now() / 1000;
-                        let waktuJam = formatWaktu(new Date(ts * 1000));
-                        
-                        csvText += `${waktuJam},${d.pH || 0},${d.turbidity || 0},${d.tinggiAir || 0}\n`;
-                        rowCount++;
-                    });
-
-                    if (rowCount > 0) {
-                        const blob = new Blob([csvText], { type: 'text/csv' });
-                        const url = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `WQ_Data_${tglPilihan}.csv`;
-                        link.click();
-                    } else {
-                        alert(`Tidak ditemukan data untuk tanggal ${tglPilihan}.`);
-                    }
-                } else {
-                    alert(`Database untuk tanggal ${tglPilihan} kosong.`);
-                }
-            } catch (err) {
-                console.error("Gagal Download CSV:", err);
-                alert("Terjadi kesalahan jaringan saat mengunduh CSV.");
-            }
-        };
-
-        const inputKalender = document.getElementById("filter-tanggal-grafik");
-        inputKalender.value = tanggalAktifPilihan;
-        window.muatGrafikPerTanggal(tanggalAktifPilihan);
-
-        let hariIniTerakhir = dapatkanTanggalLokal(new Date());
-        
-        setInterval(() => {
-            const hariIniLokal = dapatkanTanggalLokal(new Date());
-            if (hariIniLokal !== hariIniTerakhir) {
-                if (tanggalAktifPilihan === hariIniTerakhir) {
-                    tanggalAktifPilihan = hariIniLokal;
-                    inputKalender.value = hariIniLokal;
-                    window.muatGrafikPerTanggal(hariIniLokal);
-                }
-                hariIniTerakhir = hariIniLokal;
-            }
-        }, 5000); 
-    </script>
+let lastDay=dapatkanTanggalLokal(new Date());
+setInterval(()=>{
+  const today=dapatkanTanggalLokal(new Date());
+  if(today!==lastDay){
+    if(tanggalAktif===lastDay){tanggalAktif=today;inputKal.value=today;window.muatGrafikPerTanggal(today);}
+    lastDay=today;
+  }
+},5000);
+</script>
 </body>
 </html>
