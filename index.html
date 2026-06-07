@@ -431,28 +431,23 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 
   </div>
 
-  <!-- ── BAGIAN REAL-TIME DITAMBAHKAN DI SINI ── -->
   <div class="sec-label" style="margin-top: 12px;">Real-Time Panel</div>
   <div class="grid-rt">
-    <!-- pH Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">pH Level</span><div class="rt-card-icon"><i class="fa-solid fa-flask"></i></div></div>
       <div><span class="rt-card-val" id="rt-ph">--</span></div>
       <div class="rt-card-bottom"><span class="rt-badge" id="badge-ph" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
     </div>
-    <!-- Turbidity Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">Turbidity</span><div class="rt-card-icon"><i class="fa-solid fa-water"></i></div></div>
       <div><span class="rt-card-val" id="rt-turb">--</span><span class="rt-card-unit">NTU</span></div>
       <div class="rt-card-bottom"><span class="rt-badge" id="badge-turb" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
     </div>
-    <!-- Water Level Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">Water Level</span><div class="rt-card-icon"><i class="fa-solid fa-ruler-vertical"></i></div></div>
       <div><span class="rt-card-val" id="rt-level">--</span><span class="rt-card-unit">cm</span></div>
       <div class="rt-card-bottom"><span class="rt-badge" id="badge-level" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
     </div>
-    <!-- Pompa Kuras Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">Pompa Kuras</span><div class="rt-card-icon"><i class="fa-solid fa-arrow-up-from-water-pump"></i></div></div>
       <div><span class="rt-badge" id="badge-kuras" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:13px;padding:5px 10px;">OFF</span></div>
@@ -461,7 +456,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
         <div class="rt-stopwatch" id="durasi-kuras"><i class="fa-regular fa-clock"></i> 0s</div>
       </div>
     </div>
-    <!-- Pompa Isi Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">Pompa Isi</span><div class="rt-card-icon"><i class="fa-solid fa-faucet-drip"></i></div></div>
       <div><span class="rt-badge" id="badge-isi" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:13px;padding:5px 10px;">OFF</span></div>
@@ -688,7 +682,6 @@ onValue(ref(db,'SistemAir'),snap=>{
   if(!firstData){
     firstData=true;
     ['ph','tb','lv'].forEach(reveal);
-    // Mengatasi bug Chart.js blank saat transisi display none ke block
     setTimeout(() => {
       [cPh,cTb,cLv,cKuras,cIsi].forEach(c => c.resize());
     }, 50);
@@ -792,7 +785,7 @@ const iDate=document.getElementById('input-tanggal-rekap');
 if(iDate){iDate.max=today;iDate.value=today;}
 let rcUnsub=null;
 window.muatDataHarian=async function(tgl){
-  if(typeof rcUnsub==='function') rcUnsub(); // Matikan listener lama untuk mencegah memory leak
+  if(typeof rcUnsub==='function') rcUnsub(); 
   rcUnsub=onValue(ref(db,'SistemAir_Log/'+tgl),(snap)=>{
     let n=0;let tph=0,ttb=0,tlv=0;let maxPh=-999,minPh=999;
     let maxDurasiKuras=0;
@@ -836,7 +829,7 @@ window.muatDataHarian=async function(tgl){
 };
 window.muatDataHarian(today);
 
-/* CSV */
+/* CSV REKAP HARIAN (DIPERBAIKI) */
 window.downloadHarianCSV=async function(){
   const tgl=document.getElementById('input-tanggal-rekap').value||today;
   const btn=document.getElementById('text-download-btn');
@@ -844,14 +837,29 @@ window.downloadHarianCSV=async function(){
   try{
     const snap=await get(ref(db,'SistemAir_Log/'+tgl));
     if(snap.exists()){
-      let csv='Waktu,pH,Kekeruhan_NTU,Tinggi_Air_CM,Status_Kuras,Durasi_Kuras_Detik,Status_Isi,Durasi_Isi_Detik\n';let count=0;
+      // Mengubah pemisah kolom menjadi titik koma (;) agar otomatis rapi di Excel regional Indonesia
+      let csv='Waktu;pH;Kekeruhan_NTU;Tinggi_Air_CM;Status_Kuras;Durasi_Kuras_Detik;Status_Isi;Durasi_Isi_Detik\n';
+      let count=0;
       snap.forEach(child=>{
         const r=child.val();
         const t=r.timestamp?new Date(r.timestamp*1000).toLocaleTimeString('id-ID'):new Date().toLocaleTimeString('id-ID');
-        csv+=`${t},${r.pH},${r.turbidity},${r.tinggiAir},${r.pompa_kuras||'OFF'},${(r.pompa_kuras==='ON'?r.durasi_kuras_ON_detik:r.durasi_kuras_OFF_detik)||0},${r.pompa_isi||'OFF'},${(r.pompa_isi==='ON'?r.durasi_isi_ON_detik:r.durasi_isi_OFF_detik)||0}\n`;
+        
+        const pKuras = r.pompa_kuras || 'OFF';
+        const dKuras = pKuras === 'ON' ? (r.durasi_kuras_ON_detik || 0) : (r.durasi_kuras_OFF_detik || 0);
+        const pIsi = r.pompa_isi || 'OFF';
+        const dIsi = pIsi === 'ON' ? (r.durasi_isi_ON_detik || 0) : (r.durasi_isi_OFF_detik || 0);
+
+        // Menambahkan tanda kutip ("") agar aman jika ada angka dengan koma
+        csv+=`"${t}";"${r.pH}";"${r.turbidity}";"${r.tinggiAir}";"${pKuras}";"${dKuras}";"${pIsi}";"${dIsi}"\n`;
         count++;
       });
-      if(count>0){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`WQ_Data_${tgl}.csv`;a.click();toast(`${count} baris data berhasil diunduh`,'ok');}
+      if(count>0){
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+        a.download=`WQ_Data_${tgl}.csv`;
+        a.click();
+        toast(`${count} baris data berhasil diunduh`,'ok');
+      }
       else toast(`Tidak ada data untuk ${tgl}`,'warn');
     }else toast(`Database kosong untuk ${tgl}`,'warn');
   }catch(e){console.error(e);toast('Gagal mengunduh CSV','err');}
