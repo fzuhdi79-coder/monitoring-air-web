@@ -18,6 +18,7 @@ html,body{height:100%;}
   --r-s:6px;--r-m:10px;--r-l:14px;
   --shadow:0 1px 4px rgba(0,0,0,.06);
   --green:#15803d;--green-bg:#f0fdf4;--green-bd:#bbf7d0;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
   --red:#b91c1c;--red-bg:#fff5f5;--red-bd:#fecaca;
 }
 [data-theme="dark"]{
@@ -113,11 +114,13 @@ tbody td{padding:11px 14px;font-size:13px;color:var(--text-2);white-space:nowrap
 footer{border-top:1px solid var(--border);background:var(--surface);padding:14px 24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:auto;}
 
 /* RESPONSIVE */
+@media(max-width:900px){
+  .table-toolbar{flex-direction:column;align-items:flex-start;}
+}
 @media(max-width:768px){
   .nav-tabs,.nav-clock,.ghost-btn{display:none!important;}
   .hbtn{display:flex;}
   .page{padding:16px 16px 48px;gap:16px;}
-  .table-toolbar{flex-direction:column;align-items:flex-start;}
 }
 </style>
 </head>
@@ -160,7 +163,7 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 
   <div class="pg-header">
     <div class="pg-title">Data Log</div>
-    <div class="pg-sub">Riwayat parameter harian. Maksimal 2.880 data per hari.</div>
+    <div class="pg-sub">Riwayat parameter dan pompa harian. Maksimal 2.880 data per hari.</div>
   </div>
 
   <div class="table-card">
@@ -206,6 +209,8 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
             <th>pH Level</th>
             <th>Turbidity</th>
             <th>Water Level</th>
+            <th>Pompa Kuras</th>
+            <th>Pompa Isi</th>
             <th class="center">Action</th>
           </tr>
         </thead>
@@ -222,6 +227,13 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 /* CLOCK */
 function tickClock(){const e=document.getElementById('nav-clock');if(e)e.textContent=new Date().toLocaleTimeString('id-ID',{hour12:false});}
 setInterval(tickClock,1000);tickClock();
+
+/* HELPER DURASI */
+function formatDur(s) {
+  if (!s) return "0s";
+  const m = Math.floor(s / 60);
+  return m > 0 ? `${m}m ${s%60}s` : `${s}s`;
+}
 
 /* DARK MODE */
 let dark=localStorage.getItem('wq-dark')==='1';
@@ -268,7 +280,7 @@ window.filterWaktu=function(){
   if(old)old.remove();
   if(total>0&&show===0){
     const tr=document.createElement('tr');tr.id='row-empty-filter';
-    tr.innerHTML=`<td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div><div class="empty-title">Tidak ada data</div><div class="empty-sub">Tidak ada rekaman yang cocok dengan rentang jam ini.</div></div></td>`;
+    tr.innerHTML=`<td colspan="8"><div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div><div class="empty-title">Tidak ada data</div><div class="empty-sub">Tidak ada rekaman yang cocok dengan rentang jam ini.</div></div></td>`;
     document.getElementById('table-body').appendChild(tr);
   }
 };
@@ -282,18 +294,30 @@ window.resetWaktu=function(){
 /* EXPORT CSV */
 function unduhCSV(){
   const rows=document.querySelectorAll('#table-body tr[data-date]');
-  let csv='Timestamp,Date,pH,Turbidity_NTU,WaterLevel_cm\n';let n=0;
+  let csv='Timestamp,Date,pH,Turbidity_NTU,WaterLevel_cm,Status_Kuras,Durasi_Kuras_Detik,Status_Isi,Durasi_Isi_Detik\n';
+  let n=0;
+  
   rows.forEach(tr=>{
     if(tr.style.display==='none')return;
     const cells=tr.querySelectorAll('td');
-    if(cells.length<5)return;
+    if(cells.length<8)return; // Pastikan kolom lengkap
+    
     const ts=cells[0].textContent.trim();
     const dt=cells[1].textContent.trim();
     const ph=cells[2].querySelector('.td-val')?.textContent.trim()||cells[2].textContent.trim();
     const tb=cells[3].querySelector('.td-val')?.textContent.trim()||cells[3].textContent.trim();
     const lv=cells[4].querySelector('.td-val')?.textContent.trim()||cells[4].textContent.trim();
-    csv+=`"${ts}","${dt}","${ph}","${tb}","${lv}"\n`;n++;
+    
+    // Ambil data pompa dari atribut elemen tr
+    const kurasStat = tr.getAttribute('data-kuras-stat') || 'OFF';
+    const kurasDur = tr.getAttribute('data-kuras-dur') || 0;
+    const isiStat = tr.getAttribute('data-isi-stat') || 'OFF';
+    const isiDur = tr.getAttribute('data-isi-dur') || 0;
+
+    csv+=`"${ts}","${dt}","${ph}","${tb}","${lv}","${kurasStat}","${kurasDur}","${isiStat}","${isiDur}"\n`;
+    n++;
   });
+  
   if(n===0){alert('Tidak ada data untuk diunduh.');return;}
   const tgl=document.getElementById('filter-tanggal').value||new Date().toISOString().slice(0,10);
   const a=document.createElement('a');
@@ -330,7 +354,7 @@ window.muatDataDariFirebase=function(tgl){
   unsub=onValue(ref(db,'SistemAir_Log/'+tgl),snap=>{
     tbody.innerHTML='';
     if(!snap.exists()){
-      tbody.innerHTML=`<tr><td colspan="6"><div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-inbox"></i></div><div class="empty-title">Tidak ada data</div><div class="empty-sub">Belum ada rekaman untuk tanggal ${tgl}.</div></div></td></tr>`;
+      tbody.innerHTML=`<tr><td colspan="8"><div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-inbox"></i></div><div class="empty-title">Tidak ada data</div><div class="empty-sub">Belum ada rekaman untuk tanggal ${tgl}.</div></div></td></tr>`;
       document.getElementById('total-data-badge').textContent='0 data';
       return;
     }
@@ -346,15 +370,44 @@ window.muatDataDariFirebase=function(tgl){
       const phOk=ph>=6.5&&ph<=8.5;
       const phBadge=`<span class="row-badge" style="background:${phOk?'var(--green-bg)':'var(--red-bg)'};color:${phOk?'var(--green)':'var(--red)'};border-color:${phOk?'var(--green-bd)':'var(--red-bd)'};">${phOk?'Optimal':'Critical'}</span>`;
 
+      // Status & Durasi Pompa Kuras
+      const pKuras = d.pompa_kuras || 'OFF';
+      const durKuras = pKuras === 'ON' ? (d.durasi_kuras_ON_detik||0) : (d.durasi_kuras_OFF_detik||0);
+      const bgKuras = pKuras === 'ON' ? 'var(--red-bg)' : 'var(--surface-2)';
+      const colorKuras = pKuras === 'ON' ? 'var(--red)' : 'var(--text-3)';
+      const borderKuras = pKuras === 'ON' ? 'var(--red-bd)' : 'var(--border)';
+
+      // Status & Durasi Pompa Isi
+      const pIsi = d.pompa_isi || 'OFF';
+      const durIsi = pIsi === 'ON' ? (d.durasi_isi_ON_detik||0) : (d.durasi_isi_OFF_detik||0);
+      const bgIsi = pIsi === 'ON' ? 'var(--blue-bg)' : 'var(--surface-2)';
+      const colorIsi = pIsi === 'ON' ? 'var(--blue)' : 'var(--text-3)';
+      const borderIsi = pIsi === 'ON' ? 'var(--blue-bd)' : 'var(--border)';
+
       const tr=document.createElement('tr');
       tr.setAttribute('data-date',tgl);
       tr.setAttribute('data-time',jam);
+      
+      // Inject atribut pompa untuk ekspor CSV
+      tr.setAttribute('data-kuras-stat', pKuras);
+      tr.setAttribute('data-kuras-dur', durKuras);
+      tr.setAttribute('data-isi-stat', pIsi);
+      tr.setAttribute('data-isi-dur', durIsi);
+
       tr.innerHTML=`
         <td class="td-mono">${jam}</td>
         <td>${tglTampil}</td>
         <td><span class="td-val">${ph.toFixed(2)}</span>${phBadge}</td>
         <td><span class="td-val">${Math.round(d.turbidity||0)}</span><span class="td-unit">NTU</span></td>
         <td><span class="td-val">${Math.round(d.tinggiAir||0)}</span><span class="td-unit">cm</span></td>
+        <td>
+          <span class="row-badge" style="background:${bgKuras};color:${colorKuras};border-color:${borderKuras};margin-left:0;">${pKuras}</span>
+          <span class="td-mono" style="margin-left:6px;">${formatDur(durKuras)}</span>
+        </td>
+        <td>
+          <span class="row-badge" style="background:${bgIsi};color:${colorIsi};border-color:${borderIsi};margin-left:0;">${pIsi}</span>
+          <span class="td-mono" style="margin-left:6px;">${formatDur(durIsi)}</span>
+        </td>
         <td class="td-center"><button onclick="hapusDataLog('${d._key}')" class="del-btn" title="Hapus baris"><i class="fa-solid fa-trash-can"></i></button></td>`;
       tbody.appendChild(tr);
     });
