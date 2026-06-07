@@ -469,8 +469,8 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
         <span class="pump-status-text" id="rt-status-kuras" style="color:var(--text-3);">OFF</span>
       </div>
       <div class="rt-card-bottom">
-        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;text-align:center;">Durasi Aktif</div>
-        <div class="rt-stopwatch" id="durasi-kuras" style="justify-content:center;"><i class="fa-regular fa-clock"></i> 0s</div>
+        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;text-align:center;">Durasi Aktif / Non-aktif</div>
+        <div class="rt-stopwatch" id="durasi-kuras" style="justify-content:center;"><i class="fa-regular fa-clock"></i> <span style="color:var(--text-3);">0s</span></div>
       </div>
     </div>
     <div class="rt-card" id="rt-card-isi" style="--rgb-color:59, 130, 246;">
@@ -480,8 +480,8 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
         <span class="pump-status-text" id="rt-status-isi" style="color:var(--text-3);">OFF</span>
       </div>
       <div class="rt-card-bottom">
-        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;text-align:center;">Durasi Aktif</div>
-        <div class="rt-stopwatch" id="durasi-isi" style="justify-content:center;"><i class="fa-regular fa-clock"></i> 0s</div>
+        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;text-align:center;">Durasi Aktif / Non-aktif</div>
+        <div class="rt-stopwatch" id="durasi-isi" style="justify-content:center;"><i class="fa-regular fa-clock"></i> <span style="color:var(--text-3);">0s</span></div>
       </div>
     </div>
   </div>
@@ -576,23 +576,81 @@ function formatStopwatch(s) {
   const sec = s % 60;
   return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
 }
-window.localKurasDurasi = 0; 
-window.isKurasOtomatisON = false;
-window.localIsiDurasi = 0; 
-window.isIsiOtomatisON = false;
 
-setInterval(() => {
-  if (window.isKurasOtomatisON) {
-    window.localKurasDurasi++;
-    const e = document.getElementById('durasi-kuras');
-    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--red);"></i> <span style="font-weight:600;">${formatStopwatch(window.localKurasDurasi)}</span>`;
+// Objek untuk melacak status pompa secara independen di frontend
+window.pumpTracker = {
+  kuras: { isON: false, durasi: 0, interval: null, elemen: null, statusElemen: null, cardElemen: null, pulseElemen: null },
+  isi:   { isON: false, durasi: 0, interval: null, elemen: null, statusElemen: null, cardElemen: null, pulseElemen: null }
+};
+
+// Fungsi universal untuk memulai/menghentikan stopwatch di layar
+function updateStopwatchUI(tipe, statusFirebase, durasiFirebase) {
+  const t = window.pumpTracker[tipe];
+  
+  // Ambil elemen HTML jika belum ada
+  if (!t.elemen) t.elemen = document.getElementById(`durasi-${tipe}`);
+  if (!t.statusElemen) t.statusElemen = document.getElementById(`rt-status-${tipe}`);
+  if (!t.cardElemen) t.cardElemen = document.getElementById(`rt-card-${tipe}`);
+  if (!t.pulseElemen) t.pulseElemen = document.getElementById(`pulse-${tipe}`);
+
+  const isNowON = (statusFirebase === 'ON');
+  const colorVar = tipe === 'kuras' ? 'var(--red)' : 'var(--blue)';
+  const borderVar = tipe === 'kuras' ? 'var(--red-bd)' : 'var(--blue-bd)';
+
+  // UPDATE TAMPILAN KARTU & KEDIPAN (PULSE)
+  if (t.cardElemen && t.statusElemen && t.pulseElemen) {
+    if (isNowON) {
+      t.cardElemen.classList.add('active');
+      t.cardElemen.style.borderColor = borderVar;
+      t.statusElemen.textContent = 'ON';
+      t.statusElemen.style.color = colorVar;
+      t.pulseElemen.classList.add('active');
+    } else {
+      t.cardElemen.classList.remove('active');
+      t.cardElemen.style.borderColor = 'var(--border)';
+      t.statusElemen.textContent = 'OFF';
+      t.statusElemen.style.color = 'var(--text-3)';
+      t.pulseElemen.classList.remove('active');
+    }
   }
-  if (window.isIsiOtomatisON) {
-    window.localIsiDurasi++;
-    const e = document.getElementById('durasi-isi');
-    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--blue);"></i> <span style="font-weight:600;">${formatStopwatch(window.localIsiDurasi)}</span>`;
+
+  // =====================================
+  // LOGIKA STOPWATCH (REAL-TIME ON & OFF)
+  // =====================================
+  
+  // Resinkronisasi jika status berubah, atau selisih data Firebase lompat > 2 detik
+  if (t.isON !== isNowON || Math.abs(durasiFirebase - t.durasi) > 2) { 
+    t.durasi = durasiFirebase; 
   }
-}, 1000);
+  t.isON = isNowON;
+
+  // Pastikan interval berjalan TERUS MENERUS (Baik saat ON maupun OFF)
+  if (!t.interval) {
+    t.interval = setInterval(() => {
+      t.durasi++; // Tambah 1 detik di web setiap detiknya
+      
+      if (t.elemen) {
+        if (t.isON) {
+          // Tampilan teks saat pompa ON
+          const cVar = tipe === 'kuras' ? 'var(--red)' : 'var(--blue)';
+          t.elemen.innerHTML = `<i class="fa-solid fa-clock" style="color:${cVar};"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(t.durasi)}</span>`;
+        } else {
+          // Tampilan teks saat pompa OFF (tetap berdetak real-time)
+          t.elemen.innerHTML = `<i class="fa-regular fa-clock"></i> <span style="color:var(--text-3);">${formatStopwatch(t.durasi)}</span>`;
+        }
+      }
+    }, 1000); // Eksekusi persis setiap 1 detik
+  }
+  
+  // Update UI secara instan pada detik pertama data masuk
+  if (t.elemen) {
+    if (t.isON) {
+      t.elemen.innerHTML = `<i class="fa-solid fa-clock" style="color:${colorVar};"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(t.durasi)}</span>`;
+    } else {
+      t.elemen.innerHTML = `<i class="fa-regular fa-clock"></i> <span style="color:var(--text-3);">${formatStopwatch(t.durasi)}</span>`;
+    }
+  }
+}
 </script>
 
 <script type="module">
@@ -650,19 +708,26 @@ get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
     llv.push('');dlv.push(d.tinggiAir||0);
     const t=new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
     
-    const pk=d.pompa_kuras||'OFF';
-    const pi=d.pompa_isi||'OFF';
+    // PERBAIKAN KOMPATIBILITAS HISTORY: 
+    // Membaca statusSistem/pompaStatus lama jika pompa_kuras/isi belum ada di database
+    const statLama = d.statusSistem || d.pompaStatus || '';
+    const pk = d.pompa_kuras || (statLama === 'KURAS' ? 'ON' : 'OFF');
+    const pi = d.pompa_isi || (statLama === 'ISI' ? 'ON' : 'OFF');
+    
     lk.push(t);dk.push(pk==='ON'?1:0);
     li.push(t);di.push(pi==='ON'?1:0);
     
     dataHistory.push({ph:d.pH||0,tb:d.turbidity||0});
   });
   while(lph.length<20){lph.unshift('');dph.unshift(0);ltb.unshift('');dtb.unshift(0);llv.unshift('');dlv.unshift(0);lk.unshift('');dk.unshift(0);li.unshift('');di.unshift(0);}
-  cPh.data.labels=lph;cPh.data.datasets[0].data=dph;
-  cTb.data.labels=ltb;cTb.data.datasets[0].data=dtb;
-  cLv.data.labels=llv;cLv.data.datasets[0].data=dlv;
-  cKuras.data.labels=lk;cKuras.data.datasets[0].data=dk;
-  cIsi.data.labels=li;cIsi.data.datasets[0].data=di;
+  
+  // Menggunakan spread array agar referensi grafik selalu ter-update secara clean saat refresh
+  cPh.data.labels=[...lph]; cPh.data.datasets[0].data=[...dph];
+  cTb.data.labels=[...ltb]; cTb.data.datasets[0].data=[...dtb];
+  cLv.data.labels=[...llv]; cLv.data.datasets[0].data=[...dlv];
+  cKuras.data.labels=[...lk]; cKuras.data.datasets[0].data=[...dk];
+  cIsi.data.labels=[...li]; cIsi.data.datasets[0].data=[...di];
+  
   [cPh,cTb,cLv,cKuras,cIsi].forEach(c=>c.update());
   renderUptimeBar();
 });
@@ -756,7 +821,7 @@ onValue(ref(db,'SistemAir'),snap=>{
   dataHistory.push({ph,tb});if(dataHistory.length>20)dataHistory.shift();
   renderUptimeBar();
 
-  /* --- PUMP STATUS & DURATION --- */
+  /* --- PUMP STATUS & DURATION (FOR CHARTS & BUTTONS) --- */
   const pKuras = d.pompa_kuras || 'OFF';
   const durKuras = pKuras === 'ON' ? (d.durasi_kuras_ON_saat_ini_detik||0) : (d.durasi_kuras_OFF_saat_ini_detik||0);
   const statP1 = document.getElementById('stat-p1');
@@ -794,6 +859,17 @@ onValue(ref(db,'SistemAir'),snap=>{
 
   document.getElementById('icon-p1').style.color=pKuras==='ON'?'var(--red)':'var(--text-3)';
   document.getElementById('icon-p2').style.color=pIsi==='ON'?'var(--blue)':'var(--text-3)';
+
+  // ==========================================
+  // UPDATE REALTIME PANEL (UI BARU DENGAN DETIK BERJALAN)
+  // ==========================================
+  const firebasePKuras = data.pompa_kuras || 'OFF';
+  const firebaseDurKuras = (firebasePKuras === 'ON') ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
+  updateStopwatchUI('kuras', firebasePKuras, firebaseDurKuras);
+
+  const firebasePIsi = data.pompa_isi || 'OFF';
+  const firebaseDurIsi = (firebasePIsi === 'ON') ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
+  updateStopwatchUI('isi', firebasePIsi, firebaseDurIsi);
 });
 
 /* CONTROLS */
@@ -849,7 +925,7 @@ window.muatDataHarian=async function(tgl){
 };
 window.muatDataHarian(today);
 
-/* CSV REKAP HARIAN (DIPERBAIKI) */
+/* CSV REKAP HARIAN (HANYA DURASI) */
 window.downloadHarianCSV=async function(){
   const tgl=document.getElementById('input-tanggal-rekap').value||today;
   const btn=document.getElementById('text-download-btn');
@@ -857,18 +933,21 @@ window.downloadHarianCSV=async function(){
   try{
     const snap=await get(ref(db,'SistemAir_Log/'+tgl));
     if(snap.exists()){
-      let csv='Waktu;pH;Kekeruhan_NTU;Tinggi_Air_CM;Status_Kuras;Durasi_Kuras_Detik;Status_Isi;Durasi_Isi_Detik\n';
+      let csv='"Waktu";"pH";"Kekeruhan_NTU";"Tinggi_Air_CM";"Durasi_Kuras";"Durasi_Isi"\n';
       let count=0;
       snap.forEach(child=>{
         const r=child.val();
         const t=r.timestamp?new Date(r.timestamp*1000).toLocaleTimeString('id-ID'):new Date().toLocaleTimeString('id-ID');
         
         const pKuras = r.pompa_kuras || 'OFF';
-        const dKuras = pKuras === 'ON' ? (r.durasi_kuras_ON_detik || 0) : (r.durasi_kuras_OFF_detik || 0);
-        const pIsi = r.pompa_isi || 'OFF';
-        const dIsi = pIsi === 'ON' ? (r.durasi_isi_ON_detik || 0) : (r.durasi_isi_OFF_detik || 0);
+        const dKuras = pKuras === 'ON' ? (r.durasi_kuras_ON_detik || 0) : 0;
+        const formatKuras = pKuras === 'ON' ? `${dKuras}s` : '0s';
 
-        csv+=`"${t}";"${r.pH}";"${r.turbidity}";"${r.tinggiAir}";"${pKuras}";"${dKuras}";"${pIsi}";"${dIsi}"\n`;
+        const pIsi = r.pompa_isi || 'OFF';
+        const dIsi = pIsi === 'ON' ? (r.durasi_isi_ON_detik || 0) : 0;
+        const formatIsi = pIsi === 'ON' ? `${dIsi}s` : '0s';
+
+        csv+=`"${t}";"${r.pH}";"${r.turbidity}";"${r.tinggiAir}";"${formatKuras}";"${formatIsi}"\n`;
         count++;
       });
       if(count>0){
@@ -883,145 +962,6 @@ window.downloadHarianCSV=async function(){
   }catch(e){console.error(e);toast('Gagal mengunduh CSV','err');}
   if(btn)btn.textContent='Unduh CSV';
 };
-
-/* --- REAL-TIME PANEL LISTENER (DITAMBAHKAN TERPISAH AGAR KODE ASLI AMAN) --- */
-onValue(ref(db, 'SistemAir'), (snapshot) => {
-  if (!snapshot.exists()) return;
-  const data = snapshot.val();
-  
-  // UPDATE SENSOR pH
-  const ph = parseFloat(data.pH || 0).toFixed(2);
-  const phOk = (ph >= 6.5 && ph <= 8.5);
-  const rtPh = document.getElementById('rt-ph');
-  if(rtPh) rtPh.textContent = ph;
-  const bPh = document.getElementById('badge-ph');
-  if(bPh){
-    bPh.textContent = phOk ? 'Status: Optimal' : 'Status: Critical';
-    bPh.style.cssText = `background:${phOk?'var(--green-bg)':'var(--red-bg)'}; color:${phOk?'var(--green)':'var(--red)'}; border-color:${phOk?'var(--green-bd)':'var(--red-bd)'};`;
-  }
-
-  // UPDATE SENSOR TURBIDITY
-  const turb = Math.round(data.turbidity || 0);
-  const turbOk = (turb <= 53);
-  const rtTurb = document.getElementById('rt-turb');
-  if(rtTurb) rtTurb.textContent = turb;
-  const bTurb = document.getElementById('badge-turb');
-  if(bTurb){
-    bTurb.textContent = turbOk ? 'Status: Jernih' : 'Status: Keruh';
-    bTurb.style.cssText = `background:${turbOk?'var(--green-bg)':'var(--amber-bg)'}; color:${turbOk?'var(--green)':'var(--amber)'}; border-color:${turbOk?'var(--green-bd)':'var(--amber-bd)'};`;
-  }
-
-  // UPDATE KETINGGIAN AIR
-  const level = Math.round(data.tinggiAir || 0);
-  const rtLevel = document.getElementById('rt-level');
-  if(rtLevel) rtLevel.textContent = level;
-  const bLevel = document.getElementById('badge-level');
-  if(bLevel){
-    if (level <= 40) {
-      bLevel.textContent = 'Status: Habis';
-      bLevel.style.cssText = `background:var(--red-bg); color:var(--red); border-color:var(--red-bd);`;
-    } else if (level > 68) {
-      bLevel.textContent = 'Status: Penuh';
-      bLevel.style.cssText = `background:var(--amber-bg); color:var(--amber); border-color:var(--amber-bd);`;
-    } else {
-      bLevel.textContent = 'Status: Aman';
-      bLevel.style.cssText = `background:var(--blue-bg); color:var(--blue); border-color:var(--blue-bd);`;
-    }
-  }
-
-// ==========================================
-  // UPDATE POMPA KURAS & STOPWATCH
-  // ==========================================
-  const pKuras = data.pompa_kuras || 'OFF';
-  window.isKurasOtomatisON = (pKuras === 'ON');
-  window.localKurasDurasi = window.isKurasOtomatisON ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
-
-  // Perbarui tampilan UI/Warna (Sesuaikan dengan ID elemen Anda)
-  const cKuras = document.getElementById('rt-card-kuras');
-  const sKuras = document.getElementById('rt-status-kuras');
-  const pKurasPulse = document.getElementById('pulse-kuras');
-  const elemenDurasiKuras = document.getElementById('durasi-kuras'); // Elemen teks angkanya
-
-  if (cKuras && sKuras && pKurasPulse) {
-    if (window.isKurasOtomatisON) {
-      cKuras.classList.add('active');
-      cKuras.style.borderColor = 'var(--red-bd)';
-      sKuras.textContent = 'ON';
-      sKuras.style.color = 'var(--red)';
-      pKurasPulse.classList.add('active');
-    } else {
-      cKuras.classList.remove('active');
-      cKuras.style.borderColor = 'var(--border)';
-      sKuras.textContent = 'OFF';
-      sKuras.style.color = 'var(--text-3)';
-      pKurasPulse.classList.remove('active');
-    }
-  }
-
-  // Tulis angka durasi dari Firebase
-  if (elemenDurasiKuras) {
-    elemenDurasiKuras.innerHTML = `<i class="${window.isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isKurasOtomatisON?'color:var(--red);':''}"></i> <span style="${window.isKurasOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localKurasDurasi)}</span>`;
-  }
-
-  // --- TRIK REALTIME UI (DETIK BUATAN) UNTUK KURAS ---
-  if (window.intervalKuras) clearInterval(window.intervalKuras); // Hapus timer lama
-  if (window.isKurasOtomatisON) {
-    window.intervalKuras = setInterval(() => {
-      window.localKurasDurasi++; // Tambah 1 detik di web
-      if (elemenDurasiKuras) {
-        elemenDurasiKuras.innerHTML = `<i class="fa-solid fa-clock" style="color:var(--red);"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(window.localKurasDurasi)}</span>`;
-      }
-    }, 1000); // Berdetak setiap 1000ms (1 detik)
-  }
-
-
-  // ==========================================
-  // UPDATE POMPA ISI & STOPWATCH
-  // ==========================================
-  const pIsi = data.pompa_isi || 'OFF';
-  window.isIsiOtomatisON = (pIsi === 'ON');
-  window.localIsiDurasi = window.isIsiOtomatisON ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
-  
-  const cIsi = document.getElementById('rt-card-isi');
-  const sIsi = document.getElementById('rt-status-isi');
-  const pIsiPulse = document.getElementById('pulse-isi');
-  const elemenDurasiIsi = document.getElementById('durasi-isi'); // Elemen teks angkanya
-
-  if (cIsi && sIsi && pIsiPulse) {
-    if (window.isIsiOtomatisON) {
-      cIsi.classList.add('active');
-      cIsi.style.borderColor = 'var(--blue)';
-      sIsi.textContent = 'ON';
-      sIsi.style.color = 'var(--blue)';
-      pIsiPulse.classList.add('active');
-    } else {
-      cIsi.classList.remove('active');
-      cIsi.style.borderColor = 'var(--border)';
-      sIsi.textContent = 'OFF';
-      sIsi.style.color = 'var(--text-3)';
-      pIsiPulse.classList.remove('active');
-    }
-  }
-
-  // Tulis angka durasi dari Firebase
-  if (elemenDurasiIsi) {
-    elemenDurasiIsi.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> <span style="${window.isIsiOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localIsiDurasi)}</span>`;
-  }
-
-  // --- TRIK REALTIME UI (DETIK BUATAN) UNTUK ISI ---
-  if (window.intervalIsi) clearInterval(window.intervalIsi); // Hapus timer lama
-  if (window.isIsiOtomatisON) {
-    window.intervalIsi = setInterval(() => {
-      window.localIsiDurasi++; // Tambah 1 detik di web
-      if (elemenDurasiIsi) {
-        elemenDurasiIsi.innerHTML = `<i class="fa-solid fa-clock" style="color:var(--blue);"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(window.localIsiDurasi)}</span>`;
-      }
-    }, 1000);
-  }
-
-  const di = document.getElementById('durasi-isi');
-  if(di) di.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> <span style="${window.isIsiOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localIsiDurasi)}</span>`;
-});
 </script>
 </body>
 </html>
