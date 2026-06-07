@@ -180,6 +180,18 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
   .hbtn{display:flex;}
   .page{padding:16px 16px 48px;}
 }
+
+/* ── REAL-TIME DASHBOARD COMPONENT STYLES ── */
+.grid-rt{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
+.rt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:16px;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+.rt-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.rt-card-title{font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+.rt-card-icon{width:32px;height:32px;border-radius:var(--r-m);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:14px;}
+.rt-card-val{font-size:28px;font-weight:600;color:var(--text-1);line-height:1;}
+.rt-card-unit{font-size:12px;font-weight:500;color:var(--text-3);margin-left:4px;}
+.rt-card-bottom{margin-top:auto;padding-top:12px;}
+.rt-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:6px;border:1px solid;}
+.rt-stopwatch{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text-2);margin-top:6px;display:flex;align-items:center;gap:6px;}
 </style>
 </head>
 <body>
@@ -418,6 +430,48 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
     </div>
 
   </div>
+
+  <!-- ── BAGIAN REAL-TIME DITAMBAHKAN DI SINI ── -->
+  <div class="sec-label" style="margin-top: 12px;">Real-Time Panel</div>
+  <div class="grid-rt">
+    <!-- pH Card -->
+    <div class="rt-card">
+      <div class="rt-card-top"><span class="rt-card-title">pH Level</span><div class="rt-card-icon"><i class="fa-solid fa-flask"></i></div></div>
+      <div><span class="rt-card-val" id="rt-ph">--</span></div>
+      <div class="rt-card-bottom"><span class="rt-badge" id="badge-ph" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
+    </div>
+    <!-- Turbidity Card -->
+    <div class="rt-card">
+      <div class="rt-card-top"><span class="rt-card-title">Turbidity</span><div class="rt-card-icon"><i class="fa-solid fa-water"></i></div></div>
+      <div><span class="rt-card-val" id="rt-turb">--</span><span class="rt-card-unit">NTU</span></div>
+      <div class="rt-card-bottom"><span class="rt-badge" id="badge-turb" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
+    </div>
+    <!-- Water Level Card -->
+    <div class="rt-card">
+      <div class="rt-card-top"><span class="rt-card-title">Water Level</span><div class="rt-card-icon"><i class="fa-solid fa-ruler-vertical"></i></div></div>
+      <div><span class="rt-card-val" id="rt-level">--</span><span class="rt-card-unit">cm</span></div>
+      <div class="rt-card-bottom"><span class="rt-badge" id="badge-level" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
+    </div>
+    <!-- Pompa Kuras Card -->
+    <div class="rt-card">
+      <div class="rt-card-top"><span class="rt-card-title">Pompa Kuras</span><div class="rt-card-icon"><i class="fa-solid fa-arrow-up-from-water-pump"></i></div></div>
+      <div><span class="rt-badge" id="badge-kuras" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:13px;padding:5px 10px;">OFF</span></div>
+      <div class="rt-card-bottom">
+        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;">Durasi Realtime</div>
+        <div class="rt-stopwatch" id="durasi-kuras"><i class="fa-regular fa-clock"></i> 0s</div>
+      </div>
+    </div>
+    <!-- Pompa Isi Card -->
+    <div class="rt-card">
+      <div class="rt-card-top"><span class="rt-card-title">Pompa Isi</span><div class="rt-card-icon"><i class="fa-solid fa-faucet-drip"></i></div></div>
+      <div><span class="rt-badge" id="badge-isi" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:13px;padding:5px 10px;">OFF</span></div>
+      <div class="rt-card-bottom">
+        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;">Durasi Realtime</div>
+        <div class="rt-stopwatch" id="durasi-isi"><i class="fa-regular fa-clock"></i> 0s</div>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <footer>&copy; 2026 WQ-SYSTEM &middot; by ZudiJago &middot; <span id="footer-session">Session: 0m</span></footer>
@@ -500,6 +554,31 @@ function reveal(key){
   if(skC)skC.style.display='none';
   if(ch)ch.style.display='block';
 }
+
+/* ── STOPWATCH HELPER & GLOBALS FOR REALTIME DITAMBAHKAN DI SINI ── */
+function formatStopwatch(s) {
+  if (s <= 0) return "0s";
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+window.localKurasDurasi = 0; 
+window.isKurasOtomatisON = false;
+window.localIsiDurasi = 0; 
+window.isIsiOtomatisON = false;
+
+setInterval(() => {
+  if (window.isKurasOtomatisON) {
+    window.localKurasDurasi++;
+    const e = document.getElementById('durasi-kuras');
+    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--red);"></i> ${formatStopwatch(window.localKurasDurasi)}`;
+  }
+  if (window.isIsiOtomatisON) {
+    window.localIsiDurasi++;
+    const e = document.getElementById('durasi-isi');
+    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--blue);"></i> ${formatStopwatch(window.localIsiDurasi)}`;
+  }
+}, 1000);
 </script>
 
 <script type="module">
@@ -778,6 +857,76 @@ window.downloadHarianCSV=async function(){
   }catch(e){console.error(e);toast('Gagal mengunduh CSV','err');}
   if(btn)btn.textContent='Unduh CSV';
 };
+
+/* --- REAL-TIME PANEL LISTENER (DITAMBAHKAN TERPISAH AGAR KODE ASLI AMAN) --- */
+onValue(ref(db, 'SistemAir'), (snapshot) => {
+  if (!snapshot.exists()) return;
+  const data = snapshot.val();
+  
+  // UPDATE SENSOR pH
+  const ph = parseFloat(data.pH || 0).toFixed(2);
+  const phOk = (ph >= 6.5 && ph <= 8.5);
+  const rtPh = document.getElementById('rt-ph');
+  if(rtPh) rtPh.textContent = ph;
+  const bPh = document.getElementById('badge-ph');
+  if(bPh){
+    bPh.textContent = phOk ? 'Status: Optimal' : 'Status: Critical';
+    bPh.style.cssText = `background:${phOk?'var(--green-bg)':'var(--red-bg)'}; color:${phOk?'var(--green)':'var(--red)'}; border-color:${phOk?'var(--green-bd)':'var(--red-bd)'};`;
+  }
+
+  // UPDATE SENSOR TURBIDITY
+  const turb = Math.round(data.turbidity || 0);
+  const turbOk = (turb <= 53);
+  const rtTurb = document.getElementById('rt-turb');
+  if(rtTurb) rtTurb.textContent = turb;
+  const bTurb = document.getElementById('badge-turb');
+  if(bTurb){
+    bTurb.textContent = turbOk ? 'Status: Jernih' : 'Status: Keruh';
+    bTurb.style.cssText = `background:${turbOk?'var(--green-bg)':'var(--amber-bg)'}; color:${turbOk?'var(--green)':'var(--amber)'}; border-color:${turbOk?'var(--green-bd)':'var(--amber-bd)'};`;
+  }
+
+  // UPDATE KETINGGIAN AIR
+  const level = Math.round(data.tinggiAir || 0);
+  const rtLevel = document.getElementById('rt-level');
+  if(rtLevel) rtLevel.textContent = level;
+  const bLevel = document.getElementById('badge-level');
+  if(bLevel){
+    if (level <= 40) {
+      bLevel.textContent = 'Status: Habis';
+      bLevel.style.cssText = `background:var(--red-bg); color:var(--red); border-color:var(--red-bd);`;
+    } else if (level > 68) {
+      bLevel.textContent = 'Status: Penuh';
+      bLevel.style.cssText = `background:var(--amber-bg); color:var(--amber); border-color:var(--amber-bd);`;
+    } else {
+      bLevel.textContent = 'Status: Aman';
+      bLevel.style.cssText = `background:var(--blue-bg); color:var(--blue); border-color:var(--blue-bd);`;
+    }
+  }
+
+  // UPDATE POMPA KURAS & STOPWATCH
+  const pKuras = data.pompa_kuras || 'OFF';
+  const bKuras = document.getElementById('badge-kuras');
+  window.isKurasOtomatisON = (pKuras === 'ON');
+  window.localKurasDurasi = window.isKurasOtomatisON ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
+  if(bKuras){
+    bKuras.textContent = pKuras;
+    bKuras.style.cssText = `background:${window.isKurasOtomatisON?'var(--red-bg)':'var(--surface-2)'}; color:${window.isKurasOtomatisON?'var(--red)':'var(--text-3)'}; border-color:${window.isKurasOtomatisON?'var(--red-bd)':'var(--border)'};`;
+  }
+  const dk = document.getElementById('durasi-kuras');
+  if(dk) dk.innerHTML = `<i class="${window.isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isKurasOtomatisON?'color:var(--red);':''}"></i> ${formatStopwatch(window.localKurasDurasi)}`;
+
+  // UPDATE POMPA ISI & STOPWATCH
+  const pIsi = data.pompa_isi || 'OFF';
+  const bIsi = document.getElementById('badge-isi');
+  window.isIsiOtomatisON = (pIsi === 'ON');
+  window.localIsiDurasi = window.isIsiOtomatisON ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
+  if(bIsi){
+    bIsi.textContent = pIsi;
+    bIsi.style.cssText = `background:${window.isIsiOtomatisON?'var(--blue-bg)':'var(--surface-2)'}; color:${window.isIsiOtomatisON?'var(--blue)':'var(--text-3)'}; border-color:${window.isIsiOtomatisON?'var(--blue-bd)':'var(--border)'};`;
+  }
+  const di = document.getElementById('durasi-isi');
+  if(di) di.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> ${formatStopwatch(window.localIsiDurasi)}`;
+});
 </script>
 </body>
 </html>
