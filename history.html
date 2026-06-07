@@ -203,9 +203,7 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
             <th>pH Level</th>
             <th>Turbidity</th>
             <th>Water Level</th>
-            <th>Pompa Kuras</th>
-            <th>Pompa Isi</th>
-            <th class="center">Action</th>
+            <th>Durasi Kuras</th> <th>Durasi Isi</th>   <th class="center">Action</th>
           </tr>
         </thead>
         <tbody id="table-body"></tbody>
@@ -285,10 +283,12 @@ window.resetWaktu=function(){
   window.filterWaktu();
 };
 
-/* EXPORT CSV */
+/* EXPORT CSV - HANYA DURASI SAJA */
 function unduhCSV(){
   const rows=document.querySelectorAll('#table-body tr[data-date]');
-  let csv='Timestamp;Date;pH;Turbidity_NTU;WaterLevel_cm;Status_Kuras;Durasi_Kuras_Detik;Status_Isi;Durasi_Isi_Detik\n';let n=0;
+  // Kolom diubah menjadi lebih simpel
+  let csv='"Timestamp";"Date";"pH";"Turbidity_NTU";"WaterLevel_cm";"Durasi_Kuras";"Durasi_Isi"\n';
+  let n=0;
   rows.forEach(tr=>{
     if(tr.style.display==='none')return;
     const cells=tr.querySelectorAll('td');
@@ -299,12 +299,19 @@ function unduhCSV(){
     const tb=cells[3].querySelector('.td-val')?.textContent.trim()||cells[3].textContent.trim();
     const lv=cells[4].querySelector('.td-val')?.textContent.trim()||cells[4].textContent.trim();
     
+    // Ambil data attribut yang disembunyikan di <tr>
     const kurasStat = tr.getAttribute('data-kuras-stat') || 'OFF';
     const kurasDur = tr.getAttribute('data-kuras-dur') || 0;
     const isiStat = tr.getAttribute('data-isi-stat') || 'OFF';
     const isiDur = tr.getAttribute('data-isi-dur') || 0;
 
-    csv+=`"${ts}";"${dt}";"${ph}";"${tb}";"${lv}";"${kurasStat}";"${kurasDur}";"${isiStat}";"${isiDur}"\n`;n++;
+    // Logika: Jika ON tampilkan durasi asli, jika OFF tampilkan 0s
+    const formatKuras = kurasStat === 'ON' ? formatDur(kurasDur) : '0s';
+    const formatIsi = isiStat === 'ON' ? formatDur(isiDur) : '0s';
+
+    // Ekspor ke CSV dengan pemisah titik koma (;)
+    csv+=`"${ts}";"${dt}";"${ph}";"${tb}";"${lv}";"${formatKuras}";"${formatIsi}"\n`;
+    n++;
   });
   if(n===0){alert('Tidak ada data untuk diunduh.');return;}
   const tgl=document.getElementById('filter-tanggal').value||new Date().toISOString().slice(0,10);
@@ -360,12 +367,12 @@ window.muatDataDariFirebase=function(tgl){
       const phOk=ph>=6.5&&ph<=8.5;
       const phBadge=`<span class="row-badge" style="background:${phOk?'var(--green-bg)':'var(--red-bg)'};color:${phOk?'var(--green)':'var(--red)'};border-color:${phOk?'var(--green-bd)':'var(--red-bd)'};">${phOk?'Optimal':'Critical'}</span>`;
 
-      // LOGIKA & INDIKATOR TURBIDITY (<= 53)
+      // LOGIKA & INDIKATOR TURBIDITY
       const tb=Math.round(d.turbidity||0);
       const tbOk=tb <= 53; 
       const tbBadge=`<span class="row-badge" style="background:${tbOk?'var(--green-bg)':'var(--orange-bg)'};color:${tbOk?'var(--green)':'var(--orange)'};border-color:${tbOk?'var(--green-bd)':'var(--orange-bd)'};">${tbOk?'Jernih':'Keruh'}</span>`;
 
-      // LOGIKA & INDIKATOR TINGGI AIR (40 & 68)
+      // LOGIKA & INDIKATOR TINGGI AIR
       const lv=Math.round(d.tinggiAir||0);
       let lvBg, lvColor, lvBd, lvText;
       if (lv <= 40) {
@@ -377,44 +384,34 @@ window.muatDataDariFirebase=function(tgl){
       }
       const lvBadge=`<span class="row-badge" style="background:${lvBg};color:${lvColor};border-color:${lvBd};">${lvText}</span>`;
 
-      // Status & Durasi Pompa Kuras
+      // LOGIKA DURASI POMPA (DISEDERHANAKAN UNTUK TAMPILAN TABEL)
       const pKuras = d.pompa_kuras || 'OFF';
-      const durKuras = pKuras === 'ON' ? (d.durasi_kuras_ON_detik||0) : (d.durasi_kuras_OFF_detik||0);
-      const bgKuras = pKuras === 'ON' ? 'var(--red-bg)' : 'var(--surface-2)';
-      const colorKuras = pKuras === 'ON' ? 'var(--red)' : 'var(--text-3)';
-      const borderKuras = pKuras === 'ON' ? 'var(--red-bd)' : 'var(--border)';
+      const durKuras = pKuras === 'ON' ? (d.durasi_kuras_ON_detik||0) : 0;
+      const textKuras = pKuras === 'ON' ? formatDur(durKuras) : '0s';
 
-      // Status & Durasi Pompa Isi
       const pIsi = d.pompa_isi || 'OFF';
-      const durIsi = pIsi === 'ON' ? (d.durasi_isi_ON_detik||0) : (d.durasi_isi_OFF_detik||0);
-      const bgIsi = pIsi === 'ON' ? 'var(--blue-bg)' : 'var(--surface-2)';
-      const colorIsi = pIsi === 'ON' ? 'var(--blue)' : 'var(--text-3)';
-      const borderIsi = pIsi === 'ON' ? 'var(--blue-bd)' : 'var(--border)';
+      const durIsi = pIsi === 'ON' ? (d.durasi_isi_ON_detik||0) : 0;
+      const textIsi = pIsi === 'ON' ? formatDur(durIsi) : '0s';
 
       const tr=document.createElement('tr');
       tr.setAttribute('data-date',tgl);
       tr.setAttribute('data-time',jam);
       
-      // Simpan data pompa ke atribut tr untuk diekspor ke CSV
+      // Simpan data pompa ke atribut tr untuk diekspor ke CSV nantinya
       tr.setAttribute('data-kuras-stat', pKuras);
       tr.setAttribute('data-kuras-dur', durKuras);
       tr.setAttribute('data-isi-stat', pIsi);
       tr.setAttribute('data-isi-dur', durIsi);
 
+      // TAMPILAN DI TABEL HTML (SEKARANG HANYA TEKS DURASI)
       tr.innerHTML=`
         <td class="td-mono">${jam}</td>
         <td>${tglTampil}</td>
         <td><span class="td-val">${ph.toFixed(2)}</span>${phBadge}</td>
         <td><span class="td-val">${tb}</span><span class="td-unit">NTU</span>${tbBadge}</td>
         <td><span class="td-val">${lv}</span><span class="td-unit">cm</span>${lvBadge}</td>
-        <td>
-          <span class="row-badge" style="background:${bgKuras};color:${colorKuras};border-color:${borderKuras};margin-left:0;">${pKuras}</span>
-          <span class="td-mono" style="margin-left:6px;">${formatDur(durKuras)}</span>
-        </td>
-        <td>
-          <span class="row-badge" style="background:${bgIsi};color:${colorIsi};border-color:${borderIsi};margin-left:0;">${pIsi}</span>
-          <span class="td-mono" style="margin-left:6px;">${formatDur(durIsi)}</span>
-        </td>
+        <td class="td-mono">${textKuras}</td>
+        <td class="td-mono">${textIsi}</td>
         <td class="td-center"><button onclick="hapusDataLog('${d._key}')" class="del-btn" title="Hapus baris"><i class="fa-solid fa-trash-can"></i></button></td>`;
       tbody.appendChild(tr);
     });
