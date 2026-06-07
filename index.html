@@ -183,15 +183,29 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 
 /* ── REAL-TIME DASHBOARD COMPONENT STYLES ── */
 .grid-rt{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;}
-.rt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:16px;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+.rt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:16px;display:flex;flex-direction:column;box-shadow:var(--shadow);transition:all .3s ease;}
+.rt-card.active{border-color:currentColor;box-shadow:0 4px 12px rgba(0,0,0,0.08);}
 .rt-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
 .rt-card-title{font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
-.rt-card-icon{width:32px;height:32px;border-radius:var(--r-m);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:14px;}
+.rt-card-icon{width:32px;height:32px;border-radius:var(--r-m);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:14px;transition:all .3s ease;}
+.rt-card.active .rt-card-icon{color:currentColor;}
 .rt-card-val{font-size:28px;font-weight:600;color:var(--text-1);line-height:1;}
 .rt-card-unit{font-size:12px;font-weight:500;color:var(--text-3);margin-left:4px;}
 .rt-card-bottom{margin-top:auto;padding-top:12px;}
 .rt-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:6px;border:1px solid;}
 .rt-stopwatch{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text-2);margin-top:6px;display:flex;align-items:center;gap:6px;}
+
+/* Pump Status Indicator Styling */
+.pump-status-display { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 0; }
+.pump-status-text { font-size: 24px; font-weight: 700; letter-spacing: 0.05em; transition: color 0.3s ease; }
+.pump-status-pulse { position: absolute; top: 16px; right: 16px; width: 12px; height: 12px; border-radius: 50%; opacity: 0; }
+.pump-status-pulse.active { opacity: 1; animation: pump-active-pulse 1.5s infinite; }
+@keyframes pump-active-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(var(--rgb-color), 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(var(--rgb-color), 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(var(--rgb-color), 0); }
+}
+
 </style>
 </head>
 <body>
@@ -448,20 +462,26 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
       <div><span class="rt-card-val" id="rt-level">--</span><span class="rt-card-unit">cm</span></div>
       <div class="rt-card-bottom"><span class="rt-badge" id="badge-level" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
     </div>
-    <div class="rt-card">
-      <div class="rt-card-top"><span class="rt-card-title">Pompa Kuras</span><div class="rt-card-icon"><i class="fa-solid fa-arrow-up-from-water-pump"></i></div></div>
-      <div><span class="rt-badge" id="badge-kuras" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:13px;padding:5px 10px;">OFF</span></div>
+    <div class="rt-card" id="rt-card-kuras" style="--rgb-color:239, 68, 68;">
+      <div class="pump-status-pulse" id="pulse-kuras" style="background-color: var(--red);"></div>
+      <div class="rt-card-top"><span class="rt-card-title">Pompa Kuras</span><div class="rt-card-icon" id="rt-icon-kuras"><i class="fa-solid fa-arrow-up-from-water-pump"></i></div></div>
+      <div class="pump-status-display">
+        <span class="pump-status-text" id="rt-status-kuras" style="color:var(--text-3);">OFF</span>
+      </div>
       <div class="rt-card-bottom">
-        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;">Durasi Realtime</div>
-        <div class="rt-stopwatch" id="durasi-kuras"><i class="fa-regular fa-clock"></i> 0s</div>
+        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;text-align:center;">Durasi Aktif</div>
+        <div class="rt-stopwatch" id="durasi-kuras" style="justify-content:center;"><i class="fa-regular fa-clock"></i> 0s</div>
       </div>
     </div>
-    <div class="rt-card">
-      <div class="rt-card-top"><span class="rt-card-title">Pompa Isi</span><div class="rt-card-icon"><i class="fa-solid fa-faucet-drip"></i></div></div>
-      <div><span class="rt-badge" id="badge-isi" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:13px;padding:5px 10px;">OFF</span></div>
+    <div class="rt-card" id="rt-card-isi" style="--rgb-color:59, 130, 246;">
+      <div class="pump-status-pulse" id="pulse-isi" style="background-color: var(--blue);"></div>
+      <div class="rt-card-top"><span class="rt-card-title">Pompa Isi</span><div class="rt-card-icon" id="rt-icon-isi"><i class="fa-solid fa-faucet-drip"></i></div></div>
+      <div class="pump-status-display">
+        <span class="pump-status-text" id="rt-status-isi" style="color:var(--text-3);">OFF</span>
+      </div>
       <div class="rt-card-bottom">
-        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;">Durasi Realtime</div>
-        <div class="rt-stopwatch" id="durasi-isi"><i class="fa-regular fa-clock"></i> 0s</div>
+        <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;text-align:center;">Durasi Aktif</div>
+        <div class="rt-stopwatch" id="durasi-isi" style="justify-content:center;"><i class="fa-regular fa-clock"></i> 0s</div>
       </div>
     </div>
   </div>
@@ -565,12 +585,12 @@ setInterval(() => {
   if (window.isKurasOtomatisON) {
     window.localKurasDurasi++;
     const e = document.getElementById('durasi-kuras');
-    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--red);"></i> ${formatStopwatch(window.localKurasDurasi)}`;
+    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--red);"></i> <span style="font-weight:600;">${formatStopwatch(window.localKurasDurasi)}</span>`;
   }
   if (window.isIsiOtomatisON) {
     window.localIsiDurasi++;
     const e = document.getElementById('durasi-isi');
-    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--blue);"></i> ${formatStopwatch(window.localIsiDurasi)}`;
+    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--blue);"></i> <span style="font-weight:600;">${formatStopwatch(window.localIsiDurasi)}</span>`;
   }
 }, 1000);
 </script>
@@ -837,7 +857,6 @@ window.downloadHarianCSV=async function(){
   try{
     const snap=await get(ref(db,'SistemAir_Log/'+tgl));
     if(snap.exists()){
-      // Mengubah pemisah kolom menjadi titik koma (;) agar otomatis rapi di Excel regional Indonesia
       let csv='Waktu;pH;Kekeruhan_NTU;Tinggi_Air_CM;Status_Kuras;Durasi_Kuras_Detik;Status_Isi;Durasi_Isi_Detik\n';
       let count=0;
       snap.forEach(child=>{
@@ -849,7 +868,6 @@ window.downloadHarianCSV=async function(){
         const pIsi = r.pompa_isi || 'OFF';
         const dIsi = pIsi === 'ON' ? (r.durasi_isi_ON_detik || 0) : (r.durasi_isi_OFF_detik || 0);
 
-        // Menambahkan tanda kutip ("") agar aman jika ada angka dengan koma
         csv+=`"${t}";"${r.pH}";"${r.turbidity}";"${r.tinggiAir}";"${pKuras}";"${dKuras}";"${pIsi}";"${dIsi}"\n`;
         count++;
       });
@@ -911,29 +929,61 @@ onValue(ref(db, 'SistemAir'), (snapshot) => {
     }
   }
 
-  // UPDATE POMPA KURAS & STOPWATCH
+  // UPDATE POMPA KURAS & STOPWATCH (DIPERJELAS)
   const pKuras = data.pompa_kuras || 'OFF';
-  const bKuras = document.getElementById('badge-kuras');
   window.isKurasOtomatisON = (pKuras === 'ON');
   window.localKurasDurasi = window.isKurasOtomatisON ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
-  if(bKuras){
-    bKuras.textContent = pKuras;
-    bKuras.style.cssText = `background:${window.isKurasOtomatisON?'var(--red-bg)':'var(--surface-2)'}; color:${window.isKurasOtomatisON?'var(--red)':'var(--text-3)'}; border-color:${window.isKurasOtomatisON?'var(--red-bd)':'var(--border)'};`;
+  
+  const cKuras = document.getElementById('rt-card-kuras');
+  const sKuras = document.getElementById('rt-status-kuras');
+  const pKurasPulse = document.getElementById('pulse-kuras');
+  
+  if (cKuras && sKuras && pKurasPulse) {
+    if (window.isKurasOtomatisON) {
+      cKuras.classList.add('active');
+      cKuras.style.borderColor = 'var(--red)';
+      sKuras.textContent = 'ON';
+      sKuras.style.color = 'var(--red)';
+      pKurasPulse.classList.add('active');
+    } else {
+      cKuras.classList.remove('active');
+      cKuras.style.borderColor = 'var(--border)';
+      sKuras.textContent = 'OFF';
+      sKuras.style.color = 'var(--text-3)';
+      pKurasPulse.classList.remove('active');
+    }
   }
+  
   const dk = document.getElementById('durasi-kuras');
-  if(dk) dk.innerHTML = `<i class="${window.isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isKurasOtomatisON?'color:var(--red);':''}"></i> ${formatStopwatch(window.localKurasDurasi)}`;
+  if(dk) dk.innerHTML = `<i class="${window.isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isKurasOtomatisON?'color:var(--red);':''}"></i> <span style="${window.isKurasOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localKurasDurasi)}</span>`;
 
-  // UPDATE POMPA ISI & STOPWATCH
+  // UPDATE POMPA ISI & STOPWATCH (DIPERJELAS)
   const pIsi = data.pompa_isi || 'OFF';
-  const bIsi = document.getElementById('badge-isi');
   window.isIsiOtomatisON = (pIsi === 'ON');
   window.localIsiDurasi = window.isIsiOtomatisON ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
-  if(bIsi){
-    bIsi.textContent = pIsi;
-    bIsi.style.cssText = `background:${window.isIsiOtomatisON?'var(--blue-bg)':'var(--surface-2)'}; color:${window.isIsiOtomatisON?'var(--blue)':'var(--text-3)'}; border-color:${window.isIsiOtomatisON?'var(--blue-bd)':'var(--border)'};`;
+  
+  const cIsi = document.getElementById('rt-card-isi');
+  const sIsi = document.getElementById('rt-status-isi');
+  const pIsiPulse = document.getElementById('pulse-isi');
+
+  if (cIsi && sIsi && pIsiPulse) {
+    if (window.isIsiOtomatisON) {
+      cIsi.classList.add('active');
+      cIsi.style.borderColor = 'var(--blue)';
+      sIsi.textContent = 'ON';
+      sIsi.style.color = 'var(--blue)';
+      pIsiPulse.classList.add('active');
+    } else {
+      cIsi.classList.remove('active');
+      cIsi.style.borderColor = 'var(--border)';
+      sIsi.textContent = 'OFF';
+      sIsi.style.color = 'var(--text-3)';
+      pIsiPulse.classList.remove('active');
+    }
   }
+
   const di = document.getElementById('durasi-isi');
-  if(di) di.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> ${formatStopwatch(window.localIsiDurasi)}`;
+  if(di) di.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> <span style="${window.isIsiOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localIsiDurasi)}</span>`;
 });
 </script>
 </body>
