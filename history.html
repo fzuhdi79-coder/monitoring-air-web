@@ -20,6 +20,7 @@ html,body{height:100%;}
   --green:#15803d;--green-bg:#f0fdf4;--green-bd:#bbf7d0;
   --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
   --red:#b91c1c;--red-bg:#fff5f5;--red-bd:#fecaca;
+  --orange:#c2410c;--orange-bg:#fff7ed;--orange-bd:#fed7aa;
 }
 [data-theme="dark"]{
   --bg:#111110;--surface:#1a1a18;--surface-2:#202020;
@@ -98,9 +99,9 @@ tbody tr:last-child{border-bottom:none;}
 tbody td{padding:11px 14px;font-size:13px;color:var(--text-2);white-space:nowrap;}
 .td-mono{font-family:var(--mono);font-size:12px;color:var(--text-3);}
 .td-val{font-weight:600;color:var(--text-1);}
-.td-unit{font-size:12px;font-weight:400;color:var(--text-3);margin-left:2px;}
+.td-unit{font-size:12px;font-weight:400;color:var(--text-3);margin-left:2px;margin-right:8px;}
 .td-center{text-align:center;}
-.row-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid;margin-left:8px;vertical-align:middle;}
+.row-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid;vertical-align:middle;}
 .del-btn{width:28px;height:28px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-3);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .14s;font-size:11px;}
 .del-btn:hover{background:var(--red-bg);border-color:var(--red-bd);color:var(--red);}
 
@@ -126,7 +127,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="brand">
@@ -158,7 +158,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
   </div>
 </nav>
 
-<!-- MAIN -->
 <main class="page">
 
   <div class="pg-header">
@@ -167,14 +166,12 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
   </div>
 
   <div class="table-card">
-    <!-- Toolbar -->
     <div class="table-toolbar">
       <div class="toolbar-left">
         <span class="toolbar-title">Daily Records</span>
         <span class="count-badge" id="total-data-badge">0 data</span>
       </div>
       <div class="toolbar-right">
-        <!-- Filter bar -->
         <div class="filter-bar">
           <div class="filter-seg">
             <i class="fa-regular fa-calendar" style="font-size:10px;color:var(--text-3);"></i>
@@ -199,7 +196,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
       </div>
     </div>
 
-    <!-- Table -->
     <div class="tbl-wrap">
       <table id="tabel-log">
         <thead>
@@ -366,9 +362,28 @@ window.muatDataDariFirebase=function(tgl){
       const dt=d.timestamp?new Date(d.timestamp*1000):new Date();
       const jam=String(dt.getHours()).padStart(2,'0')+':'+String(dt.getMinutes()).padStart(2,'0')+':'+String(dt.getSeconds()).padStart(2,'0');
       const tglTampil=dt.toLocaleDateString('id-ID',{year:'numeric',month:'2-digit',day:'2-digit'});
+      
+      // LOGIKA & INDIKATOR pH
       const ph=d.pH||0;
       const phOk=ph>=6.5&&ph<=8.5;
       const phBadge=`<span class="row-badge" style="background:${phOk?'var(--green-bg)':'var(--red-bg)'};color:${phOk?'var(--green)':'var(--red)'};border-color:${phOk?'var(--green-bd)':'var(--red-bd)'};">${phOk?'Optimal':'Critical'}</span>`;
+
+      // LOGIKA & INDIKATOR TURBIDITY (< 30)
+      const tb=Math.round(d.turbidity||0);
+      const tbOk=tb < 30; 
+      const tbBadge=`<span class="row-badge" style="background:${tbOk?'var(--green-bg)':'var(--orange-bg)'};color:${tbOk?'var(--green)':'var(--orange)'};border-color:${tbOk?'var(--green-bd)':'var(--orange-bd)'};">${tbOk?'Jernih':'Keruh'}</span>`;
+
+      // LOGIKA & INDIKATOR TINGGI AIR (0-40, 41-68, >68)
+      const lv=Math.round(d.tinggiAir||0);
+      let lvBg, lvColor, lvBd, lvText;
+      if (lv <= 40) {
+        lvBg = 'var(--red-bg)'; lvColor = 'var(--red)'; lvBd = 'var(--red-bd)'; lvText = 'Habis';
+      } else if (lv > 68) {
+        lvBg = 'var(--orange-bg)'; lvColor = 'var(--orange)'; lvBd = 'var(--orange-bd)'; lvText = 'Penuh';
+      } else {
+        lvBg = 'var(--green-bg)'; lvColor = 'var(--green)'; lvBd = 'var(--green-bd)'; lvText = 'Aman';
+      }
+      const lvBadge=`<span class="row-badge" style="background:${lvBg};color:${lvColor};border-color:${lvBd};">${lvText}</span>`;
 
       // Status & Durasi Pompa Kuras
       const pKuras = d.pompa_kuras || 'OFF';
@@ -398,8 +413,8 @@ window.muatDataDariFirebase=function(tgl){
         <td class="td-mono">${jam}</td>
         <td>${tglTampil}</td>
         <td><span class="td-val">${ph.toFixed(2)}</span>${phBadge}</td>
-        <td><span class="td-val">${Math.round(d.turbidity||0)}</span><span class="td-unit">NTU</span></td>
-        <td><span class="td-val">${Math.round(d.tinggiAir||0)}</span><span class="td-unit">cm</span></td>
+        <td><span class="td-val">${tb}</span><span class="td-unit">NTU</span>${tbBadge}</td>
+        <td><span class="td-val">${lv}</span><span class="td-unit">cm</span>${lvBadge}</td>
         <td>
           <span class="row-badge" style="background:${bgKuras};color:${colorKuras};border-color:${borderKuras};margin-left:0;">${pKuras}</span>
           <span class="td-mono" style="margin-left:6px;">${formatDur(durKuras)}</span>
