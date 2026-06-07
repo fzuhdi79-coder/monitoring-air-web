@@ -929,19 +929,23 @@ onValue(ref(db, 'SistemAir'), (snapshot) => {
     }
   }
 
-  // UPDATE POMPA KURAS & STOPWATCH (DIPERJELAS)
+// ==========================================
+  // UPDATE POMPA KURAS & STOPWATCH
+  // ==========================================
   const pKuras = data.pompa_kuras || 'OFF';
   window.isKurasOtomatisON = (pKuras === 'ON');
   window.localKurasDurasi = window.isKurasOtomatisON ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
-  
+
+  // Perbarui tampilan UI/Warna (Sesuaikan dengan ID elemen Anda)
   const cKuras = document.getElementById('rt-card-kuras');
   const sKuras = document.getElementById('rt-status-kuras');
   const pKurasPulse = document.getElementById('pulse-kuras');
-  
+  const elemenDurasiKuras = document.getElementById('durasi-kuras'); // Elemen teks angkanya
+
   if (cKuras && sKuras && pKurasPulse) {
     if (window.isKurasOtomatisON) {
       cKuras.classList.add('active');
-      cKuras.style.borderColor = 'var(--red)';
+      cKuras.style.borderColor = 'var(--red-bd)';
       sKuras.textContent = 'ON';
       sKuras.style.color = 'var(--red)';
       pKurasPulse.classList.add('active');
@@ -953,11 +957,27 @@ onValue(ref(db, 'SistemAir'), (snapshot) => {
       pKurasPulse.classList.remove('active');
     }
   }
-  
-  const dk = document.getElementById('durasi-kuras');
-  if(dk) dk.innerHTML = `<i class="${window.isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isKurasOtomatisON?'color:var(--red);':''}"></i> <span style="${window.isKurasOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localKurasDurasi)}</span>`;
 
-  // UPDATE POMPA ISI & STOPWATCH (DIPERJELAS)
+  // Tulis angka durasi dari Firebase
+  if (elemenDurasiKuras) {
+    elemenDurasiKuras.innerHTML = `<i class="${window.isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isKurasOtomatisON?'color:var(--red);':''}"></i> <span style="${window.isKurasOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localKurasDurasi)}</span>`;
+  }
+
+  // --- TRIK REALTIME UI (DETIK BUATAN) UNTUK KURAS ---
+  if (window.intervalKuras) clearInterval(window.intervalKuras); // Hapus timer lama
+  if (window.isKurasOtomatisON) {
+    window.intervalKuras = setInterval(() => {
+      window.localKurasDurasi++; // Tambah 1 detik di web
+      if (elemenDurasiKuras) {
+        elemenDurasiKuras.innerHTML = `<i class="fa-solid fa-clock" style="color:var(--red);"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(window.localKurasDurasi)}</span>`;
+      }
+    }, 1000); // Berdetak setiap 1000ms (1 detik)
+  }
+
+
+  // ==========================================
+  // UPDATE POMPA ISI & STOPWATCH
+  // ==========================================
   const pIsi = data.pompa_isi || 'OFF';
   window.isIsiOtomatisON = (pIsi === 'ON');
   window.localIsiDurasi = window.isIsiOtomatisON ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
@@ -965,6 +985,7 @@ onValue(ref(db, 'SistemAir'), (snapshot) => {
   const cIsi = document.getElementById('rt-card-isi');
   const sIsi = document.getElementById('rt-status-isi');
   const pIsiPulse = document.getElementById('pulse-isi');
+  const elemenDurasiIsi = document.getElementById('durasi-isi'); // Elemen teks angkanya
 
   if (cIsi && sIsi && pIsiPulse) {
     if (window.isIsiOtomatisON) {
@@ -980,6 +1001,22 @@ onValue(ref(db, 'SistemAir'), (snapshot) => {
       sIsi.style.color = 'var(--text-3)';
       pIsiPulse.classList.remove('active');
     }
+  }
+
+  // Tulis angka durasi dari Firebase
+  if (elemenDurasiIsi) {
+    elemenDurasiIsi.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> <span style="${window.isIsiOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localIsiDurasi)}</span>`;
+  }
+
+  // --- TRIK REALTIME UI (DETIK BUATAN) UNTUK ISI ---
+  if (window.intervalIsi) clearInterval(window.intervalIsi); // Hapus timer lama
+  if (window.isIsiOtomatisON) {
+    window.intervalIsi = setInterval(() => {
+      window.localIsiDurasi++; // Tambah 1 detik di web
+      if (elemenDurasiIsi) {
+        elemenDurasiIsi.innerHTML = `<i class="fa-solid fa-clock" style="color:var(--blue);"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(window.localIsiDurasi)}</span>`;
+      }
+    }, 1000);
   }
 
   const di = document.getElementById('durasi-isi');
