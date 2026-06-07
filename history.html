@@ -18,8 +18,8 @@ html,body{height:100%;}
   --r-s:6px;--r-m:10px;--r-l:14px;
   --shadow:0 1px 4px rgba(0,0,0,.06);
   --green:#15803d;--green-bg:#f0fdf4;--green-bd:#bbf7d0;
-  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
   --red:#b91c1c;--red-bg:#fff5f5;--red-bd:#fecaca;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
   --orange:#c2410c;--orange-bg:#fff7ed;--orange-bd:#fed7aa;
 }
 [data-theme="dark"]{
@@ -115,13 +115,11 @@ tbody td{padding:11px 14px;font-size:13px;color:var(--text-2);white-space:nowrap
 footer{border-top:1px solid var(--border);background:var(--surface);padding:14px 24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:auto;}
 
 /* RESPONSIVE */
-@media(max-width:900px){
-  .table-toolbar{flex-direction:column;align-items:flex-start;}
-}
 @media(max-width:768px){
   .nav-tabs,.nav-clock,.ghost-btn{display:none!important;}
   .hbtn{display:flex;}
   .page{padding:16px 16px 48px;gap:16px;}
+  .table-toolbar{flex-direction:column;align-items:flex-start;}
 }
 </style>
 </head>
@@ -162,7 +160,7 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 
   <div class="pg-header">
     <div class="pg-title">Data Log</div>
-    <div class="pg-sub">Riwayat parameter dan pompa harian. Maksimal 2.880 data per hari.</div>
+    <div class="pg-sub">Riwayat parameter harian. Maksimal 2.880 data per hari.</div>
   </div>
 
   <div class="table-card">
@@ -252,7 +250,7 @@ document.getElementById('hbtn').addEventListener('click',()=>{
 
 function logout(){sessionStorage.removeItem('statusLogin');window.location.href='login.html';}
 
-/* FILTER WAKWU */
+/* FILTER WAKTU */
 window.filterWaktu=function(){
   const s=document.getElementById('filter-waktu-mulai').value;
   const e=document.getElementById('filter-waktu-selesai').value;
@@ -290,31 +288,24 @@ window.resetWaktu=function(){
 /* EXPORT CSV */
 function unduhCSV(){
   const rows=document.querySelectorAll('#table-body tr[data-date]');
-  // Pemisah diubah menggunakan titik koma (;) agar otomatis rapi di Excel regional Indonesia
-  let csv='Timestamp;Date;pH;Turbidity_NTU;WaterLevel_cm;Status_Kuras;Durasi_Kuras_Detik;Status_Isi;Durasi_Isi_Detik\n';
-  let n=0;
-  
+  let csv='Timestamp;Date;pH;Turbidity_NTU;WaterLevel_cm;Status_Kuras;Durasi_Kuras_Detik;Status_Isi;Durasi_Isi_Detik\n';let n=0;
   rows.forEach(tr=>{
     if(tr.style.display==='none')return;
     const cells=tr.querySelectorAll('td');
-    if(cells.length<8)return; // Pastikan kolom lengkap
-    
+    if(cells.length<8)return;
     const ts=cells[0].textContent.trim();
     const dt=cells[1].textContent.trim();
     const ph=cells[2].querySelector('.td-val')?.textContent.trim()||cells[2].textContent.trim();
     const tb=cells[3].querySelector('.td-val')?.textContent.trim()||cells[3].textContent.trim();
     const lv=cells[4].querySelector('.td-val')?.textContent.trim()||cells[4].textContent.trim();
     
-    // Ambil data pompa dari atribut elemen tr
     const kurasStat = tr.getAttribute('data-kuras-stat') || 'OFF';
     const kurasDur = tr.getAttribute('data-kuras-dur') || 0;
     const isiStat = tr.getAttribute('data-isi-stat') || 'OFF';
     const isiDur = tr.getAttribute('data-isi-dur') || 0;
 
-    csv+=`"${ts}";"${dt}";"${ph}";"${tb}";"${lv}";"${kurasStat}";"${kurasDur}";"${isiStat}";"${isiDur}"\n`;
-    n++;
+    csv+=`"${ts}";"${dt}";"${ph}";"${tb}";"${lv}";"${kurasStat}";"${kurasDur}";"${isiStat}";"${isiDur}"\n`;n++;
   });
-  
   if(n===0){alert('Tidak ada data untuk diunduh.');return;}
   const tgl=document.getElementById('filter-tanggal').value||new Date().toISOString().slice(0,10);
   const a=document.createElement('a');
@@ -369,12 +360,12 @@ window.muatDataDariFirebase=function(tgl){
       const phOk=ph>=6.5&&ph<=8.5;
       const phBadge=`<span class="row-badge" style="background:${phOk?'var(--green-bg)':'var(--red-bg)'};color:${phOk?'var(--green)':'var(--red)'};border-color:${phOk?'var(--green-bd)':'var(--red-bd)'};">${phOk?'Optimal':'Critical'}</span>`;
 
-      // LOGIKA & INDIKATOR TURBIDITY (< 30)
+      // LOGIKA & INDIKATOR TURBIDITY (<= 53)
       const tb=Math.round(d.turbidity||0);
-      const tbOk=tb < 30; 
+      const tbOk=tb <= 53; 
       const tbBadge=`<span class="row-badge" style="background:${tbOk?'var(--green-bg)':'var(--orange-bg)'};color:${tbOk?'var(--green)':'var(--orange)'};border-color:${tbOk?'var(--green-bd)':'var(--orange-bd)'};">${tbOk?'Jernih':'Keruh'}</span>`;
 
-      // LOGIKA & INDIKATOR TINGGI AIR (0-40, 41-68, >68)
+      // LOGIKA & INDIKATOR TINGGI AIR (40 & 68)
       const lv=Math.round(d.tinggiAir||0);
       let lvBg, lvColor, lvBd, lvText;
       if (lv <= 40) {
@@ -404,7 +395,7 @@ window.muatDataDariFirebase=function(tgl){
       tr.setAttribute('data-date',tgl);
       tr.setAttribute('data-time',jam);
       
-      // Inject atribut pompa untuk ekspor CSV
+      // Simpan data pompa ke atribut tr untuk diekspor ke CSV
       tr.setAttribute('data-kuras-stat', pKuras);
       tr.setAttribute('data-kuras-dur', durKuras);
       tr.setAttribute('data-isi-stat', pIsi);
