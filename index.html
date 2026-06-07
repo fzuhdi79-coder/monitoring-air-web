@@ -678,38 +678,31 @@ const cIsi=new Chart(document.getElementById('chart-pompa-isi').getContext('2d')
   options:pOpts
 });
 
-/* LOAD HISTORY */
+/* ─────────────────────────────────────────
+   LOAD HISTORY (20 data terakhir hari ini)
+───────────────────────────────────────── */
 get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
   if(!snap.exists())return;
   let lph=[],dph=[],ltb=[],dtb=[],llv=[],dlv=[],lk=[],dk=[],li=[],di=[];
-  dataHistory = [];
+  dataHistory=[];
   snap.forEach(child=>{
     const d=child.val();
     lph.push('');dph.push(d.pH||0);
     ltb.push('');dtb.push(d.turbidity||0);
     llv.push('');dlv.push(d.tinggiAir||0);
     const t=new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
-    
-    // --- PERBAIKAN CADANGAN DATA LAMA ---
-    // Jika tidak ada data pompa_kuras (karena data lama), baca dari statusSistem
-    const statLama = d.statusSistem || d.pompaStatus || '';
-    const pk = d.pompa_kuras || (statLama === 'KURAS' ? 'ON' : 'OFF');
-    const pi = d.pompa_isi || (statLama === 'ISI' ? 'ON' : 'OFF');
-    
+    const pk=d.pompa_kuras||'OFF';
+    const pi=d.pompa_isi||'OFF';
     lk.push(t);dk.push(pk==='ON'?1:0);
     li.push(t);di.push(pi==='ON'?1:0);
-    
     dataHistory.push({ph:d.pH||0,tb:d.turbidity||0});
   });
   while(lph.length<20){lph.unshift('');dph.unshift(0);ltb.unshift('');dtb.unshift(0);llv.unshift('');dlv.unshift(0);lk.unshift('');dk.unshift(0);li.unshift('');di.unshift(0);}
-  
-  // Gunakan spread array [...] agar memori browser stabil saat memuat ulang grafik
-  cPh.data.labels=[...lph]; cPh.data.datasets[0].data=[...dph];
-  cTb.data.labels=[...ltb]; cTb.data.datasets[0].data=[...dtb];
-  cLv.data.labels=[...llv]; cLv.data.datasets[0].data=[...dlv];
-  cKuras.data.labels=[...lk]; cKuras.data.datasets[0].data=[...dk];
-  cIsi.data.labels=[...li]; cIsi.data.datasets[0].data=[...di];
-  
+  cPh.data.labels=lph;   cPh.data.datasets[0].data=dph;
+  cTb.data.labels=ltb;   cTb.data.datasets[0].data=dtb;
+  cLv.data.labels=llv;   cLv.data.datasets[0].data=dlv;
+  cKuras.data.labels=lk; cKuras.data.datasets[0].data=dk;
+  cIsi.data.labels=li;   cIsi.data.datasets[0].data=di;
   [cPh,cTb,cLv,cKuras,cIsi].forEach(c=>c.update());
   renderUptimeBar();
 });
