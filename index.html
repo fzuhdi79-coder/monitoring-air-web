@@ -576,23 +576,76 @@ function formatStopwatch(s) {
   const sec = s % 60;
   return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
 }
-window.localKurasDurasi = 0; 
-window.isKurasOtomatisON = false;
-window.localIsiDurasi = 0; 
-window.isIsiOtomatisON = false;
 
-setInterval(() => {
-  if (window.isKurasOtomatisON) {
-    window.localKurasDurasi++;
-    const e = document.getElementById('durasi-kuras');
-    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--red);"></i> <span style="font-weight:600;">${formatStopwatch(window.localKurasDurasi)}</span>`;
+// Objek untuk melacak status pompa secara independen dan akurat (Tanpa Delay)
+window.pumpTracker = {
+  kuras: { isON: false, durasi: 0, interval: null, elemen: null, statusElemen: null, cardElemen: null, pulseElemen: null },
+  isi:   { isON: false, durasi: 0, interval: null, elemen: null, statusElemen: null, cardElemen: null, pulseElemen: null }
+};
+
+// Fungsi universal untuk memulai/menghentikan stopwatch di layar seketika
+function updateStopwatchUI(tipe, status, durasi, isManualClick = false) {
+  const t = window.pumpTracker[tipe];
+  
+  // Ambil elemen HTML
+  if (!t.elemen) t.elemen = document.getElementById(`durasi-${tipe}`);
+  if (!t.statusElemen) t.statusElemen = document.getElementById(`rt-status-${tipe}`);
+  if (!t.cardElemen) t.cardElemen = document.getElementById(`rt-card-${tipe}`);
+  if (!t.pulseElemen) t.pulseElemen = document.getElementById(`pulse-${tipe}`);
+
+  const isNowON = (status === 'ON');
+  const colorVar = tipe === 'kuras' ? 'var(--red)' : 'var(--blue)';
+  const borderVar = tipe === 'kuras' ? 'var(--red-bd)' : 'var(--blue-bd)';
+
+  // UPDATE TAMPILAN KARTU & KEDIPAN (PULSE) SECARA INSTAN
+  if (t.cardElemen && t.statusElemen && t.pulseElemen) {
+    if (isNowON) {
+      t.cardElemen.classList.add('active');
+      t.cardElemen.style.borderColor = borderVar;
+      t.statusElemen.textContent = 'ON';
+      t.statusElemen.style.color = colorVar;
+      t.pulseElemen.classList.add('active');
+    } else {
+      t.cardElemen.classList.remove('active');
+      t.cardElemen.style.borderColor = 'var(--border)';
+      t.statusElemen.textContent = 'OFF';
+      t.statusElemen.style.color = 'var(--text-3)';
+      t.pulseElemen.classList.remove('active');
+    }
   }
-  if (window.isIsiOtomatisON) {
-    window.localIsiDurasi++;
-    const e = document.getElementById('durasi-isi');
-    if(e) e.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--blue);"></i> <span style="font-weight:600;">${formatStopwatch(window.localIsiDurasi)}</span>`;
+
+  // LOGIKA STOPWATCH
+  // Jika ini dari klik tombol, atau status berubah dari Firebase, atau selisih waktu loncat
+  if (isManualClick || t.isON !== isNowON || Math.abs(durasi - t.durasi) > 2) { 
+    t.durasi = durasi; 
   }
-}, 1000);
+  t.isON = isNowON;
+
+  // Pastikan interval berjalan TERUS MENERUS
+  if (!t.interval) {
+    t.interval = setInterval(() => {
+      t.durasi++; 
+      
+      if (t.elemen) {
+        if (t.isON) {
+          const cVar = tipe === 'kuras' ? 'var(--red)' : 'var(--blue)';
+          t.elemen.innerHTML = `<i class="fa-solid fa-clock" style="color:${cVar};"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(t.durasi)}</span>`;
+        } else {
+          t.elemen.innerHTML = `<i class="fa-regular fa-clock"></i> <span style="color:var(--text-3);">${formatStopwatch(t.durasi)}</span>`;
+        }
+      }
+    }, 1000); 
+  }
+  
+  // Tulis angka durasi instan saat fungsi dipanggil
+  if (t.elemen) {
+    if (t.isON) {
+      t.elemen.innerHTML = `<i class="fa-solid fa-clock" style="color:${colorVar};"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(t.durasi)}</span>`;
+    } else {
+      t.elemen.innerHTML = `<i class="fa-regular fa-clock"></i> <span style="color:var(--text-3);">${formatStopwatch(t.durasi)}</span>`;
+    }
+  }
+}
 </script>
 
 <script type="module">
@@ -651,7 +704,6 @@ get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
     const t=new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
     
     // --- PERBAIKAN CADANGAN DATA LAMA ---
-    // Jika tidak ada data pompa_kuras (karena data lama), baca dari statusSistem
     const statLama = d.statusSistem || d.pompaStatus || '';
     const pk = d.pompa_kuras || (statLama === 'KURAS' ? 'ON' : 'OFF');
     const pi = d.pompa_isi || (statLama === 'ISI' ? 'ON' : 'OFF');
@@ -663,7 +715,6 @@ get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
   });
   while(lph.length<20){lph.unshift('');dph.unshift(0);ltb.unshift('');dtb.unshift(0);llv.unshift('');dlv.unshift(0);lk.unshift('');dk.unshift(0);li.unshift('');di.unshift(0);}
   
-  // Gunakan spread array [...] agar memori browser stabil saat memuat ulang grafik
   cPh.data.labels=[...lph]; cPh.data.datasets[0].data=[...dph];
   cTb.data.labels=[...ltb]; cTb.data.datasets[0].data=[...dtb];
   cLv.data.labels=[...llv]; cLv.data.datasets[0].data=[...dlv];
@@ -865,112 +916,36 @@ onValue(ref(db,'SistemAir'),snap=>{
   document.getElementById('icon-p1').style.color=pKuras==='ON'?'var(--red)':'var(--text-3)';
   document.getElementById('icon-p2').style.color=pIsi==='ON'?'var(--blue)':'var(--text-3)';
 
-
   // ==========================================
-  // UPDATE POMPA KURAS & STOPWATCH
+  // UPDATE REALTIME PANEL (UI BARU DENGAN DETIK BERJALAN MULUS)
   // ==========================================
-  window.isKurasOtomatisON = (pKuras === 'ON');
-  window.localKurasDurasi = window.isKurasOtomatisON ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
+  const firebasePKuras = data.pompa_kuras || 'OFF';
+  const firebaseDurKuras = (firebasePKuras === 'ON') ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
+  updateStopwatchUI('kuras', firebasePKuras, firebaseDurKuras, false);
 
-  // Perbarui tampilan UI/Warna (Sesuaikan dengan ID elemen Anda)
-  const cCardKuras = document.getElementById('rt-card-kuras');
-  const sKuras = document.getElementById('rt-status-kuras');
-  const pKurasPulse = document.getElementById('pulse-kuras');
-  const elemenDurasiKuras = document.getElementById('durasi-kuras'); // Elemen teks angkanya
-
-  if (cCardKuras && sKuras && pKurasPulse) {
-    if (window.isKurasOtomatisON) {
-      cCardKuras.classList.add('active');
-      cCardKuras.style.borderColor = 'var(--red-bd)';
-      sKuras.textContent = 'ON';
-      sKuras.style.color = 'var(--red)';
-      pKurasPulse.classList.add('active');
-    } else {
-      cCardKuras.classList.remove('active');
-      cCardKuras.style.borderColor = 'var(--border)';
-      sKuras.textContent = 'OFF';
-      sKuras.style.color = 'var(--text-3)';
-      pKurasPulse.classList.remove('active');
-    }
-  }
-
-  // Tulis angka durasi dari Firebase
-  if (elemenDurasiKuras) {
-    elemenDurasiKuras.innerHTML = `<i class="${window.isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isKurasOtomatisON?'color:var(--red);':''}"></i> <span style="${window.isKurasOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localKurasDurasi)}</span>`;
-  }
-
-  // --- TRIK REALTIME UI (DETIK BUATAN) UNTUK KURAS ---
-  if (window.intervalKuras) clearInterval(window.intervalKuras); // Hapus timer lama
-  
-  // Timer DIBIARKAN JALAN TERUS tanpa if(ON), agar saat OFF detik tetap bertambah
-  window.intervalKuras = setInterval(() => {
-    window.localKurasDurasi++; // Tambah 1 detik di web
-    if (elemenDurasiKuras) {
-      // Sesuaikan warna & style berdasarkan status ON atau OFF
-      const iconClass = window.isKurasOtomatisON ? 'fa-solid' : 'fa-regular';
-      const iconColor = window.isKurasOtomatisON ? 'color:var(--red);' : '';
-      const textColor = window.isKurasOtomatisON ? 'font-weight:600; color:var(--text-1);' : 'color:var(--text-3);';
-      
-      elemenDurasiKuras.innerHTML = `<i class="${iconClass} fa-clock" style="${iconColor}"></i> <span style="${textColor}">${formatStopwatch(window.localKurasDurasi)}</span>`;
-    }
-  }, 1000); // Berdetak setiap 1 detik
-
-
-  // ==========================================
-  // UPDATE POMPA ISI & STOPWATCH
-  // ==========================================
-  window.isIsiOtomatisON = (pIsi === 'ON');
-  window.localIsiDurasi = window.isIsiOtomatisON ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
-  
-  const cCardIsi = document.getElementById('rt-card-isi');
-  const sIsi = document.getElementById('rt-status-isi');
-  const pIsiPulse = document.getElementById('pulse-isi');
-  const elemenDurasiIsi = document.getElementById('durasi-isi'); // Elemen teks angkanya
-
-  if (cCardIsi && sIsi && pIsiPulse) {
-    if (window.isIsiOtomatisON) {
-      cCardIsi.classList.add('active');
-      cCardIsi.style.borderColor = 'var(--blue)';
-      sIsi.textContent = 'ON';
-      sIsi.style.color = 'var(--blue)';
-      pIsiPulse.classList.add('active');
-    } else {
-      cCardIsi.classList.remove('active');
-      cCardIsi.style.borderColor = 'var(--border)';
-      sIsi.textContent = 'OFF';
-      sIsi.style.color = 'var(--text-3)';
-      pIsiPulse.classList.remove('active');
-    }
-  }
-
-  // Tulis angka durasi dari Firebase
-  if (elemenDurasiIsi) {
-    elemenDurasiIsi.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> <span style="${window.isIsiOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localIsiDurasi)}</span>`;
-  }
-
-  // --- TRIK REALTIME UI (DETIK BUATAN) UNTUK ISI ---
-  if (window.intervalIsi) clearInterval(window.intervalIsi); // Hapus timer lama
-  
-  // Timer DIBIARKAN JALAN TERUS tanpa if(ON)
-  window.intervalIsi = setInterval(() => {
-    window.localIsiDurasi++; // Tambah 1 detik di web
-    if (elemenDurasiIsi) {
-      // Sesuaikan warna & style berdasarkan status ON atau OFF
-      const iconClass = window.isIsiOtomatisON ? 'fa-solid' : 'fa-regular';
-      const iconColor = window.isIsiOtomatisON ? 'color:var(--blue);' : '';
-      const textColor = window.isIsiOtomatisON ? 'font-weight:600; color:var(--text-1);' : 'color:var(--text-3);';
-      
-      elemenDurasiIsi.innerHTML = `<i class="${iconClass} fa-clock" style="${iconColor}"></i> <span style="${textColor}">${formatStopwatch(window.localIsiDurasi)}</span>`;
-    }
-  }, 1000);
-
-  const di = document.getElementById('durasi-isi');
-  if(di) di.innerHTML = `<i class="${window.isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${window.isIsiOtomatisON?'color:var(--blue);':''}"></i> <span style="${window.isIsiOtomatisON?'font-weight:600; color:var(--text-1);':'color:var(--text-3);'}">${formatStopwatch(window.localIsiDurasi)}</span>`;
+  const firebasePIsi = data.pompa_isi || 'OFF';
+  const firebaseDurIsi = (firebasePIsi === 'ON') ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
+  updateStopwatchUI('isi', firebasePIsi, firebaseDurIsi, false);
 });
 
 /* CONTROLS */
 window.ubahMode=function(m){set(ref(db,'SistemAir/modeSistem'),m);toast(`Mode: ${m==='AUTO'?'Automated':'Manual Override'}`);};
-window.ubahPompa=function(p){set(ref(db,'SistemAir/pompaStatus'),p);toast(p==='KURAS'?'Pompa Drainage ON':p==='ISI'?'Pompa Inflow ON':'Pompa dimatikan',p==='OFF'?'info':'ok');};
+
+window.ubahPompa=function(p){
+  set(ref(db,'SistemAir/pompaStatus'),p);
+  toast(p==='KURAS'?'Pompa Drainage ON':p==='ISI'?'Pompa Inflow ON':'Pompa dimatikan',p==='OFF'?'info':'ok');
+  
+  if (p === 'KURAS') {
+    updateStopwatchUI('kuras', 'ON', 0, true);
+    updateStopwatchUI('isi', 'OFF', window.pumpTracker.isi.durasi, true);
+  } else if (p === 'ISI') {
+    updateStopwatchUI('isi', 'ON', 0, true);
+    updateStopwatchUI('kuras', 'OFF', window.pumpTracker.kuras.durasi, true);
+  } else if (p === 'OFF') {
+    updateStopwatchUI('kuras', 'OFF', 0, true);
+    updateStopwatchUI('isi', 'OFF', 0, true);
+  }
+};
 
 /* RECAP */
 const iDate=document.getElementById('input-tanggal-rekap');
