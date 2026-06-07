@@ -99,9 +99,9 @@ tbody tr:last-child{border-bottom:none;}
 tbody td{padding:11px 14px;font-size:13px;color:var(--text-2);white-space:nowrap;}
 .td-mono{font-family:var(--mono);font-size:12px;color:var(--text-3);}
 .td-val{font-weight:600;color:var(--text-1);}
-.td-unit{font-size:12px;font-weight:400;color:var(--text-3);margin-left:2px;margin-right:8px;}
+.td-unit{font-size:12px;font-weight:400;color:var(--text-3);margin-left:2px;}
 .td-center{text-align:center;}
-.row-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid;vertical-align:middle;}
+.row-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid;margin-left:8px;vertical-align:middle;}
 .del-btn{width:28px;height:28px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-3);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .14s;font-size:11px;}
 .del-btn:hover{background:var(--red-bg);border-color:var(--red-bd);color:var(--red);}
 
@@ -127,6 +127,7 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="brand">
@@ -158,6 +159,7 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
   </div>
 </nav>
 
+<!-- MAIN -->
 <main class="page">
 
   <div class="pg-header">
@@ -166,12 +168,14 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
   </div>
 
   <div class="table-card">
+    <!-- Toolbar -->
     <div class="table-toolbar">
       <div class="toolbar-left">
         <span class="toolbar-title">Daily Records</span>
         <span class="count-badge" id="total-data-badge">0 data</span>
       </div>
       <div class="toolbar-right">
+        <!-- Filter bar -->
         <div class="filter-bar">
           <div class="filter-seg">
             <i class="fa-regular fa-calendar" style="font-size:10px;color:var(--text-3);"></i>
@@ -196,6 +200,7 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
       </div>
     </div>
 
+    <!-- Table -->
     <div class="tbl-wrap">
       <table id="tabel-log">
         <thead>
@@ -252,7 +257,7 @@ document.getElementById('hbtn').addEventListener('click',()=>{
 
 function logout(){sessionStorage.removeItem('statusLogin');window.location.href='login.html';}
 
-/* FILTER WAKTU */
+/* FILTER WAKWU */
 window.filterWaktu=function(){
   const s=document.getElementById('filter-waktu-mulai').value;
   const e=document.getElementById('filter-waktu-selesai').value;
