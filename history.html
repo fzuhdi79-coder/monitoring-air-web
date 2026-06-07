@@ -127,7 +127,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="index.html" class="brand">
@@ -159,7 +158,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
   </div>
 </nav>
 
-<!-- MAIN -->
 <main class="page">
 
   <div class="pg-header">
@@ -168,14 +166,12 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
   </div>
 
   <div class="table-card">
-    <!-- Toolbar -->
     <div class="table-toolbar">
       <div class="toolbar-left">
         <span class="toolbar-title">Daily Records</span>
         <span class="count-badge" id="total-data-badge">0 data</span>
       </div>
       <div class="toolbar-right">
-        <!-- Filter bar -->
         <div class="filter-bar">
           <div class="filter-seg">
             <i class="fa-regular fa-calendar" style="font-size:10px;color:var(--text-3);"></i>
@@ -200,7 +196,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
       </div>
     </div>
 
-    <!-- Table -->
     <div class="tbl-wrap">
       <table id="tabel-log">
         <thead>
@@ -295,7 +290,8 @@ window.resetWaktu=function(){
 /* EXPORT CSV */
 function unduhCSV(){
   const rows=document.querySelectorAll('#table-body tr[data-date]');
-  let csv='Timestamp,Date,pH,Turbidity_NTU,WaterLevel_cm,Status_Kuras,Durasi_Kuras_Detik,Status_Isi,Durasi_Isi_Detik\n';
+  // Pemisah diubah menggunakan titik koma (;) agar otomatis rapi di Excel regional Indonesia
+  let csv='Timestamp;Date;pH;Turbidity_NTU;WaterLevel_cm;Status_Kuras;Durasi_Kuras_Detik;Status_Isi;Durasi_Isi_Detik\n';
   let n=0;
   
   rows.forEach(tr=>{
@@ -315,7 +311,7 @@ function unduhCSV(){
     const isiStat = tr.getAttribute('data-isi-stat') || 'OFF';
     const isiDur = tr.getAttribute('data-isi-dur') || 0;
 
-    csv+=`"${ts}","${dt}","${ph}","${tb}","${lv}","${kurasStat}","${kurasDur}","${isiStat}","${isiDur}"\n`;
+    csv+=`"${ts}";"${dt}";"${ph}";"${tb}";"${lv}";"${kurasStat}";"${kurasDur}";"${isiStat}";"${isiDur}"\n`;
     n++;
   });
   
