@@ -569,7 +569,7 @@ function reveal(key){
   if(ch)ch.style.display='block';
 }
 
-/* ── STOPWATCH HELPER & GLOBALS FOR REALTIME DITAMBAHKAN DI SINI ── */
+/* ── STOPWATCH HELPER & GLOBALS FOR REALTIME ── */
 function formatStopwatch(s) {
   if (s <= 0) return "0s";
   const m = Math.floor(s / 60);
@@ -615,17 +615,14 @@ function updateStopwatchUI(tipe, status, durasi, isManualClick = false) {
   }
 
   // LOGIKA STOPWATCH
-  // Jika ini dari klik tombol, atau status berubah dari Firebase, atau selisih waktu loncat
   if (isManualClick || t.isON !== isNowON || Math.abs(durasi - t.durasi) > 2) { 
     t.durasi = durasi; 
   }
   t.isON = isNowON;
 
-  // Pastikan interval berjalan TERUS MENERUS
   if (!t.interval) {
     t.interval = setInterval(() => {
       t.durasi++; 
-      
       if (t.elemen) {
         if (t.isON) {
           const cVar = tipe === 'kuras' ? 'var(--red)' : 'var(--blue)';
@@ -637,7 +634,6 @@ function updateStopwatchUI(tipe, status, durasi, isManualClick = false) {
     }, 1000); 
   }
   
-  // Tulis angka durasi instan saat fungsi dipanggil
   if (t.elemen) {
     if (t.isON) {
       t.elemen.innerHTML = `<i class="fa-solid fa-clock" style="color:${colorVar};"></i> <span style="font-weight:600; color:var(--text-1);">${formatStopwatch(t.durasi)}</span>`;
@@ -672,22 +668,23 @@ const cPh=miniChart('chart-ph','#15803d');
 const cTb=miniChart('chart-turbidity','#b45309');
 const cLv=miniChart('chart-level','#1d4ed8');
 
+// Setelan Chart Pompa yang Disempurnakan
 const pOpts={
   responsive:true,maintainAspectRatio:false,animation:{duration:200},
   plugins:{legend:{display:false}},
   scales:{
-    x:{grid:{display:false},ticks:{font:{size:9,family:"'DM Mono',monospace"},color:'#b0b0ac'}},
-    y:{min:-0.1,max:1.1,ticks:{stepSize:1,font:{size:10,weight:'500'},color:'#737370',callback:v=>v===1?'ON':v===0?'OFF':''},grid:{color:'#efefed'}}
+    x:{grid:{display:false},ticks:{font:{size:9,family:"'DM Mono',monospace"},color:'#b0b0ac',maxTicksLimit:10}},
+    y:{min:-0.2,max:1.2,ticks:{stepSize:1,font:{size:10,weight:'500'},color:'#737370',callback:v=>v===1?'ON':v===0?'OFF':''},grid:{color:'#efefed'}}
   }
 };
 const cKuras=new Chart(document.getElementById('chart-pompa-kuras').getContext('2d'),{
   type:'line',
-  data:{labels:Array(20).fill(''),datasets:[{data:Array(20).fill(0),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.04)',fill:true,stepped:true,pointRadius:0,borderWidth:1.5}]},
+  data:{labels:Array(20).fill(''),datasets:[{data:Array(20).fill(0),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.04)',fill:true,stepped:true,pointRadius:0,borderWidth:2.5}]},
   options:pOpts
 });
 const cIsi=new Chart(document.getElementById('chart-pompa-isi').getContext('2d'),{
   type:'line',
-  data:{labels:Array(20).fill(''),datasets:[{data:Array(20).fill(0),borderColor:'#1d4ed8',backgroundColor:'rgba(29,78,216,.04)',fill:true,stepped:true,pointRadius:0,borderWidth:1.5}]},
+  data:{labels:Array(20).fill(''),datasets:[{data:Array(20).fill(0),borderColor:'#1d4ed8',backgroundColor:'rgba(29,78,216,.04)',fill:true,stepped:true,pointRadius:0,borderWidth:2.5}]},
   options:pOpts
 });
 
@@ -703,7 +700,6 @@ get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
     llv.push('');dlv.push(d.tinggiAir||0);
     const t=new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
     
-    // --- PERBAIKAN CADANGAN DATA LAMA ---
     const statLama = d.statusSistem || d.pompaStatus || '';
     const pk = d.pompa_kuras || (statLama === 'KURAS' ? 'ON' : 'OFF');
     const pi = d.pompa_isi || (statLama === 'ISI' ? 'ON' : 'OFF');
@@ -749,72 +745,11 @@ function setOffline(msg){
 onValue(ref(db,'.info/connected'),s=>{if(s.val()!==true)setOffline('OFFLINE');});
 
 
-/* REALTIME PANEL (DATA DARI SistemAir_Sensor) */
-onValue(ref(db, 'SistemAir_Sensor'), (snapshot) => {
-  const loader = document.getElementById('loading-overlay');
-  if (loader) loader.style.display = 'none';
-
-  const data = snapshot.val();
-  if(data){
-    // UPDATE PANEL ATAS (pH, Kekeruhan, Tinggi Air)
-    const elPh = document.getElementById('rt-ph');
-    const elKekeruhan = document.getElementById('rt-turbidity');
-    const elAir = document.getElementById('rt-water');
-    
-    const bPh = document.getElementById('badge-ph');
-    const bKekeruhan = document.getElementById('badge-turbidity');
-    const bAir = document.getElementById('badge-water');
-
-    // Nilai pH
-    const phValue = parseFloat(data.pH || 0).toFixed(2);
-    if(elPh) elPh.textContent = phValue;
-    if(bPh) {
-      if(phValue < 6.5 || phValue > 8.5) {
-        bPh.textContent = 'Status: CRITICAL';
-        bPh.style.cssText = 'background:var(--red-bg); color:var(--red); border-color:var(--red-bd);';
-      } else {
-        bPh.textContent = 'Status: OPTIMAL';
-        bPh.style.cssText = 'background:var(--green-bg); color:var(--green); border-color:var(--green-bd);';
-      }
-    }
-
-    // Nilai Kekeruhan (NTU)
-    const ntuValue = Math.round(data.turbidity || 0);
-    if(elKekeruhan) elKekeruhan.textContent = ntuValue;
-    if(bKekeruhan) {
-      if(ntuValue < 25) {
-        bKekeruhan.textContent = 'Status: CLEAR';
-        bKekeruhan.style.cssText = 'background:var(--green-bg); color:var(--green); border-color:var(--green-bd);';
-      } else if(ntuValue < 100) {
-        bKekeruhan.textContent = 'Status: WARNING';
-        bKekeruhan.style.cssText = 'background:var(--amber-bg); color:var(--amber); border-color:var(--amber-bd);';
-      } else {
-        bKekeruhan.textContent = 'Status: HAZARD';
-        bKekeruhan.style.cssText = 'background:var(--red-bg); color:var(--red); border-color:var(--red-bd);';
-      }
-    }
-
-    // Nilai Ketinggian Air (cm)
-    const lvlValue = Math.round(data.tinggiAir || 0);
-    if(elAir) elAir.textContent = lvlValue;
-    if(bAir) {
-      if(lvlValue < 20) {
-        bAir.textContent = 'Status: LOW';
-        bAir.style.cssText = 'background:var(--red-bg); color:var(--red); border-color:var(--red-bd);';
-      } else {
-        bAir.textContent = 'Status: NORMAL';
-        bAir.style.cssText = 'background:var(--blue-bg); color:var(--blue); border-color:var(--blue-bd);';
-      }
-    }
-  }
-});
-
-
-/* MAIN LISTENER */
+/* MAIN LISTENER (MENYATUKAN SEMUA LOGIK UPDATE SENSOR & PANEL) */
 onValue(ref(db,'SistemAir'),snap=>{
   if(!snap.exists())return;
   const d=snap.val();
-  const data = d; // Alias untuk fungsi stopwatch di bawah
+  const data = d; 
   
   const t=new Date().toLocaleTimeString('id-ID',{hour12:false});
   setOnline();
@@ -877,7 +812,7 @@ onValue(ref(db,'SistemAir'),snap=>{
   dataHistory.push({ph,tb});if(dataHistory.length>20)dataHistory.shift();
   renderUptimeBar();
 
-  /* --- PUMP STATUS & DURATION (FOR CHARTS & BUTTONS) --- */
+  /* --- PUMP STATUS & DURATION --- */
   const pKuras = d.pompa_kuras || 'OFF';
   const durKuras = pKuras === 'ON' ? (d.durasi_kuras_ON_saat_ini_detik||0) : (d.durasi_kuras_OFF_saat_ini_detik||0);
   const statP1 = document.getElementById('stat-p1');
@@ -894,9 +829,18 @@ onValue(ref(db,'SistemAir'),snap=>{
     else statP2.innerHTML = `Status: <b style="opacity:0.6;">OFF</b> (${formatDur(durIsi)})`;
   }
 
-  /* pump charts */
-  push(cKuras, pKuras==='ON'?1:0, t);
-  push(cIsi, pIsi==='ON'?1:0, t);
+  /* pump charts yang Disempurnakan */
+  // Mencegah penumpukan data grafik di detik yang sama (bikin grafik berantakan)
+  const lastTimeKuras = cKuras.data.labels[cKuras.data.labels.length - 1];
+  if (lastTimeKuras !== t) {
+    push(cKuras, pKuras==='ON'?1:0, t);
+    push(cIsi, pIsi==='ON'?1:0, t);
+  } else {
+    cKuras.data.datasets[0].data[cKuras.data.datasets[0].data.length - 1] = pKuras==='ON'?1:0;
+    cIsi.data.datasets[0].data[cIsi.data.datasets[0].data.length - 1] = pIsi==='ON'?1:0;
+    cKuras.update();
+    cIsi.update();
+  }
 
   /* mode & buttons */
   const mode=d.modeSistem||'AUTO';
@@ -917,15 +861,56 @@ onValue(ref(db,'SistemAir'),snap=>{
   document.getElementById('icon-p2').style.color=pIsi==='ON'?'var(--blue)':'var(--text-3)';
 
   // ==========================================
-  // UPDATE REALTIME PANEL (UI BARU DENGAN DETIK BERJALAN MULUS)
+  // UPDATE REALTIME PANEL BAWAH (LOGIKA YANG SEBELUMNYA TIDAK JALAN)
   // ==========================================
-  const firebasePKuras = data.pompa_kuras || 'OFF';
-  const firebaseDurKuras = (firebasePKuras === 'ON') ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
-  updateStopwatchUI('kuras', firebasePKuras, firebaseDurKuras, false);
+  const elPh = document.getElementById('rt-ph');
+  const elKekeruhan = document.getElementById('rt-turbidity');
+  const elAir = document.getElementById('rt-water');
+  
+  const bPh = document.getElementById('badge-ph');
+  const bKekeruhan = document.getElementById('badge-turbidity');
+  const bAir = document.getElementById('badge-water');
 
-  const firebasePIsi = data.pompa_isi || 'OFF';
-  const firebaseDurIsi = (firebasePIsi === 'ON') ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
-  updateStopwatchUI('isi', firebasePIsi, firebaseDurIsi, false);
+  if(elPh) elPh.textContent = ph.toFixed(2);
+  if(bPh) {
+    if(ph < 6.5 || ph > 8.5) {
+      bPh.textContent = 'Status: CRITICAL';
+      bPh.style.cssText = 'background:var(--red-bg); color:var(--red); border-color:var(--red-bd);';
+    } else {
+      bPh.textContent = 'Status: OPTIMAL';
+      bPh.style.cssText = 'background:var(--green-bg); color:var(--green); border-color:var(--green-bd);';
+    }
+  }
+
+  const ntuValue = Math.round(tb);
+  if(elKekeruhan) elKekeruhan.textContent = ntuValue;
+  if(bKekeruhan) {
+    if(ntuValue < 25) {
+      bKekeruhan.textContent = 'Status: CLEAR';
+      bKekeruhan.style.cssText = 'background:var(--green-bg); color:var(--green); border-color:var(--green-bd);';
+    } else if(ntuValue < 100) {
+      bKekeruhan.textContent = 'Status: WARNING';
+      bKekeruhan.style.cssText = 'background:var(--amber-bg); color:var(--amber); border-color:var(--amber-bd);';
+    } else {
+      bKekeruhan.textContent = 'Status: HAZARD';
+      bKekeruhan.style.cssText = 'background:var(--red-bg); color:var(--red); border-color:var(--red-bd);';
+    }
+  }
+
+  const lvlValue = Math.round(lv);
+  if(elAir) elAir.textContent = lvlValue;
+  if(bAir) {
+    if(lvlValue < 20) {
+      bAir.textContent = 'Status: LOW';
+      bAir.style.cssText = 'background:var(--red-bg); color:var(--red); border-color:var(--red-bd);';
+    } else {
+      bAir.textContent = 'Status: NORMAL';
+      bAir.style.cssText = 'background:var(--blue-bg); color:var(--blue); border-color:var(--blue-bd);';
+    }
+  }
+
+  updateStopwatchUI('kuras', pKuras, durKuras, false);
+  updateStopwatchUI('isi', pIsi, durIsi, false);
 });
 
 /* CONTROLS */
