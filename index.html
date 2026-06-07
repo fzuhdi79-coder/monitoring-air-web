@@ -403,6 +403,14 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
           <span class="recap-lbl"><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;color:var(--text-3);width:14px;"></i>pH Max / Min</span>
           <span class="recap-val" id="maxmin-ph" style="color:var(--red);">—</span>
         </div>
+        <div class="summary-item">
+          <span class="summary-label">Total Pompa Kuras (ON)</span>
+          <span class="summary-value" id="total-kuras-harian">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Total Pompa Isi (ON)</span>
+          <span class="summary-value" id="total-isi-harian">—</span>
+        </div>
         <div class="recap-row">
           <span class="recap-lbl"><i class="fa-solid fa-database" style="font-size:10px;color:var(--text-3);width:14px;"></i>Total Sampel</span>
           <span class="recap-val" id="total-sampel">—</span>
@@ -697,18 +705,49 @@ window.ubahPompa=function(p){set(ref(db,'SistemAir/pompaStatus'),p);toast(p==='K
 const iDate=document.getElementById('input-tanggal-rekap');
 if(iDate){iDate.max=today;iDate.value=today;}
 let rcUnsub=null;
-window.muatDataHarian=function(tgl){
-  const lbl=document.getElementById('label-keterangan-rekap');
-  if(lbl)lbl.textContent=tgl===today?'Data real-time dari riwayat log hari ini.':`Data rata-rata tanggal ${tgl}`;
-  if(rcUnsub)rcUnsub();
-  rcUnsub=onValue(ref(db,'SistemAir_Log/'+tgl),snap=>{
-    let tph=0,ttb=0,tlv=0,maxPh=-999,minPh=999,n=0;
-    if(snap.exists()){snap.forEach(child=>{const d=child.val();n++;const ph=parseFloat(d.pH)||0,tb=parseFloat(d.turbidity)||0,lv=parseFloat(d.tinggiAir)||0;tph+=ph;ttb+=tb;tlv+=lv;if(ph>maxPh)maxPh=ph;if(ph<minPh)minPh=ph;});}
+window.muatDataHarian=async function(tgl){
+  onValue(ref(db,'SistemAir_Log/'+tgl),(snap)=>{
+    let n=0;let tph=0,ttb=0,tlv=0;let maxPh=-999,minPh=999;
+    let maxDurasiKuras=0;
+    let maxDurasiIsi=0;
+
+    if(snap.exists()){
+      snap.forEach(child=>{
+        const d=child.val();n++;tph+=d.pH||0;ttb+=d.turbidity||0;tlv+=d.tinggiAir||0;
+        if(d.pH>maxPh)maxPh=d.pH;if(d.pH<minPh)minPh=d.pH;
+        
+        // Mengambil akumulasi nilai tertinggi harian untuk durasi pompa yang ON
+        const durKuras = d.durasi_kuras_ON_detik || 0;
+        const durIsi = d.durasi_isi_ON_detik || 0;
+        if(durKuras > maxDurasiKuras) maxDurasiKuras = durKuras;
+        if(durIsi > maxDurasiIsi) maxDurasiIsi = durIsi;
+      });
+    }
+
+    // Fungsi pembantu konversi format detik ke Jam, Menit, Detik agar mudah dibaca
+    const formatWaktuHarian = (totalDetik) => {
+      if (totalDetik === 0) return '0 dtk';
+      const j = Math.floor(totalDetik / 3600);
+      const m = Math.floor((totalDetik % 3600) / 60);
+      const d = totalDetik % 60;
+      let hasil = '';
+      if (j > 0) hasil += `${j}j `;
+      if (m > 0) hasil += `${m}m `;
+      if (d > 0 || hasil === '') hasil += `${d}dtk`;
+      return hasil.trim();
+    };
+
     document.getElementById('rata-ph').textContent    =n>0?(tph/n).toFixed(2):'—';
     document.getElementById('rata-tb').textContent    =n>0?Math.round(ttb/n)+' NTU':'—';
     document.getElementById('rata-lv').textContent    =n>0?Math.round(tlv/n)+' cm':'—';
     document.getElementById('maxmin-ph').textContent  =n>0?`${maxPh.toFixed(1)} / ${minPh.toFixed(1)}`:'—';
     document.getElementById('total-sampel').textContent=n>0?`${n} data`:'0 data';
+    
+    // Menampilkan total durasi masing-masing pompa ke dalam halaman web
+    const elKuras = document.getElementById('total-kuras-harian');
+    const elIsi = document.getElementById('total-isi-harian');
+    if(elKuras) elKuras.textContent = n > 0 ? formatWaktuHarian(maxDurasiKuras) : '—';
+    if(elIsi) elIsi.textContent = n > 0 ? formatWaktuHarian(maxDurasiIsi) : '—';
   });
 };
 window.muatDataHarian(today);
