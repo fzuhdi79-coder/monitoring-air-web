@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<script>if(sessionStorage.getItem("statusLogin")!=="sukses"){window.location.href="login.html";}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real-Time — WQ System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+:root{
+  --bg:#f6f6f5;--surface:#ffffff;--surface-2:#fafaf9;
+  --border:#e5e5e2;--border-2:#efefed;
+  --text-1:#111110;--text-2:#737370;--text-3:#b0b0ac;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',system-ui,sans-serif;
+  --r-s:6px;--r-m:10px;--r-l:14px;
+  --shadow:0 1px 4px rgba(0,0,0,.06);
+  --green:#15803d;--green-bg:#f0fdf4;--green-bd:#bbf7d0;
+  --red:#b91c1c;--red-bg:#fff5f5;--red-bd:#fecaca;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
+  --orange:#c2410c;--orange-bg:#fff7ed;--orange-bd:#fed7aa;
+}
+[data-theme="dark"]{
+  --bg:#111110;--surface:#1a1a18;--surface-2:#202020;
+  --border:#2c2c2a;--border-2:#242422;
+  --text-1:#f0f0ee;--text-2:#9a9a96;--text-3:#585854;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--text-1);display:flex;flex-direction:column;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+[data-theme="dark"] nav{background:rgba(26,26,24,.88);}
+.nav-inner{max-width:1280px;margin:0 auto;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.brand-mark{width:28px;height:28px;border-radius:7px;background:var(--text-1);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-mark svg{width:13px;height:13px;}
+.brand-name{font-size:14px;font-weight:600;letter-spacing:-.02em;color:var(--text-1);}
+.nav-tabs{display:flex;align-items:center;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-m);padding:3px;overflow-x:auto;}
+.nav-tab{padding:5px 14px;border-radius:7px;font-size:13px;font-weight:500;text-decoration:none;color:var(--text-2);transition:color .14s,background .14s;white-space:nowrap;}
+.nav-tab:hover{color:var(--text-1);background:var(--border-2);}
+.nav-tab.on{background:var(--surface);color:var(--text-1);box-shadow:var(--shadow);}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.nav-clock{font-family:var(--mono);font-size:12px;color:var(--text-3);}
+.icon-btn{width:32px;height:32px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;}
+.icon-btn:hover{background:var(--surface-2);color:var(--text-1);}
+.ghost-btn{height:32px;padding:0 12px;border-radius:var(--r-s);border:1px solid var(--border);background:none;font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .14s;}
+.ghost-btn:hover{background:var(--surface-2);color:var(--text-1);}
+.hbtn{display:none;width:32px;height:32px;border-radius:var(--r-s);border:1px solid var(--border);background:none;color:var(--text-2);cursor:pointer;align-items:center;justify-content:center;}
+.mob-menu{display:none;flex-direction:column;gap:3px;padding:10px 16px 14px;border-top:1px solid var(--border);background:var(--surface);}
+.mob-menu.open{display:flex;}
+.mob-link{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--r-s);font-size:13px;font-weight:500;color:var(--text-2);text-decoration:none;transition:all .14s;}
+.mob-link:hover,.mob-link.on{background:var(--bg);color:var(--text-1);}
+.mob-divider{height:1px;background:var(--border);margin:4px 0;}
+
+/* PAGE */
+.page{max-width:1280px;margin:0 auto;padding:28px 24px 56px;display:flex;flex-direction:column;gap:24px;}
+.pg-header{padding-bottom:16px;border-bottom:1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-end;}
+.pg-title{font-size:18px;font-weight:600;letter-spacing:-.022em;}
+.pg-sub{font-size:13px;color:var(--text-3);margin-top:4px;}
+.live-indicator{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--green);background:var(--green-bg);padding:4px 10px;border-radius:20px;border:1px solid var(--green-bd);}
+.dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite;}
+@keyframes blink { 0% {opacity:1;} 50% {opacity:0.3;} 100% {opacity:1;} }
+
+/* GRID CARDS */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-l);padding:20px;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.card-title{font-size:13px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;}
+.card-icon{width:36px;height:36px;border-radius:var(--r-m);background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--text-2);font-size:16px;}
+.card-val{font-size:36px;font-weight:600;color:var(--text-1);line-height:1;}
+.card-unit{font-size:14px;font-weight:500;color:var(--text-3);margin-left:4px;}
+.card-bottom{margin-top:auto;padding-top:16px;}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;border:1px solid;}
+.stopwatch{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text-2);margin-top:8px;display:flex;align-items:center;gap:6px;}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);background:var(--surface);padding:14px 24px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text-3);margin-top:auto;}
+
+@media(max-width:768px){
+  .nav-tabs,.nav-clock,.ghost-btn{display:none!important;}
+  .hbtn{display:flex;}
+  .pg-header{flex-direction:column;align-items:flex-start;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3C9.8 3 8 5.2 8 8.5C8 11 9.4 13.1 11.5 14.2L11 17H13L12.5 14.2C14.6 13.1 16 11 16 8.5C16 5.2 14.2 3 12 3Z" fill="white"/><rect x="10" y="17" width="4" height="2.5" rx="1" fill="white" opacity=".5"/></svg>
+      </div>
+      <span class="brand-name">WQ System</span>
+    </a>
+    <div class="nav-tabs">
+      <a href="index.html" class="nav-tab">Overview</a>
+      <a href="realtime.html" class="nav-tab on">Real-Time</a>
+      <a href="grafik.html" class="nav-tab">Analytics</a>
+      <a href="history.html" class="nav-tab">Data Log</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-clock" id="nav-clock">--:--:--</span>
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme"><i class="fa-regular fa-moon" style="font-size:12px;"></i></button>
+      <button class="ghost-btn" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i>Sign out</button>
+      <button class="hbtn" id="hbtn"><i class="fa-solid fa-bars" id="hicon" style="font-size:13px;"></i></button>
+    </div>
+  </div>
+  <div class="mob-menu" id="mob-menu">
+    <a href="index.html" class="mob-link"><i class="fa-solid fa-chart-pie" style="font-size:12px;color:var(--text-3);width:16px;"></i>Overview</a>
+    <a href="realtime.html" class="mob-link on"><i class="fa-solid fa-bolt" style="font-size:12px;color:var(--text-3);width:16px;"></i>Real-Time</a>
+    <a href="grafik.html" class="mob-link"><i class="fa-solid fa-chart-area" style="font-size:12px;color:var(--text-3);width:16px;"></i>Analytics</a>
+    <a href="history.html" class="mob-link"><i class="fa-solid fa-database" style="font-size:12px;color:var(--text-3);width:16px;"></i>Data Log</a>
+    <div class="mob-divider"></div>
+    <button onclick="logout()" style="width:100%;padding:9px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-s);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;">
+      <i class="fa-solid fa-arrow-right-from-bracket" style="font-size:11px;"></i>Sign out
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="page">
+  <div class="pg-header">
+    <div>
+      <div class="pg-title">Real-Time Dashboard</div>
+      <div class="pg-sub">Pemantauan langsung kondisi air dan durasi pompa secara live.</div>
+    </div>
+    <div class="live-indicator"><div class="dot"></div> LIVE CONNECTED</div>
+  </div>
+
+  <div class="grid">
+    <!-- pH Card -->
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">pH Level</span>
+        <div class="card-icon"><i class="fa-solid fa-flask"></i></div>
+      </div>
+      <div>
+        <span class="card-val" id="rt-ph">--</span>
+      </div>
+      <div class="card-bottom">
+        <span class="badge" id="badge-ph" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Turbidity Card -->
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Turbidity</span>
+        <div class="card-icon"><i class="fa-solid fa-water"></i></div>
+      </div>
+      <div>
+        <span class="card-val" id="rt-turb">--</span><span class="card-unit">NTU</span>
+      </div>
+      <div class="card-bottom">
+        <span class="badge" id="badge-turb" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Water Level Card -->
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Water Level</span>
+        <div class="card-icon"><i class="fa-solid fa-ruler-vertical"></i></div>
+      </div>
+      <div>
+        <span class="card-val" id="rt-level">--</span><span class="card-unit">cm</span>
+      </div>
+      <div class="card-bottom">
+        <span class="badge" id="badge-level" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Pompa Kuras Card -->
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Pompa Kuras</span>
+        <div class="card-icon"><i class="fa-solid fa-arrow-up-from-water-pump"></i></div>
+      </div>
+      <div>
+        <span class="badge" id="badge-kuras" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:14px;padding:6px 12px;">OFF</span>
+      </div>
+      <div class="card-bottom">
+        <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;font-weight:600;">Durasi Realtime</div>
+        <div class="stopwatch" id="durasi-kuras"><i class="fa-regular fa-clock"></i> 0s</div>
+      </div>
+    </div>
+
+    <!-- Pompa Isi Card -->
+    <div class="card">
+      <div class="card-top">
+        <span class="card-title">Pompa Isi</span>
+        <div class="card-icon"><i class="fa-solid fa-faucet-drip"></i></div>
+      </div>
+      <div>
+        <span class="badge" id="badge-isi" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);font-size:14px;padding:6px 12px;">OFF</span>
+      </div>
+      <div class="card-bottom">
+        <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;font-weight:600;">Durasi Realtime</div>
+        <div class="stopwatch" id="durasi-isi"><i class="fa-regular fa-clock"></i> 0s</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>&copy; 2026 WQ-SYSTEM &middot; by ZudiJago</footer>
+
+<script>
+/* CLOCK & THEME */
+function tickClock(){const e=document.getElementById('nav-clock');if(e)e.textContent=new Date().toLocaleTimeString('id-ID',{hour12:false});}
+setInterval(tickClock,1000);tickClock();
+
+let dark=localStorage.getItem('wq-dark')==='1';
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme',dark?'dark':'');
+  const b=document.getElementById('theme-btn');
+  if(b)b.innerHTML=dark?'<i class="fa-regular fa-sun" style="font-size:12px;"></i>':'<i class="fa-regular fa-moon" style="font-size:12px;"></i>';
+}
+function toggleTheme(){dark=!dark;localStorage.setItem('wq-dark',dark?'1':'0');applyTheme();}
+applyTheme();
+
+document.getElementById('hbtn').addEventListener('click',()=>{
+  const m=document.getElementById('mob-menu');
+  const ic=document.getElementById('hicon');
+  m.classList.toggle('open');
+  ic.className=m.classList.contains('open')?'fa-solid fa-xmark':'fa-solid fa-bars';
+  ic.style.fontSize='13px';
+});
+function logout(){sessionStorage.removeItem('statusLogin');window.location.href='login.html';}
+
+/* STOPWATCH HELPER */
+function formatStopwatch(s) {
+  if (s <= 0) return "0s";
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+}
+
+// Variabel lokal untuk tick 1 detik agar animasi stopwatch mulus
+let localKurasDurasi = 0;
+let isKurasOtomatisON = false;
+
+let localIsiDurasi = 0;
+let isIsiOtomatisON = false;
+
+// Jalankan tick setiap 1 detik
+setInterval(() => {
+  if (isKurasOtomatisON) {
+    localKurasDurasi++;
+    document.getElementById('durasi-kuras').innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--red);"></i> ${formatStopwatch(localKurasDurasi)}`;
+  }
+  if (isIsiOtomatisON) {
+    localIsiDurasi++;
+    document.getElementById('durasi-isi').innerHTML = `<i class="fa-solid fa-stopwatch" style="color:var(--blue);"></i> ${formatStopwatch(localIsiDurasi)}`;
+  }
+}, 1000);
+</script>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+import{getDatabase,ref,onValue}from"https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+const app=initializeApp({apiKey:"AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",databaseURL:"https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"});
+const db=getDatabase(app);
+
+// Membaca Data Real-time Node /SistemAir
+onValue(ref(db, 'SistemAir'), (snapshot) => {
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    
+    // UPDATE SENSOR pH
+    const ph = parseFloat(data.pH || 0).toFixed(2);
+    const phOk = (ph >= 6.5 && ph <= 8.5);
+    document.getElementById('rt-ph').textContent = ph;
+    const bPh = document.getElementById('badge-ph');
+    bPh.textContent = phOk ? 'Status: Optimal' : 'Status: Critical';
+    bPh.style.cssText = `background:${phOk?'var(--green-bg)':'var(--red-bg)'}; color:${phOk?'var(--green)':'var(--red)'}; border-color:${phOk?'var(--green-bd)':'var(--red-bd)'};`;
+
+    // UPDATE SENSOR TURBIDITY
+    const turb = Math.round(data.turbidity || 0);
+    const turbOk = (turb <= 53);
+    document.getElementById('rt-turb').textContent = turb;
+    const bTurb = document.getElementById('badge-turb');
+    bTurb.textContent = turbOk ? 'Status: Jernih' : 'Status: Keruh';
+    bTurb.style.cssText = `background:${turbOk?'var(--green-bg)':'var(--orange-bg)'}; color:${turbOk?'var(--green)':'var(--orange)'}; border-color:${turbOk?'var(--green-bd)':'var(--orange-bd)'};`;
+
+    // UPDATE KETINGGIAN AIR
+    const level = Math.round(data.tinggiAir || 0);
+    document.getElementById('rt-level').textContent = level;
+    const bLevel = document.getElementById('badge-level');
+    if (level <= 40) {
+      bLevel.textContent = 'Status: Habis';
+      bLevel.style.cssText = `background:var(--red-bg); color:var(--red); border-color:var(--red-bd);`;
+    } else if (level > 68) {
+      bLevel.textContent = 'Status: Penuh';
+      bLevel.style.cssText = `background:var(--orange-bg); color:var(--orange); border-color:var(--orange-bd);`;
+    } else {
+      bLevel.textContent = 'Status: Aman';
+      bLevel.style.cssText = `background:var(--green-bg); color:var(--green); border-color:var(--green-bd);`;
+    }
+
+    // UPDATE POMPA KURAS & STOPWATCH
+    const pKuras = data.pompa_kuras || 'OFF';
+    const bKuras = document.getElementById('badge-kuras');
+    isKurasOtomatisON = (pKuras === 'ON');
+    // Sinkronisasi dengan nilai dari ESP32 (tiap 5 detik agar akurat)
+    localKurasDurasi = isKurasOtomatisON ? (data.durasi_kuras_ON_saat_ini_detik || 0) : (data.durasi_kuras_OFF_saat_ini_detik || 0);
+    
+    bKuras.textContent = pKuras;
+    bKuras.style.cssText = `background:${isKurasOtomatisON?'var(--red-bg)':'var(--surface-2)'}; color:${isKurasOtomatisON?'var(--red)':'var(--text-3)'}; border-color:${isKurasOtomatisON?'var(--red-bd)':'var(--border)'};`;
+    document.getElementById('durasi-kuras').innerHTML = `<i class="${isKurasOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${isKurasOtomatisON?'color:var(--red);':''}"></i> ${formatStopwatch(localKurasDurasi)}`;
+
+    // UPDATE POMPA ISI & STOPWATCH
+    const pIsi = data.pompa_isi || 'OFF';
+    const bIsi = document.getElementById('badge-isi');
+    isIsiOtomatisON = (pIsi === 'ON');
+    // Sinkronisasi dengan nilai dari ESP32 (tiap 5 detik agar akurat)
+    localIsiDurasi = isIsiOtomatisON ? (data.durasi_isi_ON_saat_ini_detik || 0) : (data.durasi_isi_OFF_saat_ini_detik || 0);
+    
+    bIsi.textContent = pIsi;
+    bIsi.style.cssText = `background:${isIsiOtomatisON?'var(--blue-bg)':'var(--surface-2)'}; color:${isIsiOtomatisON?'var(--blue)':'var(--text-3)'}; border-color:${isIsiOtomatisON?'var(--blue-bd)':'var(--border)'};`;
+    document.getElementById('durasi-isi').innerHTML = `<i class="${isIsiOtomatisON?'fa-solid':'fa-regular'} fa-clock" style="${isIsiOtomatisON?'color:var(--blue);':''}"></i> ${formatStopwatch(localIsiDurasi)}`;
+  }
+});
+</script>
+</body>
+</html>
