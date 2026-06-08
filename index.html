@@ -447,25 +447,21 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
 
   <div class="sec-label" style="margin-top: 12px;">Real-Time Panel</div>
   <div class="grid-rt">
-    <!-- pH Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">pH Level</span><div class="rt-card-icon"><i class="fa-solid fa-flask"></i></div></div>
       <div><span class="rt-card-val" id="rt-ph">--</span></div>
       <div class="rt-card-bottom"><span class="rt-badge" id="badge-ph" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
     </div>
-    <!-- Turbidity Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">Turbidity</span><div class="rt-card-icon"><i class="fa-solid fa-water"></i></div></div>
       <div><span class="rt-card-val" id="rt-turbidity">--</span><span class="rt-card-unit">NTU</span></div>
       <div class="rt-card-bottom"><span class="rt-badge" id="badge-turbidity" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
     </div>
-    <!-- Water Level Card -->
     <div class="rt-card">
       <div class="rt-card-top"><span class="rt-card-title">Water Level</span><div class="rt-card-icon"><i class="fa-solid fa-ruler-vertical"></i></div></div>
       <div><span class="rt-card-val" id="rt-water">--</span><span class="rt-card-unit">cm</span></div>
       <div class="rt-card-bottom"><span class="rt-badge" id="badge-water" style="background:var(--surface-2);color:var(--text-3);border-color:var(--border);">Loading...</span></div>
     </div>
-    <!-- Pompa Kuras Card -->
     <div class="rt-card" id="rt-card-kuras" style="--rgb-color:239, 68, 68;">
       <div class="pump-status-pulse" id="pulse-kuras" style="background-color: var(--red);"></div>
       <div class="rt-card-top"><span class="rt-card-title">Pompa Kuras</span><div class="rt-card-icon" id="rt-icon-kuras"><i class="fa-solid fa-arrow-up-from-water-pump"></i></div></div>
@@ -477,7 +473,6 @@ footer{border-top:1px solid var(--border);background:var(--surface);padding:14px
         <div class="rt-stopwatch" id="durasi-kuras" style="justify-content:center;"><i class="fa-regular fa-clock"></i> <span style="color:var(--text-3);">0s</span></div>
       </div>
     </div>
-    <!-- Pompa Isi Card -->
     <div class="rt-card" id="rt-card-isi" style="--rgb-color:59, 130, 246;">
       <div class="pump-status-pulse" id="pulse-isi" style="background-color: var(--blue);"></div>
       <div class="rt-card-top"><span class="rt-card-title">Pompa Isi</span><div class="rt-card-icon" id="rt-icon-isi"><i class="fa-solid fa-faucet-drip"></i></div></div>
@@ -582,14 +577,17 @@ function formatStopwatch(s) {
   return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
 }
 
+// Objek untuk melacak status pompa secara independen dan akurat (Tanpa Delay)
 window.pumpTracker = {
   kuras: { isON: false, durasi: 0, interval: null, elemen: null, statusElemen: null, cardElemen: null, pulseElemen: null },
   isi:   { isON: false, durasi: 0, interval: null, elemen: null, statusElemen: null, cardElemen: null, pulseElemen: null }
 };
 
+// Fungsi universal untuk memulai/menghentikan stopwatch di layar seketika
 function updateStopwatchUI(tipe, status, durasi, isManualClick = false) {
   const t = window.pumpTracker[tipe];
   
+  // Ambil elemen HTML
   if (!t.elemen) t.elemen = document.getElementById(`durasi-${tipe}`);
   if (!t.statusElemen) t.statusElemen = document.getElementById(`rt-status-${tipe}`);
   if (!t.cardElemen) t.cardElemen = document.getElementById(`rt-card-${tipe}`);
@@ -599,6 +597,7 @@ function updateStopwatchUI(tipe, status, durasi, isManualClick = false) {
   const colorVar = tipe === 'kuras' ? 'var(--red)' : 'var(--blue)';
   const borderVar = tipe === 'kuras' ? 'var(--red-bd)' : 'var(--blue-bd)';
 
+  // UPDATE TAMPILAN KARTU & KEDIPAN (PULSE) SECARA INSTAN
   if (t.cardElemen && t.statusElemen && t.pulseElemen) {
     if (isNowON) {
       t.cardElemen.classList.add('active');
@@ -615,6 +614,7 @@ function updateStopwatchUI(tipe, status, durasi, isManualClick = false) {
     }
   }
 
+  // LOGIKA STOPWATCH
   if (isManualClick || t.isON !== isNowON || Math.abs(durasi - t.durasi) > 2) { 
     t.durasi = durasi; 
   }
@@ -651,10 +651,7 @@ import{getDatabase,ref,onValue,set,get,query,limitToLast}from"https://www.gstati
 const app=initializeApp({apiKey:"AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A",databaseURL:"https://realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"});
 const db=getDatabase(app);
 const badge=document.getElementById('conn-badge');
-
-let hwTimer, firstData=false, prevPh=null, prevTb=null, prevLv=null;
-let isHistoryLoaded = false; // FLAG PENTING untuk mencegah data tabrakan saat refresh
-let lastRealtimeData = null; // Menyimpan data instan terbaru
+let hwTimer,firstData=false,prevPh=null,prevTb=null,prevLv=null;
 
 const now=new Date();
 const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
@@ -671,13 +668,13 @@ const cPh=miniChart('chart-ph','#15803d');
 const cTb=miniChart('chart-turbidity','#b45309');
 const cLv=miniChart('chart-level','#1d4ed8');
 
-// Setelan Chart Pompa yang di-Tuning Khusus
+// Setelan Chart Pompa yang Disempurnakan
 const pOpts={
   responsive:true,maintainAspectRatio:false,animation:{duration:200},
   plugins:{legend:{display:false}},
   scales:{
-    x:{grid:{display:false},ticks:{font:{size:9,family:"'DM Mono',monospace"},color:'#b0b0ac',maxTicksLimit:8}},
-    y:{min:-0.1,max:1.1,ticks:{stepSize:1,font:{size:10,weight:'600'},color:'#737370',callback:v=>v===1?'ON':v===0?'OFF':''},grid:{color:'#efefed'}}
+    x:{grid:{display:false},ticks:{font:{size:9,family:"'DM Mono',monospace"},color:'#b0b0ac',maxTicksLimit:10}},
+    y:{min:-0.2,max:1.2,ticks:{stepSize:1,font:{size:10,weight:'500'},color:'#737370',callback:v=>v===1?'ON':v===0?'OFF':''},grid:{color:'#efefed'}}
   }
 };
 const cKuras=new Chart(document.getElementById('chart-pompa-kuras').getContext('2d'),{
@@ -691,67 +688,28 @@ const cIsi=new Chart(document.getElementById('chart-pompa-isi').getContext('2d')
   options:pOpts
 });
 
-function push(chart,val,lbl=''){
-  chart.data.labels.push(lbl);chart.data.datasets[0].data.push(val);
-  if(chart.data.datasets[0].data.length>20){chart.data.labels.shift();chart.data.datasets[0].data.shift();}
-  chart.update();
-}
-
-// LOGIKA UPDATE GRAFIK REAL-TIME
-function updateChartsWithRealtime(d) {
-  const t = new Date().toLocaleTimeString('id-ID',{hour12:false});
-  const ph = d.pH||0;
-  const tb = d.turbidity||0;
-  const lv = d.tinggiAir||0;
-  const pKuras = d.pompa_kuras || 'OFF';
-  const pIsi = d.pompa_isi || 'OFF';
-
-  push(cPh, ph, t);
-  push(cTb, tb, t);
-  push(cLv, lv, t);
-
-  // Mencegah penumpukan garis putus di pompa
-  const lastTimeKuras = cKuras.data.labels[cKuras.data.labels.length - 1];
-  if (lastTimeKuras !== t) {
-    push(cKuras, pKuras==='ON'?1:0, t);
-    push(cIsi, pIsi==='ON'?1:0, t);
-  } else {
-    cKuras.data.datasets[0].data[cKuras.data.datasets[0].data.length - 1] = pKuras==='ON'?1:0;
-    cIsi.data.datasets[0].data[cIsi.data.datasets[0].data.length - 1] = pIsi==='ON'?1:0;
-    cKuras.update();
-    cIsi.update();
-  }
-}
-
-/* 1. LOAD HISTORY TERLEBIH DAHULU */
+/* LOAD HISTORY */
 get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
+  if(!snap.exists())return;
   let lph=[],dph=[],ltb=[],dtb=[],llv=[],dlv=[],lk=[],dk=[],li=[],di=[];
   dataHistory = [];
-  
-  if(snap.exists()){
-    snap.forEach(child=>{
-      const d=child.val();
-      lph.push('');dph.push(d.pH||0);
-      ltb.push('');dtb.push(d.turbidity||0);
-      llv.push('');dlv.push(d.tinggiAir||0);
-      const t=new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
-      
-      const statLama = d.statusSistem || d.pompaStatus || '';
-      const pk = d.pompa_kuras || (statLama === 'KURAS' ? 'ON' : 'OFF');
-      const pi = d.pompa_isi || (statLama === 'ISI' ? 'ON' : 'OFF');
-      
-      lk.push(t);dk.push(pk==='ON'?1:0);
-      li.push(t);di.push(pi==='ON'?1:0);
-      
-      dataHistory.push({ph:d.pH||0,tb:d.turbidity||0});
-    });
-  }
-
-  // Jika log kurang dari 20, sisipkan angka 0 agar grafik tetap proporsional
-  while(lph.length<20){
-    lph.unshift('');dph.unshift(0);ltb.unshift('');dtb.unshift(0);llv.unshift('');dlv.unshift(0);
-    lk.unshift('');dk.unshift(0);li.unshift('');di.unshift(0);
-  }
+  snap.forEach(child=>{
+    const d=child.val();
+    lph.push('');dph.push(d.pH||0);
+    ltb.push('');dtb.push(d.turbidity||0);
+    llv.push('');dlv.push(d.tinggiAir||0);
+    const t=new Date((d.timestamp?d.timestamp*1000:Date.now())).toLocaleTimeString('id-ID',{hour12:false});
+    
+    const statLama = d.statusSistem || d.pompaStatus || '';
+    const pk = d.pompa_kuras || (statLama === 'KURAS' ? 'ON' : 'OFF');
+    const pi = d.pompa_isi || (statLama === 'ISI' ? 'ON' : 'OFF');
+    
+    lk.push(t);dk.push(pk==='ON'?1:0);
+    li.push(t);di.push(pi==='ON'?1:0);
+    
+    dataHistory.push({ph:d.pH||0,tb:d.turbidity||0});
+  });
+  while(lph.length<20){lph.unshift('');dph.unshift(0);ltb.unshift('');dtb.unshift(0);llv.unshift('');dlv.unshift(0);lk.unshift('');dk.unshift(0);li.unshift('');di.unshift(0);}
   
   cPh.data.labels=[...lph]; cPh.data.datasets[0].data=[...dph];
   cTb.data.labels=[...ltb]; cTb.data.datasets[0].data=[...dtb];
@@ -759,17 +717,15 @@ get(query(ref(db,'SistemAir_Log/'+today),limitToLast(20))).then(snap=>{
   cKuras.data.labels=[...lk]; cKuras.data.datasets[0].data=[...dk];
   cIsi.data.labels=[...li]; cIsi.data.datasets[0].data=[...di];
   
-  isHistoryLoaded = true; // Tandai bahwa riwayat grafik sudah siap
-  
-  // Jika saat memuat histori data realtime keburu masuk, timpa dengan data realtime terbaru
-  if(lastRealtimeData) {
-      updateChartsWithRealtime(lastRealtimeData);
-  } else {
-      [cPh,cTb,cLv,cKuras,cIsi].forEach(c=>c.update());
-  }
+  [cPh,cTb,cLv,cKuras,cIsi].forEach(c=>c.update());
   renderUptimeBar();
 });
 
+function push(chart,val,lbl=''){
+  chart.data.labels.push(lbl);chart.data.datasets[0].data.push(val);
+  if(chart.data.datasets[0].data.length>20){chart.data.labels.shift();chart.data.datasets[0].data.shift();}
+  chart.update();
+}
 
 /* ONLINE / OFFLINE UI */
 function setOnline(){
@@ -789,11 +745,11 @@ function setOffline(msg){
 onValue(ref(db,'.info/connected'),s=>{if(s.val()!==true)setOffline('OFFLINE');});
 
 
-/* 2. MAIN LISTENER (MENYATUKAN UI & GRAFIK TANPA TABRAKAN) */
+/* MAIN LISTENER (MENYATUKAN SEMUA LOGIK UPDATE SENSOR & PANEL) */
 onValue(ref(db,'SistemAir'),snap=>{
   if(!snap.exists())return;
   const d=snap.val();
-  lastRealtimeData = d; 
+  const data = d; 
   
   const t=new Date().toLocaleTimeString('id-ID',{hour12:false});
   setOnline();
@@ -817,6 +773,7 @@ onValue(ref(db,'SistemAir'),snap=>{
   }else{
     sph.textContent='✓ OPTIMAL';sph.style.cssText='background:var(--green-bg);color:var(--green);border-color:var(--green-bd);';
   }
+  push(cPh,ph);
   document.getElementById('time-ph').innerHTML=`<i class="fa-regular fa-clock"></i>${t}`;
   prevPh=ph;
 
@@ -833,6 +790,7 @@ onValue(ref(db,'SistemAir'),snap=>{
     stb.textContent='⚠ HAZARD';stb.style.cssText='background:var(--red-bg);color:var(--red);border-color:var(--red-bd);';
     if(prevTb!==null&&prevTb<100)toast(`Turbidity kritis: ${Math.round(tb)} NTU`,'err');
   }
+  push(cTb,tb);
   document.getElementById('time-tb').innerHTML=`<i class="fa-regular fa-clock"></i>${t}`;
   prevTb=tb;
 
@@ -846,6 +804,7 @@ onValue(ref(db,'SistemAir'),snap=>{
   }else{
     slv.textContent='✓ NORMAL';slv.style.cssText='background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bd);';
   }
+  push(cLv,lv);
   document.getElementById('time-lv').innerHTML=`<i class="fa-regular fa-clock"></i>${t}`;
   prevLv=lv;
 
@@ -870,6 +829,19 @@ onValue(ref(db,'SistemAir'),snap=>{
     else statP2.innerHTML = `Status: <b style="opacity:0.6;">OFF</b> (${formatDur(durIsi)})`;
   }
 
+  /* pump charts yang Disempurnakan */
+  // Mencegah penumpukan data grafik di detik yang sama (bikin grafik berantakan)
+  const lastTimeKuras = cKuras.data.labels[cKuras.data.labels.length - 1];
+  if (lastTimeKuras !== t) {
+    push(cKuras, pKuras==='ON'?1:0, t);
+    push(cIsi, pIsi==='ON'?1:0, t);
+  } else {
+    cKuras.data.datasets[0].data[cKuras.data.datasets[0].data.length - 1] = pKuras==='ON'?1:0;
+    cIsi.data.datasets[0].data[cIsi.data.datasets[0].data.length - 1] = pIsi==='ON'?1:0;
+    cKuras.update();
+    cIsi.update();
+  }
+
   /* mode & buttons */
   const mode=d.modeSistem||'AUTO';
   document.getElementById('btn-mode-auto').className='mode-btn '+(mode==='AUTO'?'on':'off');
@@ -888,7 +860,9 @@ onValue(ref(db,'SistemAir'),snap=>{
   document.getElementById('icon-p1').style.color=pKuras==='ON'?'var(--red)':'var(--text-3)';
   document.getElementById('icon-p2').style.color=pIsi==='ON'?'var(--blue)':'var(--text-3)';
 
-  // UPDATE REALTIME PANEL BAWAH
+  // ==========================================
+  // UPDATE REALTIME PANEL BAWAH (LOGIKA YANG SEBELUMNYA TIDAK JALAN)
+  // ==========================================
   const elPh = document.getElementById('rt-ph');
   const elKekeruhan = document.getElementById('rt-turbidity');
   const elAir = document.getElementById('rt-water');
@@ -937,12 +911,6 @@ onValue(ref(db,'SistemAir'),snap=>{
 
   updateStopwatchUI('kuras', pKuras, durKuras, false);
   updateStopwatchUI('isi', pIsi, durIsi, false);
-  
-  // EKSEKUSI UPDATE GRAFIK HANYA JIKA HISTORI SUDAH SIAP 
-  // (Inilah kunci menghilangkan bug lompatan saat refresh)
-  if (isHistoryLoaded) {
-      updateChartsWithRealtime(d);
-  }
 });
 
 /* CONTROLS */
