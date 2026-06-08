@@ -21,8 +21,8 @@
 // ==========================================
 // KREDENSIAL WIFI & FIREBASE
 // ==========================================
-#define WIFI_SSID     "Mawar9D_4G"
-#define WIFI_PASSWORD "ahmadzaidanalma2"
+#define WIFI_SSID     "zudistecu"
+#define WIFI_PASSWORD "nicacantikk"
 #define API_KEY       "AIzaSyDps5vc8pREiwr3BrNbX1k7xN1zleMZR2A"
 #define DATABASE_URL  "realtime-database-5c956-default-rtdb.asia-southeast1.firebasedatabase.app"
 
@@ -64,7 +64,7 @@ int   ph_index = 0;
 const int jumlahSampel = 31;
 float voltJernih = 1.370;
 float faktorNTU  = 1500;
-const float BATAS_TURBIDITY = 53.0;
+const float BATAS_TURBIDITY = 30.0;
 
 // ==========================================
 // VARIABEL SENSOR ULTRASONIK
@@ -80,6 +80,7 @@ const float TARGET_KURAS_PH   = BATAS_PENUH - 18.0;
 
 enum StatusSistem { NORMAL, KURAS_KOTOR, KURAS_KIMIA, PENGISIAN, MANUAL_KURAS, MANUAL_ISI };
 StatusSistem statusSekarang = NORMAL;
+StatusSistem statusSistemSebelumnya = NORMAL; // <-- Variabel baru untuk mendeteksi perubahan status
 String modeSistem = "AUTO";
 
 // ==========================================
@@ -298,7 +299,8 @@ void loop() {
   // ==============================
   // FIREBASE BACA MODE
   // ==============================
-  if (WiFi.status() == WL_CONNECTED && Firebase.ready() && (millis() - timerBaca > 2000)) {
+  // PERBAIKAN: Interval dipercepat dari 2000ms ke 500ms agar respons menekan tombol sangat instan
+  if (WiFi.status() == WL_CONNECTED && Firebase.ready() && (millis() - timerBaca > 500)) {
     timerBaca = millis();
     if (Firebase.getString(fbdoRead, "/SistemAir/modeSistem")) modeSistem = fbdoRead.stringData();
     if (modeSistem == "MANUAL") {
@@ -312,35 +314,22 @@ void loop() {
   }
 
   // ==============================
-  // OTOMASI POMPA & WAKTU AMAN
+  // OTOMASI POMPA (INSTAN / REAL-TIME)
   // ==============================
-  static unsigned long waktuMulaiKotor = 0;
-  static unsigned long waktuMulaiKimia = 0;
-  static unsigned long waktuSelesaiIsi = 0;
-  const unsigned long TUNDA_TURBIDITY     = 3000;
-  const unsigned long TUNDA_PH            = 3000;
-  
-  const unsigned long WAKTU_PEMANASAN     = 15000;  
-  const unsigned long JEDA_PASCAPENGISIAN = 300000; 
-
-  if (modeSistem == "AUTO" && (statusSekarang == MANUAL_KURAS || statusSekarang == MANUAL_ISI)) statusSekarang = NORMAL;
+  if (modeSistem == "AUTO" && (statusSekarang == MANUAL_KURAS || statusSekarang == MANUAL_ISI)) {
+      statusSekarang = NORMAL;
+  }
 
   if (modeSistem == "AUTO") {
-    if (millis() < WAKTU_PEMANASAN || (waktuSelesaiIsi != 0 && millis() - waktuSelesaiIsi < JEDA_PASCAPENGISIAN)) {
-      statusSekarang  = NORMAL; waktuMulaiKotor = 0; waktuMulaiKimia = 0;
-    } else {
       if (statusSekarang == NORMAL) {
-        if (ntu > BATAS_TURBIDITY) {
-          if (waktuMulaiKotor == 0) waktuMulaiKotor = millis();
-          else if (millis() - waktuMulaiKotor >= TUNDA_TURBIDITY) { statusSekarang = KURAS_KOTOR; waktuMulaiKotor = 0; }
-        } else waktuMulaiKotor = 0;
-
-        if (finalPH < 6.5 || finalPH > 8.5) {
-          if (waktuMulaiKimia == 0) waktuMulaiKimia = millis();
-          else if (millis() - waktuMulaiKimia >= TUNDA_PH) { statusSekarang = KURAS_KIMIA; waktuMulaiKimia = 0; }
-        } else waktuMulaiKimia = 0;
+          // Begitu melebihi batas, langsung ganti status (tanpa delay/cooldown)
+          if (ntu > BATAS_TURBIDITY) { 
+              statusSekarang = KURAS_KOTOR; 
+          } 
+          else if (finalPH < 6.5 || finalPH > 8.5) { 
+              statusSekarang = KURAS_KIMIA; 
+          }
       }
-    }
   }
 
   // ==============================
@@ -360,7 +349,7 @@ void loop() {
 
     case PENGISIAN:
       digitalWrite(PIN_RELAY_KURAS, RELAY_MATI); digitalWrite(PIN_RELAY_ISI, RELAY_NYALA); pmpStatus = "ISI"; isIsi = true;
-      if (tinggiAir >= BATAS_PENUH) { statusSekarang = NORMAL; waktuSelesaiIsi = millis(); }
+      if (tinggiAir >= BATAS_PENUH) { statusSekarang = NORMAL; }
       break;
 
     case MANUAL_KURAS:
@@ -374,25 +363,30 @@ void loop() {
       digitalWrite(PIN_RELAY_KURAS, RELAY_MATI); digitalWrite(PIN_RELAY_ISI, RELAY_MATI); pmpStatus = "OFF"; break;
   }
 
+  // --- PERBAIKAN: PAKSA KIRIM DATA INSTAN KE FIREBASE SAAT STATUS POMPA BERUBAH ---
+  // Jika pompa baru saja menyala ATAU baru saja mati, langsung lapor ke website
+  // tanpa perlu menunggu timerKirim 5 detik.
+  if (statusSekarang != statusSistemSebelumnya) {
+    timerKirim = millis() - 5000; // Memotong antrean timer agar eksekusi tulis Firebase langsung jalan
+    statusSistemSebelumnya = statusSekarang;
+  }
+  // --------------------------------------------------------------------------------
+
   // --- LOGIKA DURASI DAN STATUS KURAS ---
   if (isKuras && !stateKurasSebelumnya) {
-    // Pompa baru saja nyala
     waktuMulaiKuras_ON = millis(); 
   } else if (!isKuras && stateKurasSebelumnya) {
-    // Pompa baru saja mati
     durasiHarianKuras += (millis() - waktuMulaiKuras_ON); 
-    waktuMulaiKuras_OFF = millis(); // Catat waktu matinya
+    waktuMulaiKuras_OFF = millis();
   }
   stateKurasSebelumnya = isKuras;
 
   // --- LOGIKA DURASI DAN STATUS ISI ---
   if (isIsi && !stateIsiSebelumnya) {
-    // Pompa baru saja nyala
     waktuMulaiIsi_ON = millis();
   } else if (!isIsi && stateIsiSebelumnya) {
-    // Pompa baru saja mati
     durasiHarianIsi += (millis() - waktuMulaiIsi_ON);
-    waktuMulaiIsi_OFF = millis(); // Catat waktu matinya
+    waktuMulaiIsi_OFF = millis();
   }
   stateIsiSebelumnya = isIsi;
 
@@ -542,4 +536,4 @@ void loop() {
       }
     }
   }
-}
+}s
